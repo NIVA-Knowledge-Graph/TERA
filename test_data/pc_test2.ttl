@@ -1,0 +1,1000 @@
+@prefix rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix compound:	<http://rdf.ncbi.nlm.nih.gov/pubchem/compound/> .
+@prefix obo:	<http://purl.obolibrary.org/obo/> .
+compound:CID702558	rdf:type	obo:CHEBI_95041 .
+@prefix nci:	<http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#> .
+compound:CID703684	rdf:type	nci:C96773 .
+compound:CID708275	rdf:type	obo:CHEBI_114750 .
+compound:CID717531	rdf:type	obo:CHEBI_86549 .
+compound:CID724755	rdf:type	obo:CHEBI_107679 .
+compound:CID726225	rdf:type	obo:CHEBI_123234 .
+compound:CID785072	rdf:type	obo:CHEBI_59069 .
+compound:CID793075	rdf:type	obo:CHEBI_104238 .
+compound:CID795881	rdf:type	obo:CHEBI_117062 .
+compound:CID706367	rdf:type	obo:CHEBI_114879 .
+compound:CID715513	rdf:type	obo:CHEBI_115642 .
+compound:CID716719	rdf:type	obo:CHEBI_112348 .
+compound:CID730135	rdf:type	obo:CHEBI_120948 .
+@prefix ns4:	<http://purl.bioontology.org/ontology/NDFRT/> .
+compound:CID736282	rdf:type	ns4:N0000167203 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/91403002> .
+compound:CID750722	rdf:type	obo:CHEBI_114322 .
+compound:CID752039	rdf:type	obo:CHEBI_109109 .
+compound:CID755776	rdf:type	obo:CHEBI_122135 .
+compound:CID767302	rdf:type	obo:CHEBI_114901 .
+compound:CID787417	rdf:type	obo:CHEBI_107593 .
+compound:CID788156	rdf:type	obo:CHEBI_121395 .
+compound:CID710825	rdf:type	obo:CHEBI_104016 .
+compound:CID719867	rdf:type	obo:CHEBI_103918 .
+compound:CID720585	rdf:type	obo:CHEBI_105190 .
+compound:CID721472	rdf:type	obo:CHEBI_90413 .
+compound:CID736190	rdf:type	obo:CHEBI_47069 ,
+		ns4:N0000170251 .
+compound:CID741395	rdf:type	obo:CHEBI_93980 .
+compound:CID750917	rdf:type	obo:CHEBI_107684 .
+compound:CID759619	rdf:type	obo:CHEBI_107441 .
+compound:CID795700	rdf:type	obo:CHEBI_52611 .
+compound:CID799707	rdf:type	obo:CHEBI_115592 .
+compound:CID45934204	rdf:type	obo:CHEBI_95151 .
+compound:CID743778	rdf:type	obo:CHEBI_108477 .
+compound:CID751371	rdf:type	obo:CHEBI_120769 .
+compound:CID773295	rdf:type	obo:CHEBI_109356 .
+compound:CID788751	rdf:type	obo:CHEBI_107780 .
+compound:CID794339	rdf:type	obo:CHEBI_107511 .
+compound:CID703931	rdf:type	obo:CHEBI_108980 .
+compound:CID712366	rdf:type	obo:CHEBI_120037 .
+compound:CID743404	rdf:type	obo:CHEBI_119796 .
+compound:CID752897	rdf:type	nci:C76626 .
+compound:CID754779	rdf:type	obo:CHEBI_109314 .
+compound:CID758295	rdf:type	obo:CHEBI_113200 .
+compound:CID761932	rdf:type	obo:CHEBI_106066 .
+compound:CID771491	rdf:type	obo:CHEBI_120634 .
+compound:CID779179	rdf:type	nci:C66180 .
+compound:CID779290	rdf:type	obo:CHEBI_117100 .
+compound:CID791428	rdf:type	obo:CHEBI_114392 .
+compound:CID793865	rdf:type	obo:CHEBI_114915 .
+compound:CID799944	rdf:type	obo:CHEBI_112247 .
+compound:CID704276	rdf:type	obo:CHEBI_105458 .
+compound:CID706531	rdf:type	obo:CHEBI_94109 .
+compound:CID738585	rdf:type	obo:CHEBI_109386 .
+compound:CID741053	rdf:type	obo:CHEBI_105503 .
+compound:CID741311	rdf:type	obo:CHEBI_112728 .
+compound:CID765480	rdf:type	obo:CHEBI_107114 .
+compound:CID769170	rdf:type	obo:CHEBI_123313 .
+compound:CID702927	rdf:type	obo:CHEBI_92003 .
+compound:CID715715	rdf:type	obo:CHEBI_124646 .
+compound:CID747315	rdf:type	obo:CHEBI_120991 .
+compound:CID759856	rdf:type	obo:CHEBI_60458 .
+compound:CID761196	rdf:type	obo:CHEBI_121961 .
+compound:CID767910	rdf:type	obo:CHEBI_121233 .
+compound:CID789775	rdf:type	obo:CHEBI_116472 .
+compound:CID796895	rdf:type	obo:CHEBI_116113 .
+compound:CID714409	rdf:type	obo:CHEBI_107702 .
+compound:CID725675	rdf:type	obo:CHEBI_109462 .
+compound:CID730427	rdf:type	obo:CHEBI_114353 .
+compound:CID730698	rdf:type	obo:CHEBI_123427 .
+compound:CID732207	rdf:type	obo:CHEBI_113243 .
+compound:CID792664	rdf:type	obo:CHEBI_123345 .
+compound:CID303906	rdf:type	obo:CHEBI_67411 .
+compound:CID330358	rdf:type	obo:CHEBI_6692 .
+compound:CID330573	rdf:type	obo:CHEBI_227 .
+@prefix bp:	<http://www.biopax.org/release/biopax-level3.owl#> .
+compound:CID330573	rdf:type	bp:SmallMolecule .
+compound:CID342467	rdf:type	ns4:N0000005775 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/90733003> .
+compound:CID387316	rdf:type	obo:CHEBI_16525 ,
+		bp:SmallMolecule ,
+		ns4:N0000167451 .
+compound:CID395535	rdf:type	obo:CHEBI_50082 .
+compound:CID320372	rdf:type	obo:CHEBI_1959 .
+compound:CID322769	rdf:type	obo:CHEBI_85615 .
+compound:CID342538	rdf:type	obo:CHEBI_95185 .
+compound:CID343083	rdf:type	obo:CHEBI_93558 .
+compound:CID352542	rdf:type	obo:CHEBI_70378 .
+compound:CID355436	rdf:type	obo:CHEBI_4765 .
+compound:CID369976	rdf:type	obo:CHEBI_90748 .
+compound:CID390622	rdf:type	obo:CHEBI_17791 .
+compound:CID304590	rdf:type	obo:CHEBI_80961 .
+compound:CID309593	rdf:type	obo:CHEBI_115609 .
+compound:CID348458	rdf:type	obo:CHEBI_64308 .
+compound:CID358022	rdf:type	bp:SmallMolecule .
+compound:CID369311	rdf:type	<http://purl.bioontology.org/ontology/SNOMEDCT/699183003> .
+compound:CID306836	rdf:type	obo:CHEBI_105905 .
+compound:CID307957	rdf:type	obo:CHEBI_39464 .
+compound:CID312145	rdf:type	obo:CHEBI_52289 ,
+		bp:SmallMolecule .
+compound:CID342801	rdf:type	obo:CHEBI_69939 .
+compound:CID301926	rdf:type	obo:CHEBI_109327 .
+compound:CID312822	rdf:type	<http://purl.bioontology.org/ontology/SNOMEDCT/707295002> .
+compound:CID346340	rdf:type	bp:SmallMolecule .
+compound:CID378526	rdf:type	obo:CHEBI_112165 .
+compound:CID384679	rdf:type	obo:CHEBI_143257 .
+compound:CID395532	rdf:type	obo:CHEBI_50079 .
+compound:CID206035	rdf:type	obo:CHEBI_138755 .
+compound:CID206044	rdf:type	nci:C75190 .
+compound:CID208842	rdf:type	nci:C65405 .
+compound:CID214344	rdf:type	nci:C65841 .
+compound:CID214347	rdf:type	nci:C73205 .
+compound:CID216252	rdf:type	nci:C83766 .
+compound:CID216258	rdf:type	ns4:N0000007035 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/82885001> .
+compound:CID223250	rdf:type	obo:CHEBI_79804 .
+compound:CID227667	rdf:type	obo:CHEBI_79803 .
+compound:CID230349	rdf:type	ns4:N0000178917 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/58907007> .
+compound:CID232427	rdf:type	obo:CHEBI_79664 .
+compound:CID240071	rdf:type	obo:CHEBI_79663 .
+compound:CID247440	rdf:type	obo:CHEBI_116924 .
+compound:CID248574	rdf:type	<http://purl.bioontology.org/ontology/SNOMEDCT/45454008> .
+compound:CID248981	rdf:type	obo:CHEBI_79685 .
+compound:CID253877	rdf:type	obo:CHEBI_32030 ,
+		nci:C76725 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/35903003> .
+compound:CID286547	rdf:type	obo:CHEBI_113157 .
+compound:CID200145	rdf:type	<http://purl.bioontology.org/ontology/SNOMEDCT/35871001> .
+compound:CID206005	rdf:type	nci:C77285 .
+compound:CID206666	rdf:type	obo:CHEBI_104234 .
+compound:CID213060	rdf:type	obo:CHEBI_80585 ,
+		bp:SmallMolecule .
+compound:CID216385	rdf:type	nci:C87248 .
+compound:CID225755	rdf:type	obo:CHEBI_78595 .
+compound:CID237338	rdf:type	obo:CHEBI_116646 .
+compound:CID237808	rdf:type	obo:CHEBI_79876 .
+compound:CID239828	rdf:type	obo:CHEBI_138668 .
+compound:CID240986	rdf:type	obo:CHEBI_79668 .
+compound:CID241352	rdf:type	obo:CHEBI_79587 .
+compound:CID243746	rdf:type	obo:CHEBI_79784 .
+compound:CID243750	rdf:type	obo:CHEBI_79682 .
+compound:CID245469	rdf:type	obo:CHEBI_79761 .
+compound:CID245470	rdf:type	obo:CHEBI_79506 .
+compound:CID246207	rdf:type	obo:CHEBI_79405 .
+compound:CID248790	rdf:type	obo:CHEBI_79707 .
+compound:CID252378	rdf:type	obo:CHEBI_79592 .
+compound:CID253112	rdf:type	obo:CHEBI_79582 .
+compound:CID253881	rdf:type	obo:CHEBI_63004 ,
+		nci:C83922 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/58693000> .
+compound:CID261075	rdf:type	obo:CHEBI_59028 .
+compound:CID261943	rdf:type	<http://purl.bioontology.org/ontology/SNOMEDCT/35871001> .
+compound:CID287291	rdf:type	ns4:N0000166665 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/44344002> .
+compound:CID293275	rdf:type	<http://purl.bioontology.org/ontology/SNOMEDCT/51177004> .
+compound:CID46173254	rdf:type	obo:CHEBI_75545 ,
+		bp:SmallMolecule .
+compound:CID46173365	rdf:type	<http://purl.bioontology.org/ontology/SNOMEDCT/19841008> .
+compound:CID46173787	rdf:type	obo:CHEBI_10151 .
+compound:CID46173812	rdf:type	obo:CHEBI_53028 ,
+		bp:SmallMolecule .
+compound:CID46173825	rdf:type	obo:CHEBI_80718 .
+compound:CID46173867	rdf:type	obo:CHEBI_80943 .
+compound:CID46173921	rdf:type	obo:CHEBI_81129 .
+compound:CID46173925	rdf:type	obo:CHEBI_81144 .
+compound:CID46173929	rdf:type	obo:CHEBI_81169 .
+compound:CID46173956	rdf:type	obo:CHEBI_81218 .
+compound:CID46173966	rdf:type	obo:CHEBI_81239 .
+compound:CID46224548	rdf:type	obo:CHEBI_57439 .
+compound:CID208823	rdf:type	nci:C65950 .
+compound:CID208828	rdf:type	obo:CHEBI_135836 .
+compound:CID208832	rdf:type	nci:C79127 .
+compound:CID208834	rdf:type	nci:C78039 .
+compound:CID211017	rdf:type	obo:CHEBI_119826 .
+compound:CID213033	rdf:type	nci:C74250 .
+compound:CID216268	rdf:type	nci:C72658 .
+compound:CID221118	rdf:type	obo:CHEBI_29653 ,
+		bp:SmallMolecule .
+compound:CID222805	rdf:type	obo:CHEBI_79865 .
+compound:CID232426	rdf:type	obo:CHEBI_79760 .
+compound:CID241902	rdf:type	obo:CHEBI_9984 ,
+		ns4:N0000179000 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/20303001> .
+compound:CID247305	rdf:type	obo:CHEBI_79484 .
+compound:CID247335	rdf:type	ns4:N0000170631 .
+compound:CID247837	rdf:type	obo:CHEBI_79612 .
+compound:CID248015	rdf:type	obo:CHEBI_79483 .
+compound:CID250876	rdf:type	ns4:N0000168461 .
+compound:CID252289	rdf:type	obo:CHEBI_79436 .
+compound:CID252301	rdf:type	obo:CHEBI_135575 ,
+		nci:C76302 .
+compound:CID259035	rdf:type	obo:CHEBI_79679 .
+compound:CID281241	rdf:type	obo:CHEBI_7328 ,
+		bp:SmallMolecule .
+compound:CID293807	rdf:type	obo:CHEBI_108381 .
+compound:CID202225	rdf:type	obo:CHEBI_45735 ,
+		nci:C66643 ,
+		ns4:N0000005960 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/64130008> .
+compound:CID207510	rdf:type	<http://purl.bioontology.org/ontology/SNOMEDCT/79330001> .
+compound:CID216295	rdf:type	nci:C90810 .
+compound:CID216465	rdf:type	bp:SmallMolecule .
+compound:CID235942	rdf:type	obo:CHEBI_79713 .
+compound:CID243761	rdf:type	obo:CHEBI_15826 .
+compound:CID246163	rdf:type	obo:CHEBI_79939 .
+compound:CID246576	rdf:type	obo:CHEBI_79883 .
+compound:CID248583	rdf:type	obo:CHEBI_79465 .
+compound:CID248783	rdf:type	obo:CHEBI_79607 .
+compound:CID250388	rdf:type	obo:CHEBI_18072 ,
+		bp:SmallMolecule .
+compound:CID250402	rdf:type	obo:CHEBI_86347 .
+compound:CID252374	rdf:type	obo:CHEBI_79448 .
+compound:CID253933	rdf:type	obo:CHEBI_79590 .
+compound:CID285666	rdf:type	obo:CHEBI_24624 .
+compound:CID289840	rdf:type	obo:CHEBI_124913 ,
+		ns4:N0000168453 .
+compound:CID295425	rdf:type	obo:CHEBI_94001 .
+compound:CID46173390	rdf:type	obo:CHEBI_59911 ,
+		bp:SmallMolecule .
+compound:CID46173556	rdf:type	bp:SmallMolecule .
+compound:CID46173872	rdf:type	obo:CHEBI_80983 ,
+		bp:SmallMolecule .
+compound:CID46173914	rdf:type	obo:CHEBI_81105 .
+compound:CID46173941	rdf:type	obo:CHEBI_81182 ,
+		bp:SmallMolecule .
+compound:CID46173961	rdf:type	obo:CHEBI_81234 .
+compound:CID46173985	rdf:type	obo:CHEBI_81307 ,
+		bp:SmallMolecule .
+compound:CID46217171	rdf:type	bp:SmallMolecule .
+compound:CID46224546	rdf:type	obo:CHEBI_57437 ,
+		bp:SmallMolecule .
+compound:CID46173813	rdf:type	obo:CHEBI_80402 ,
+		bp:SmallMolecule .
+compound:CID46173917	rdf:type	obo:CHEBI_81118 .
+compound:CID204102	rdf:type	nci:C84134 .
+compound:CID219073	rdf:type	nci:C65753 .
+compound:CID222817	rdf:type	obo:CHEBI_79847 .
+compound:CID224247	rdf:type	obo:CHEBI_79771 .
+compound:CID236179	rdf:type	obo:CHEBI_79840 .
+compound:CID236416	rdf:type	obo:CHEBI_79833 .
+compound:CID236666	rdf:type	obo:CHEBI_59714 .
+compound:CID238684	rdf:type	obo:CHEBI_79555 .
+compound:CID239061	rdf:type	nci:C66666 .
+compound:CID253634	rdf:type	obo:CHEBI_79653 .
+compound:CID254232	rdf:type	obo:CHEBI_34865 .
+compound:CID257428	rdf:type	obo:CHEBI_73970 .
+compound:CID260706	rdf:type	nci:C90953 .
+compound:CID261618	rdf:type	obo:CHEBI_3802 .
+compound:CID270954	rdf:type	obo:CHEBI_142786 .
+compound:CID284016	rdf:type	obo:CHEBI_123188 .
+compound:CID287263	rdf:type	obo:CHEBI_93956 .
+compound:CID291576	rdf:type	ns4:N0000178941 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/70961008> .
+compound:CID295292	rdf:type	obo:CHEBI_108177 .
+compound:CID46173378	rdf:type	obo:CHEBI_134496 ,
+		bp:SmallMolecule .
+compound:CID46173708	rdf:type	bp:SmallMolecule .
+compound:CID200497	rdf:type	obo:CHEBI_51644 .
+compound:CID203685	rdf:type	nci:C81653 .
+compound:CID203875	rdf:type	ns4:N0000179397 .
+compound:CID204107	rdf:type	nci:C78028 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/426315005> .
+compound:CID208917	rdf:type	nci:C73329 .
+compound:CID213032	rdf:type	obo:CHEBI_83250 .
+compound:CID214463	rdf:type	obo:CHEBI_51560 .
+compound:CID216235	rdf:type	obo:CHEBI_135736 ,
+		nci:C73038 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/428709002> .
+compound:CID216452	rdf:type	obo:CHEBI_131531 .
+compound:CID216866	rdf:type	obo:CHEBI_77839 .
+compound:CID222023	rdf:type	obo:CHEBI_141185 .
+compound:CID222115	rdf:type	nci:C95311 .
+compound:CID232838	rdf:type	<http://purl.bioontology.org/ontology/SNOMEDCT/96268008> .
+compound:CID234907	rdf:type	nci:C95318 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/126069000> .
+compound:CID235557	rdf:type	obo:CHEBI_79873 .
+compound:CID236319	rdf:type	obo:CHEBI_120965 .
+compound:CID244387	rdf:type	obo:CHEBI_79542 .
+compound:CID246883	rdf:type	obo:CHEBI_79921 .
+compound:CID251910	rdf:type	<http://purl.bioontology.org/ontology/SNOMEDCT/96268008> .
+compound:CID252372	rdf:type	obo:CHEBI_31828 .
+compound:CID259991	rdf:type	obo:CHEBI_80908 .
+compound:CID289151	rdf:type	obo:CHEBI_6530 ,
+		bp:SmallMolecule .
+compound:CID291317	rdf:type	obo:CHEBI_38050 ,
+		obo:CHEBI_38052 ,
+		obo:CHEBI_38054 .
+compound:CID216219	rdf:type	nci:C81511 .
+compound:CID216840	rdf:type	obo:CHEBI_142414 .
+compound:CID219095	rdf:type	nci:C74183 .
+compound:CID223751	rdf:type	obo:CHEBI_109714 .
+compound:CID227107	rdf:type	obo:CHEBI_79860 .
+compound:CID227596	rdf:type	obo:CHEBI_79764 .
+compound:CID227666	rdf:type	obo:CHEBI_79856 .
+compound:CID229624	rdf:type	obo:CHEBI_79460 .
+compound:CID230070	rdf:type	obo:CHEBI_79852 .
+compound:CID234906	rdf:type	obo:CHEBI_79673 .
+compound:CID246485	rdf:type	obo:CHEBI_79917 .
+compound:CID246940	rdf:type	nci:C65810 .
+compound:CID253676	rdf:type	nci:C66156 .
+compound:CID271816	rdf:type	obo:CHEBI_37377 .
+compound:CID46242512	rdf:type	obo:CHEBI_72441 .
+compound:CID3240627	rdf:type	obo:CHEBI_105188 .
+compound:CID418931	rdf:type	ns4:N0000005960 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/64130008> .
+compound:CID422051	rdf:type	obo:CHEBI_121039 .
+compound:CID439191	rdf:type	obo:CHEBI_16001 ,
+		bp:SmallMolecule .
+compound:CID439192	rdf:type	obo:CHEBI_48649 ,
+		bp:SmallMolecule ,
+		ns4:N0000168498 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/22555008> .
+compound:CID439203	rdf:type	bp:SmallMolecule .
+compound:CID439204	rdf:type	bp:SmallMolecule .
+compound:CID439205	rdf:type	bp:SmallMolecule .
+compound:CID439212	rdf:type	<http://purl.bioontology.org/ontology/SNOMEDCT/59804006> .
+compound:CID439245	rdf:type	bp:SmallMolecule .
+compound:CID439304	rdf:type	obo:CHEBI_48674 .
+compound:CID439312	rdf:type	obo:CHEBI_4249 ,
+		bp:SmallMolecule .
+compound:CID439361	rdf:type	obo:CHEBI_27441 .
+compound:CID439458	rdf:type	obo:CHEBI_17109 ,
+		bp:SmallMolecule .
+compound:CID439474	rdf:type	obo:CHEBI_16143 ,
+		bp:SmallMolecule .
+compound:CID439501	rdf:type	obo:CHEBI_472805 ,
+		bp:SmallMolecule ,
+		ns4:N0000168453 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/33589008> ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/35966009> .
+compound:CID439602	rdf:type	obo:CHEBI_28418 .
+compound:CID439626	rdf:type	obo:CHEBI_62974 ,
+		bp:SmallMolecule .
+compound:CID439639	rdf:type	obo:CHEBI_143180 ,
+		bp:SmallMolecule .
+compound:CID439659	rdf:type	bp:SmallMolecule .
+compound:CID439862	rdf:type	bp:SmallMolecule .
+compound:CID439897	rdf:type	obo:CHEBI_32809 .
+compound:CID439959	rdf:type	obo:CHEBI_16487 .
+compound:CID439964	rdf:type	obo:CHEBI_5457 .
+compound:CID440055	rdf:type	obo:CHEBI_47876 .
+compound:CID440133	rdf:type	obo:CHEBI_1090 .
+compound:CID440308	rdf:type	obo:CHEBI_27395 ,
+		bp:SmallMolecule .
+compound:CID440403	rdf:type	obo:CHEBI_17978 ,
+		bp:SmallMolecule .
+compound:CID440470	rdf:type	bp:SmallMolecule .
+compound:CID440545	rdf:type	obo:CHEBI_37719 .
+compound:CID440562	rdf:type	obo:CHEBI_6836 .
+compound:CID440744	rdf:type	obo:CHEBI_2065 ,
+		bp:SmallMolecule .
+compound:CID441073	rdf:type	ns4:N0000006907 ,
+		ns4:N0000178969 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/47857006> .
+compound:CID441074	rdf:type	obo:CHEBI_28593 ,
+		bp:SmallMolecule ,
+		nci:C793 ,
+		ns4:N0000007728 ,
+		ns4:N0000178968 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/31306009> ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/82230005> .
+compound:CID441167	rdf:type	obo:CHEBI_9973 .
+compound:CID441173	rdf:type	obo:CHEBI_719 .
+compound:CID441260	rdf:type	obo:CHEBI_64186 ,
+		bp:SmallMolecule .
+compound:CID441375	rdf:type	obo:CHEBI_7935 ,
+		ns4:N0000179358 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/30203009> .
+compound:CID441393	rdf:type	ns4:N0000006298 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/96050003> .
+compound:CID441405	rdf:type	obo:CHEBI_144094 .
+compound:CID441479	rdf:type	obo:CHEBI_28994 .
+compound:CID441482	rdf:type	obo:CHEBI_28552 .
+compound:CID441484	rdf:type	obo:CHEBI_10295 .
+compound:CID441538	rdf:type	obo:CHEBI_3747 .
+compound:CID441586	rdf:type	obo:CHEBI_3005 .
+compound:CID441826	rdf:type	obo:CHEBI_2528 .
+compound:CID441871	rdf:type	<http://purl.bioontology.org/ontology/SNOMEDCT/420838006> ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/5289002> .
+compound:CID441934	rdf:type	obo:CHEBI_77149 .
+compound:CID441942	rdf:type	obo:CHEBI_8484 .
+compound:CID442025	rdf:type	obo:CHEBI_3323 .
+compound:CID442111	rdf:type	obo:CHEBI_6430 .
+compound:CID442119	rdf:type	obo:CHEBI_9543 .
+compound:CID442153	rdf:type	obo:CHEBI_2368 .
+compound:CID442288	rdf:type	obo:CHEBI_7938 .
+compound:CID442330	rdf:type	obo:CHEBI_7482 .
+compound:CID442504	rdf:type	obo:CHEBI_9860 .
+compound:CID442675	rdf:type	obo:CHEBI_3702 .
+compound:CID442678	rdf:type	obo:CHEBI_4807 .
+compound:CID442710	rdf:type	obo:CHEBI_6693 .
+compound:CID442725	rdf:type	obo:CHEBI_28268 .
+compound:CID442788	rdf:type	obo:CHEBI_5754 .
+compound:CID442847	rdf:type	obo:CHEBI_132335 .
+compound:CID442860	rdf:type	obo:CHEBI_5746 .
+compound:CID442912	rdf:type	obo:CHEBI_5792 .
+compound:CID442930	rdf:type	obo:CHEBI_8625 .
+compound:CID442955	rdf:type	obo:CHEBI_6410 .
+compound:CID443076	rdf:type	obo:CHEBI_36491 ,
+		bp:SmallMolecule .
+compound:CID443223	rdf:type	obo:CHEBI_4188 ,
+		bp:SmallMolecule .
+compound:CID443293	rdf:type	obo:CHEBI_4734 .
+compound:CID443323	rdf:type	obo:CHEBI_73926 .
+compound:CID443347	rdf:type	obo:CHEBI_716 .
+compound:CID443348	rdf:type	obo:CHEBI_2327 .
+compound:CID443381	rdf:type	obo:CHEBI_4003 .
+compound:CID443525	rdf:type	obo:CHEBI_29478 ,
+		bp:SmallMolecule .
+compound:CID443605	rdf:type	obo:CHEBI_29705 .
+compound:CID443649	rdf:type	bp:SmallMolecule .
+compound:CID443816	rdf:type	obo:CHEBI_31055 ,
+		bp:SmallMolecule .
+compound:CID445154	rdf:type	obo:CHEBI_27881 ,
+		obo:CHEBI_45713 ,
+		bp:SmallMolecule ,
+		nci:C1215 ,
+		ns4:N0000179228 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/96383001> .
+compound:CID446193	rdf:type	obo:CHEBI_45457 .
+compound:CID446495	rdf:type	obo:CHEBI_61988 ,
+		bp:SmallMolecule .
+compound:CID447078	rdf:type	obo:CHEBI_47766 .
+compound:CID448696	rdf:type	obo:CHEBI_136456 .
+compound:CID448837	rdf:type	obo:CHEBI_138683 .
+compound:CID449242	rdf:type	obo:CHEBI_63748 .
+compound:CID456304	rdf:type	obo:CHEBI_66079 .
+compound:CID456468	rdf:type	obo:CHEBI_42101 ,
+		ns4:N0000170208 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/52560005> .
+compound:CID458121	rdf:type	obo:CHEBI_139386 .
+compound:CID480764	rdf:type	obo:CHEBI_50207 ,
+		bp:SmallMolecule .
+compound:CID485154	rdf:type	obo:CHEBI_68660 .
+compound:CID662857	rdf:type	obo:CHEBI_107505 .
+compound:CID430245	rdf:type	bp:SmallMolecule .
+compound:CID439183	rdf:type	obo:CHEBI_17794 ,
+		bp:SmallMolecule .
+compound:CID439214	rdf:type	bp:SmallMolecule .
+compound:CID439251	rdf:type	obo:CHEBI_18697 ,
+		bp:SmallMolecule .
+compound:CID439336	rdf:type	obo:CHEBI_27680 .
+compound:CID439358	rdf:type	obo:CHEBI_18120 ,
+		bp:SmallMolecule .
+compound:CID439400	rdf:type	obo:CHEBI_17436 ,
+		bp:SmallMolecule .
+compound:CID439410	rdf:type	obo:CHEBI_15406 ,
+		bp:SmallMolecule .
+compound:CID439469	rdf:type	obo:CHEBI_134676 .
+compound:CID439716	rdf:type	obo:CHEBI_16327 ,
+		bp:SmallMolecule .
+compound:CID439739	rdf:type	bp:SmallMolecule .
+compound:CID439814	rdf:type	bp:SmallMolecule .
+compound:CID439904	rdf:type	bp:SmallMolecule .
+compound:CID439925	rdf:type	obo:CHEBI_17592 .
+compound:CID440030	rdf:type	obo:CHEBI_28707 .
+compound:CID440126	rdf:type	obo:CHEBI_17163 .
+compound:CID440192	rdf:type	obo:CHEBI_16079 .
+compound:CID440210	rdf:type	obo:CHEBI_28898 .
+compound:CID440664	rdf:type	obo:CHEBI_28033 .
+compound:CID440745	rdf:type	obo:CHEBI_2076 ,
+		bp:SmallMolecule .
+compound:CID440894	rdf:type	obo:CHEBI_1848 ,
+		obo:CHEBI_20384 ,
+		bp:SmallMolecule .
+compound:CID440911	rdf:type	bp:SmallMolecule .
+compound:CID441000	rdf:type	obo:CHEBI_4621 .
+compound:CID441183	rdf:type	obo:CHEBI_5533 .
+compound:CID441202	rdf:type	obo:CHEBI_16925 ,
+		bp:SmallMolecule .
+compound:CID441277	rdf:type	nci:C47661 ,
+		ns4:N0000179497 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/91013003> .
+compound:CID441316	rdf:type	obo:CHEBI_28752 ,
+		bp:SmallMolecule .
+compound:CID441374	rdf:type	obo:CHEBI_6109 ,
+		nci:C65998 ,
+		nci:C76152 ,
+		ns4:N0000179630 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/100898004> ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/8689007> .
+compound:CID441451	rdf:type	obo:CHEBI_6248 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/31119004> .
+compound:CID441588	rdf:type	obo:CHEBI_70240 .
+compound:CID441884	rdf:type	obo:CHEBI_4389 .
+compound:CID441906	rdf:type	obo:CHEBI_2898 .
+compound:CID441920	rdf:type	obo:CHEBI_5069 .
+compound:CID441927	rdf:type	obo:CHEBI_46707 .
+compound:CID442019	rdf:type	obo:CHEBI_2296 .
+compound:CID442218	rdf:type	obo:CHEBI_4837 .
+compound:CID442320	rdf:type	obo:CHEBI_9962 .
+compound:CID442324	rdf:type	obo:CHEBI_9966 .
+compound:CID442432	rdf:type	obo:CHEBI_7888 .
+compound:CID442438	rdf:type	obo:CHEBI_26 .
+compound:CID442444	rdf:type	bp:SmallMolecule .
+compound:CID442507	rdf:type	obo:CHEBI_3157 .
+compound:CID442656	rdf:type	obo:CHEBI_114 .
+compound:CID442666	rdf:type	obo:CHEBI_73 .
+compound:CID442740	rdf:type	obo:CHEBI_6024 .
+compound:CID442765	rdf:type	obo:CHEBI_8608 .
+compound:CID442861	rdf:type	obo:CHEBI_6011 .
+compound:CID443019	rdf:type	obo:CHEBI_9127 ,
+		bp:SmallMolecule .
+compound:CID443074	rdf:type	obo:CHEBI_5588 .
+compound:CID443142	rdf:type	obo:CHEBI_18198 ,
+		bp:SmallMolecule .
+compound:CID443195	rdf:type	obo:CHEBI_28091 ,
+		bp:SmallMolecule .
+compound:CID443267	rdf:type	obo:CHEBI_616 .
+compound:CID443334	rdf:type	obo:CHEBI_2317 .
+compound:CID443389	rdf:type	obo:CHEBI_8978 .
+compound:CID443408	rdf:type	obo:CHEBI_4650 ,
+		ns4:N0000167307 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/28580002> .
+compound:CID443482	rdf:type	obo:CHEBI_29517 .
+compound:CID443625	rdf:type	obo:CHEBI_29735 .
+compound:CID443686	rdf:type	obo:CHEBI_31896 .
+compound:CID443699	rdf:type	obo:CHEBI_31117 .
+compound:CID443800	rdf:type	obo:CHEBI_32050 ,
+		bp:SmallMolecule .
+compound:CID443879	rdf:type	obo:CHEBI_9622 ,
+		nci:C62083 ,
+		ns4:N0000007085 ,
+		ns4:N0000191932 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/109113000> ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/109114006> .
+compound:CID444022	rdf:type	obo:CHEBI_51770 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/710202000> .
+compound:CID444039	rdf:type	<http://purl.bioontology.org/ontology/SNOMEDCT/108864007> .
+compound:CID444998	rdf:type	obo:CHEBI_138169 .
+compound:CID446475	rdf:type	obo:CHEBI_15427 ,
+		bp:SmallMolecule .
+compound:CID447277	rdf:type	obo:CHEBI_15831 ,
+		obo:CHEBI_48861 ,
+		bp:SmallMolecule .
+compound:CID447916	rdf:type	obo:CHEBI_46515 .
+compound:CID448378	rdf:type	obo:CHEBI_140569 .
+compound:CID449278	rdf:type	obo:CHEBI_42893 .
+compound:CID449437	rdf:type	obo:CHEBI_143171 .
+compound:CID449538	rdf:type	obo:CHEBI_46143 ,
+		bp:SmallMolecule .
+compound:CID456255	rdf:type	obo:CHEBI_3480 ,
+		nci:C353 ,
+		ns4:N0000007873 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/61651006> .
+compound:CID461549	rdf:type	ns4:N0000171496 .
+compound:CID467825	rdf:type	obo:CHEBI_143825 ,
+		nci:C38688 .
+compound:CID472184	rdf:type	obo:CHEBI_49789 .
+compound:CID476861	rdf:type	nci:C61441 .
+compound:CID477840	rdf:type	obo:CHEBI_50610 .
+compound:CID408099	rdf:type	<http://purl.bioontology.org/ontology/SNOMEDCT/20230008> .
+compound:CID409694	rdf:type	obo:CHEBI_74031 .
+compound:CID439174	rdf:type	obo:CHEBI_506227 ,
+		bp:SmallMolecule ,
+		ns4:N0000168415 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/259446009> ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/73379004> .
+compound:CID439281	rdf:type	obo:CHEBI_63153 ,
+		bp:SmallMolecule ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/37315007> .
+compound:CID439435	rdf:type	obo:CHEBI_17807 ,
+		bp:SmallMolecule .
+compound:CID439444	rdf:type	obo:CHEBI_17816 ,
+		bp:SmallMolecule .
+compound:CID439447	rdf:type	obo:CHEBI_6851 .
+compound:CID439592	rdf:type	obo:CHEBI_15403 .
+compound:CID439635	rdf:type	bp:SmallMolecule .
+compound:CID439888	rdf:type	obo:CHEBI_16812 ,
+		bp:SmallMolecule .
+compound:CID439916	rdf:type	obo:CHEBI_21601 .
+compound:CID440003	rdf:type	obo:CHEBI_15874 .
+compound:CID440093	rdf:type	obo:CHEBI_17648 .
+compound:CID440156	rdf:type	obo:CHEBI_18025 .
+compound:CID440169	rdf:type	obo:CHEBI_4280 ,
+		bp:SmallMolecule .
+compound:CID440326	rdf:type	bp:SmallMolecule .
+compound:CID440345	rdf:type	obo:CHEBI_16495 .
+compound:CID440552	rdf:type	obo:CHEBI_28497 ,
+		bp:SmallMolecule .
+compound:CID440602	rdf:type	bp:SmallMolecule .
+compound:CID440846	rdf:type	obo:CHEBI_8294 .
+compound:CID441226	rdf:type	bp:SmallMolecule .
+compound:CID441351	rdf:type	obo:CHEBI_8885 ,
+		nci:C47709 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/108450002> .
+compound:CID441397	rdf:type	obo:CHEBI_2968 ,
+		ns4:N0000005940 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/82312001> .
+compound:CID441429	rdf:type	obo:CHEBI_27522 ,
+		bp:SmallMolecule .
+compound:CID441436	rdf:type	obo:CHEBI_8029 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/706979000> .
+compound:CID441439	rdf:type	obo:CHEBI_10017 .
+compound:CID441583	rdf:type	obo:CHEBI_2548 .
+compound:CID441729	rdf:type	obo:CHEBI_4402 .
+compound:CID441740	rdf:type	obo:CHEBI_5890 .
+compound:CID441812	rdf:type	obo:CHEBI_10105 .
+compound:CID441844	rdf:type	obo:CHEBI_2867 .
+compound:CID441849	rdf:type	obo:CHEBI_3299 .
+compound:CID441969	rdf:type	obo:CHEBI_6891 .
+compound:CID442082	rdf:type	obo:CHEBI_8809 ,
+		bp:SmallMolecule .
+compound:CID442173	rdf:type	obo:CHEBI_2984 .
+compound:CID442535	rdf:type	obo:CHEBI_5316 .
+compound:CID442646	rdf:type	obo:CHEBI_6507 .
+compound:CID442841	rdf:type	obo:CHEBI_2552 .
+compound:CID442900	rdf:type	obo:CHEBI_2516 .
+compound:CID442990	rdf:type	obo:CHEBI_9780 .
+compound:CID443007	rdf:type	obo:CHEBI_8176 .
+compound:CID443047	rdf:type	<http://purl.bioontology.org/ontology/SNOMEDCT/90670002> .
+compound:CID443101	rdf:type	ns4:N0000006483 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/17693003> .
+compound:CID443270	rdf:type	obo:CHEBI_611 .
+compound:CID443309	rdf:type	obo:CHEBI_8418 .
+compound:CID443514	rdf:type	bp:SmallMolecule .
+compound:CID443564	rdf:type	obo:CHEBI_29658 ,
+		bp:SmallMolecule .
+compound:CID443587	rdf:type	obo:CHEBI_29471 .
+compound:CID443633	rdf:type	obo:CHEBI_29676 .
+compound:CID443714	rdf:type	obo:CHEBI_31594 .
+compound:CID443718	rdf:type	obo:CHEBI_31884 .
+compound:CID443722	rdf:type	obo:CHEBI_32117 .
+compound:CID444206	rdf:type	obo:CHEBI_74705 .
+compound:CID444865	rdf:type	ns4:N0000167508 .
+compound:CID446718	rdf:type	obo:CHEBI_45725 ,
+		bp:SmallMolecule .
+compound:CID446798	rdf:type	obo:CHEBI_52075 ,
+		bp:SmallMolecule .
+compound:CID446845	rdf:type	obo:CHEBI_106738 .
+compound:CID447451	rdf:type	obo:CHEBI_29506 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/425636009> .
+compound:CID448154	rdf:type	obo:CHEBI_27512 ,
+		bp:SmallMolecule .
+compound:CID448338	rdf:type	obo:CHEBI_84432 ,
+		bp:SmallMolecule .
+compound:CID449190	rdf:type	nci:C83653 .
+compound:CID449517	rdf:type	obo:CHEBI_17842 ,
+		bp:SmallMolecule .
+compound:CID449673	rdf:type	obo:CHEBI_136031 .
+compound:CID453622	rdf:type	obo:CHEBI_71683 .
+compound:CID456190	rdf:type	bp:SmallMolecule ,
+		ns4:N0000006022 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/76591000> .
+compound:CID456194	rdf:type	obo:CHEBI_53634 ,
+		bp:SmallMolecule ,
+		nci:C95127 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/20379003> .
+compound:CID464001	rdf:type	obo:CHEBI_66080 .
+compound:CID467785	rdf:type	obo:CHEBI_66410 .
+compound:CID471426	rdf:type	obo:CHEBI_67914 .
+compound:CID473141	rdf:type	obo:CHEBI_42989 .
+compound:CID489140	rdf:type	obo:CHEBI_66741 .
+compound:CID490364	rdf:type	obo:CHEBI_70681 .
+compound:CID497456	rdf:type	obo:CHEBI_107086 .
+compound:CID10020	rdf:type	obo:CHEBI_133351 .
+compound:CID102225	rdf:type	obo:CHEBI_34339 .
+compound:CID10239	rdf:type	obo:CHEBI_135094 ,
+		nci:C66278 .
+compound:CID10297	rdf:type	obo:CHEBI_80680 ,
+		bp:SmallMolecule ,
+		nci:C29364 ,
+		ns4:N0000006004 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/80127003> ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/96257008> .
+compound:CID11079	rdf:type	obo:CHEBI_7470 ,
+		nci:C47632 ,
+		ns4:N0000179431 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/57583000> .
+compound:CID11125	rdf:type	obo:CHEBI_6504 ,
+		nci:C1318 ,
+		ns4:N0000006445 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/16977003> .
+compound:CID111337	rdf:type	obo:CHEBI_34139 .
+compound:CID11163	rdf:type	obo:CHEBI_17201 ,
+		nci:C81374 ,
+		ns4:N0000170304 .
+compound:CID11439	rdf:type	obo:CHEBI_9307 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/74632002> .
+compound:CID119432	rdf:type	obo:CHEBI_135980 ,
+		nci:C79714 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/429311000> ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/129508003> .
+compound:CID12446	rdf:type	obo:CHEBI_83605 ,
+		ns4:N0000167239 .
+compound:CID1355	rdf:type	obo:CHEBI_10588 .
+compound:CID14505	rdf:type	obo:CHEBI_59983 .
+compound:CID14604	rdf:type	obo:CHEBI_135060 ,
+		nci:C65557 .
+compound:CID14851	rdf:type	obo:CHEBI_79732 .
+compound:CID15459	rdf:type	obo:CHEBI_6797 ,
+		ns4:N0000006436 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/87599003> .
+compound:CID1550734	rdf:type	obo:CHEBI_38361 .
+compound:CID16118	rdf:type	obo:CHEBI_47833 ,
+		ns4:N0000170267 .
+compound:CID16139	rdf:type	bp:SmallMolecule .
+compound:CID193422	rdf:type	obo:CHEBI_125545 .
+compound:CID20984	rdf:type	obo:CHEBI_68502 .
+compound:CID21233	rdf:type	obo:CHEBI_6900 ,
+		nci:C76069 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/89664002> .
+compound:CID21954	rdf:type	obo:CHEBI_81771 ,
+		ns4:N0000167111 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/49444004> .
+compound:CID23340	rdf:type	obo:CHEBI_94318 .
+compound:CID2381	rdf:type	obo:CHEBI_3112 ,
+		nci:C65263 ,
+		ns4:N0000007878 ,
+		ns4:N0000179053 ,
+		ns4:N0000179478 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/65041000> ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/10020007> ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/61742009> .
+compound:CID2576	rdf:type	obo:CHEBI_3419 ,
+		ns4:N0000006668 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/25076002> .
+compound:CID2724	rdf:type	obo:CHEBI_3643 ,
+		ns4:N0000005924 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/73213007> .
+compound:CID2733	rdf:type	obo:CHEBI_3655 ,
+		nci:C28926 ,
+		ns4:N0000006971 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/44908000> .
+compound:CID27944	rdf:type	obo:CHEBI_6433 ,
+		nci:C610 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/81365005> .
+compound:CID28115	rdf:type	obo:CHEBI_131454 .
+compound:CID30487	rdf:type	obo:CHEBI_8059 ,
+		nci:C61887 ,
+		ns4:N0000006615 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/39142008> .
+compound:CID3052	rdf:type	obo:CHEBI_4527 ,
+		nci:C65378 ,
+		ns4:N0000167124 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/60731009> ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/387340001> .
+compound:CID31245	rdf:type	obo:CHEBI_89986 .
+compound:CID31252	rdf:type	obo:CHEBI_89762 .
+compound:CID31405	rdf:type	obo:CHEBI_131421 .
+compound:CID31477	rdf:type	obo:CHEBI_6897 ,
+		ns4:N0000006183 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/108831007> .
+compound:CID3388	rdf:type	nci:C47996 ,
+		ns4:N0000179137 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/321669003> .
+compound:CID3389	rdf:type	obo:CHEBI_5125 ,
+		nci:C65726 ,
+		ns4:N0000179195 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/321689002> .
+compound:CID3469	rdf:type	obo:CHEBI_17189 ,
+		bp:SmallMolecule ,
+		nci:C76714 .
+compound:CID3598	rdf:type	obo:CHEBI_5693 ,
+		nci:C47556 ,
+		ns4:N0000007260 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/1878008> ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/273955007> .
+compound:CID3720	rdf:type	obo:CHEBI_31699 ,
+		obo:CHEBI_33064 ,
+		nci:C75996 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/350626003> .
+compound:CID3899	rdf:type	obo:CHEBI_6402 ,
+		nci:C1128 ,
+		ns4:N0000006451 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/109143003> .
+compound:CID39468	rdf:type	obo:CHEBI_6438 ,
+		nci:C62043 ,
+		ns4:N0000007411 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/349903009> .
+compound:CID446156	rdf:type	obo:CHEBI_3558 ,
+		obo:CHEBI_94755 ,
+		bp:SmallMolecule ,
+		nci:C65308 ,
+		ns4:N0000006045 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/108596008> .
+compound:CID4601	rdf:type	obo:CHEBI_7789 ,
+		ns4:N0000006810 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/35035001> .
+compound:CID4659569	rdf:type	obo:CHEBI_63630 ,
+		nci:C47762 ,
+		ns4:N0000006672 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/108464002> .
+compound:CID4723	rdf:type	obo:CHEBI_7953 ,
+		ns4:N0000006778 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/70776005> ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/387393000> .
+compound:CID4837	rdf:type	obo:CHEBI_28568 ,
+		nci:C61892 ,
+		ns4:N0000011297 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/324963001> .
+compound:CID4886	rdf:type	obo:CHEBI_8357 ,
+		nci:C61903 ,
+		ns4:N0000171570 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/31872002> .
+compound:CID5070	rdf:type	obo:CHEBI_8863 ,
+		nci:C47704 ,
+		ns4:N0000006860 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/109141001> .
+compound:CID5161	rdf:type	obo:CHEBI_9014 ,
+		nci:C62636 ,
+		ns4:N0000179234 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/13252002> .
+compound:CID5281078	rdf:type	obo:CHEBI_8764 ,
+		obo:CHEBI_93612 ,
+		bp:SmallMolecule ,
+		nci:C1468 ,
+		ns4:N0000005137 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/109131004> .
+compound:CID5281081	rdf:type	obo:CHEBI_4798 ,
+		nci:C61746 ,
+		ns4:N0000004746 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/116116003> .
+compound:CID5281316	rdf:type	obo:CHEBI_3941 ,
+		bp:SmallMolecule .
+compound:CID5284650	rdf:type	obo:CHEBI_35101 ,
+		obo:CHEBI_36664 .
+compound:CID5354896	rdf:type	obo:CHEBI_89992 .
+compound:CID5361	rdf:type	obo:CHEBI_45906 ,
+		nci:C853 ,
+		ns4:N0000167387 .
+compound:CID5419	rdf:type	obo:CHEBI_28674 ,
+		ns4:N0000006098 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/2183004> .
+compound:CID5426	rdf:type	obo:CHEBI_74947 ,
+		ns4:N0000006367 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/78702007> .
+compound:CID5455	rdf:type	obo:CHEBI_9495 ,
+		nci:C66600 ,
+		ns4:N0000166713 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/39012008> .
+compound:CID5497196	rdf:type	bp:SmallMolecule .
+compound:CID5709	rdf:type	obo:CHEBI_10082 ,
+		nci:C87749 ,
+		ns4:N0000006572 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/76289007> .
+compound:CID5745	rdf:type	obo:CHEBI_3897 ,
+		nci:C1058 ,
+		ns4:N0000179090 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/127382005> .
+compound:CID5795	rdf:type	obo:CHEBI_8431 ,
+		nci:C47688 ,
+		ns4:N0000179500 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/73444000> .
+compound:CID5853	rdf:type	obo:CHEBI_6908 ,
+		ns4:N0000166428 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/100239003> ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/101123007> ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/49849004> .
+compound:CID5877	rdf:type	obo:CHEBI_6889 ,
+		nci:C48003 ,
+		ns4:N0000179565 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/80959009> .
+compound:CID60947	rdf:type	obo:CHEBI_9605 ,
+		nci:C76405 ,
+		ns4:N0000006285 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/108981004> .
+compound:CID6240	rdf:type	nci:C47975 ,
+		ns4:N0000179496 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/82431006> .
+compound:CID64150	rdf:type	nci:C28818 ,
+		ns4:N0000179743 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/64507008> .
+compound:CID6488	rdf:type	obo:CHEBI_134961 ,
+		nci:C76936 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/56325002> .
+compound:CID65	rdf:type	obo:CHEBI_27545 ,
+		bp:SmallMolecule .
+compound:CID6604100	rdf:type	obo:CHEBI_4318 ,
+		ns4:N0000178908 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/81946009> .
+compound:CID667467	rdf:type	obo:CHEBI_50931 ,
+		nci:C65325 ,
+		ns4:N0000006953 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/57002000> .
+compound:CID66950	rdf:type	obo:CHEBI_55502 .
+compound:CID6740	rdf:type	obo:CHEBI_142281 .
+compound:CID6843	rdf:type	obo:CHEBI_8496 ,
+		nci:C66492 ,
+		ns4:N0000007688 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/79221007> .
+compound:CID6998	rdf:type	obo:CHEBI_16008 ,
+		bp:SmallMolecule ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/256024008> .
+compound:CID70211	rdf:type	obo:CHEBI_53275 .
+compound:CID7298	rdf:type	obo:CHEBI_16133 .
+compound:CID7697	rdf:type	obo:CHEBI_3642 ,
+		ns4:N0000007743 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/80311000> .
+compound:CID77787	rdf:type	obo:CHEBI_35089 .
+compound:CID7976	rdf:type	obo:CHEBI_89015 .
+compound:CID8228	rdf:type	nci:C29116 ,
+		ns4:N0000179549 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/3378009> .
+compound:CID9338	rdf:type	obo:CHEBI_68465 ,
+		bp:SmallMolecule .
+compound:CID94144	rdf:type	obo:CHEBI_28859 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/126087002> .
+compound:CID97856	rdf:type	obo:CHEBI_90143 .
+compound:CID408888	rdf:type	ns4:N0000005896 .
+compound:CID431734	rdf:type	obo:CHEBI_2706 .
+compound:CID439260	rdf:type	obo:CHEBI_18357 ,
+		bp:SmallMolecule ,
+		nci:C2321 ,
+		nci:C62098 ,
+		ns4:N0000007426 ,
+		ns4:N0000178944 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/111130009> ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/349918005> ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/45555007> .
+compound:CID439337	rdf:type	bp:SmallMolecule .
+compound:CID439368	rdf:type	obo:CHEBI_16719 ,
+		bp:SmallMolecule .
+compound:CID439530	rdf:type	obo:CHEBI_17939 ,
+		bp:SmallMolecule ,
+		nci:C787 ,
+		ns4:N0000170627 .
+compound:CID439587	rdf:type	obo:CHEBI_73647 ,
+		obo:CHEBI_8321 .
+compound:CID439615	rdf:type	obo:CHEBI_9641 .
+compound:CID439696	rdf:type	obo:CHEBI_6041 .
+compound:CID439708	rdf:type	bp:SmallMolecule .
+compound:CID439733	rdf:type	obo:CHEBI_15408 ,
+		bp:SmallMolecule .
+compound:CID439896	rdf:type	obo:CHEBI_16943 ,
+		bp:SmallMolecule .
+compound:CID439948	rdf:type	obo:CHEBI_28275 .
+compound:CID440033	rdf:type	obo:CHEBI_40673 ,
+		bp:SmallMolecule .
+compound:CID440048	rdf:type	obo:CHEBI_848 .
+compound:CID440344	rdf:type	obo:CHEBI_17693 .
+compound:CID440349	rdf:type	obo:CHEBI_35266 ,
+		bp:SmallMolecule .
+compound:CID440550	rdf:type	obo:CHEBI_28575 .
+compound:CID440558	rdf:type	obo:CHEBI_27910 ,
+		bp:SmallMolecule .
+compound:CID440561	rdf:type	obo:CHEBI_28432 .
+compound:CID440667	rdf:type	obo:CHEBI_27956 ,
+		bp:SmallMolecule ,
+		nci:C68508 ,
+		ns4:N0000168481 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/707244004> .
+compound:CID440719	rdf:type	obo:CHEBI_17355 ,
+		bp:SmallMolecule .
+compound:CID440735	rdf:type	obo:CHEBI_28412 ,
+		bp:SmallMolecule .
+compound:CID440833	rdf:type	obo:CHEBI_11412 ,
+		bp:SmallMolecule ,
+		nci:C81117 .
+compound:CID440929	rdf:type	obo:CHEBI_17101 ,
+		bp:SmallMolecule .
+compound:CID440985	rdf:type	obo:CHEBI_18431 ,
+		bp:SmallMolecule .
+compound:CID441097	rdf:type	obo:CHEBI_27645 ,
+		bp:SmallMolecule .
+compound:CID441131	rdf:type	obo:CHEBI_3734 .
+compound:CID441174	rdf:type	obo:CHEBI_8353 .
+compound:CID441256	rdf:type	bp:SmallMolecule .
+compound:CID441339	rdf:type	obo:CHEBI_28723 ,
+		bp:SmallMolecule .
+compound:CID441406	rdf:type	obo:CHEBI_5781 ,
+		nci:C65865 ,
+		<http://purl.bioontology.org/ontology/SNOMEDCT/109064002> .
+compound:CID441539	rdf:type	obo:CHEBI_2625 .
+compound:CID441939	rdf:type	obo:CHEBI_8194 .
+compound:CID442008	rdf:type	obo:CHEBI_3352 .
+compound:CID442103	rdf:type	obo:CHEBI_5619 .
+compound:CID442158	rdf:type	obo:CHEBI_2535 .
+compound:CID442201	rdf:type	obo:CHEBI_3955 .
+compound:CID442291	rdf:type	obo:CHEBI_8205 ,
+		nci:C87696 .
+compound:CID442425	rdf:type	obo:CHEBI_5954 .
+compound:CID442449	rdf:type	bp:SmallMolecule .
+compound:CID442523	rdf:type	obo:CHEBI_4400 .
+compound:CID442530	rdf:type	obo:CHEBI_7719 ,
+		bp:SmallMolecule .
+compound:CID442546	rdf:type	obo:CHEBI_28150 .
+compound:CID442636	rdf:type	obo:CHEBI_5192 .
+compound:CID442643	rdf:type	obo:CHEBI_6023 .
+compound:CID442745	rdf:type	obo:CHEBI_5715 .
+compound:CID442758	rdf:type	obo:CHEBI_8867 .
+compound:CID442814	rdf:type	obo:CHEBI_7886 .
+compound:CID442840	rdf:type	obo:CHEBI_2452 .
+compound:CID442931	rdf:type	obo:CHEBI_8839 .
+compound:CID442935	rdf:type	obo:CHEBI_9936 .
+compound:CID443031	rdf:type	obo:CHEBI_3129 .
+compound:CID443274	rdf:type	obo:CHEBI_1263 .
+compound:CID443409	rdf:type	obo:CHEBI_4901 ,
+		ns4:N0000167219 .
+compound:CID443460	rdf:type	bp:SmallMolecule .
+compound:CID443498	rdf:type	obo:CHEBI_30906 .
+compound:CID443565	rdf:type	obo:CHEBI_29614 ,
+		bp:SmallMolecule .
+compound:CID443733	rdf:type	obo:CHEBI_31833 .
