@@ -3,14 +3,14 @@ from rdflib import Graph, Namespace, Literal, URIRef
 from rdflib.namespace import RDF, OWL, RDFS
 import pandas as pd
 import validators
-from utils import query_endpoint
+from .utils import query_endpoint, strip_namespace, do_recursively_in_class, graph_to_dict
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 from collections import defaultdict
 
 class Alignment:
     def __init__(self, name = 'Alignment'):
-        self.name = name 
+        self.name = name
     
     def mapping(self, x, reverse = False):
         tmp = self.mappings
@@ -22,12 +22,28 @@ class Alignment:
         else:
             return 'no mapping'
     
-    def convert(self, ids, reverse=True):
-        return map(lambda x: self.mapping(x,reverse), ids)
+    @do_recursively_in_class
+    def convert(self, id_, reverse=True, strip = False):
+        if strip:
+            ids = [strip_namespace(i,['/','#','CID']) for i in ids]
+        return self.mapping(id_,reverse)
+
+class EndpointMapping(Alignment):
+    def __init__(self, endpoint):
+        super(EndpointMapping, self).__init__()
+        self.mappings = self.load_mapping(endpoint)
     
+    def load_mapping(self, endpoint):
+        query = """
+        SELECT ?s ?o WHERE {
+            ?s <http://www.w3.org/2002/07/owl#sameAs> ?o .
+        } 
+        """
+        res = query_endpoint(endpoint, query, var = ['s','o'])
+        return {str(s):str(o) for s,o in res}
 
 class WikidataMapping(Alignment):
-    def __init__(self, query, name='WikidataMapping'):
+    def __init__(self, query):
         """
         query :: str
             Wikidata query with two variables. 
@@ -38,7 +54,7 @@ class WikidataMapping(Alignment):
             ?compound wdt:P231 ?to .
             } 
         """
-        super(WikidataMapping, self).__init__(name)
+        super(WikidataMapping, self).__init__()
         self.mappings = self.load_mapping(query)
         
     def load_mapping(self, query):
@@ -48,12 +64,12 @@ class WikidataMapping(Alignment):
         return {str(f):str(t) for f,t in res}
 
 class LogMapMapping(Alignment):
-    def __init__(self, filename, threshold=0.95, name='LogMapMapping'):
+    def __init__(self, filename, threshold=0.95):
         """
         filename :: str
             path to logmap output file (.rdf)
         """
-        super(LogMapMapping, self).__init__(name)
+        super(LogMapMapping, self).__init__()
         
         self.threshold = threshold
         self.mappings = self.load_mapping(filename)
@@ -76,51 +92,61 @@ class LogMapMapping(Alignment):
 
         
 class StringMatchingMapping(Alignment):
-    def __init__(self, g1, g2, threshold=0.99, name='StringMatchingMapping'):
+    def __init__(self, dict1, dict2):
         """
         g1 :: dict 
         g2 :: dict
             {entity:list of strings}
         """
-        super(StringMatchingMapping, self).__init__(name)
+        super(StringMatchingMapping, self).__init__()
         
-        self.threshold = threshold
-        self.mappings = self.load_mapping(g1,g2)
+        self.threshold = 0.95
+        self.mappings = self.load_mapping(dict1,dict2)
     
     def load_mapping(self, dict1, dict2):
         tmp = defaultdict(float)
         for k1 in dict1:
             for k2 in dict2:
-                _, score = process.extractOne(dict1[k2],dict2[k2])
+                try:
+                    _, score = process.extractOne(dict1[k1],dict2[k2])
+                except TypeError:
+                    score = 0
+                    
                 if score >= self.threshold:
                     tmp[k1,k2] = max(tmp[k1,k2],score)
         
         return {k1:k2 for k1,k2 in tmp}
     
-class StringGraphMapping(StringMatchingMapping):
-    def __init__(self, g1, g2, threshold=0.99, name='StringGraphMapping'):
+class StringGraphMapping(Alignment):
+    def __init__(self, g1, g2):
         """
         g1 :: Graph
         g2 :: Graph
         Uses literal to align entities in g1 and g2.
         """
-        dict1 = self.graph_to_dict(g1)
-        dict2 = self.graph_to_dict(g2)
-        super(StringMatchingMapping, self).__init__(dict1,
-                                                    dict2,
-                                                    threshold=threshold,
-                                                    name=name)
+        super(StringGraphMapping, self).__init__()
         
-    def graph_to_dict(self, graph):
-        entities = graph.subjects()
-        d = defaultdict(list)
+        self.threshold = 0.95
+        dict1 = graph_to_dict(g1)
+        dict2 = graph_to_dict(g2)
+        self.mappings = self.load_mapping(dict1, dict2)
+    
+    def load_mapping(self, dict1, dict2):
+        tmp = defaultdict(float)
+        for k1 in dict1:
+            for k2 in dict2:
+                try:
+                    _, score = process.extractOne(dict1[k1],dict2[k2])
+                except TypeError:
+                    score = 0
+                    
+                if score >= self.threshold:
+                    tmp[k1,k2] = max(tmp[k1,k2],score)
         
-        for e in entities1:
-            d[e] = [str(o) for g1.objects(subject=e) if isinstance(o,Literal)]
-        return d
+        return {k1:k2 for k1,k2 in tmp}
         
 class CasToInchikey(WikidataMapping):
-    def __init__(self, name = 'CasToInchikey'):
+    def __init__(self):
         query = """
         SELECT ?from ?to
             { 
@@ -128,12 +154,11 @@ class CasToInchikey(WikidataMapping):
             ?compound wdt:P231 ?to .
             }
         """
-        super(CasToInchikey, self).__init__(query=query, 
-                                            name=name)
+        super(CasToInchikey, self).__init__(query=query)
     
     
 class InchikeyToCas(WikidataMapping):
-    def __init__(self, name = 'InchikeyToCas'):
+    def __init__(self):
         query = """
         SELECT ?from ?to
             { 
@@ -141,11 +166,10 @@ class InchikeyToCas(WikidataMapping):
             ?compound wdt:P231 ?from .
             }
         """
-        super(InchikeyToCas, self).__init__(query=query, 
-                                            name=name)
+        super(InchikeyToCas, self).__init__(query=query)
     
 class InchikeyToPubChem(WikidataMapping):
-    def __init__(self, name = 'InchikeyToPubChem'):
+    def __init__(self):
         query = """
         SELECT ?from ?to
             { 
@@ -153,11 +177,10 @@ class InchikeyToPubChem(WikidataMapping):
             ?compound wdt:P662 ?to .
             }
         """
-        super(InchikeyToPubChem, self).__init__(query=query, 
-                                            name=name)
+        super(InchikeyToPubChem, self).__init__(query=query)
     
 class InchikeyToChEBI(WikidataMapping):
-    def __init__(self, name = 'InchikeyToChEBI'):
+    def __init__(self):
         query = """
         SELECT ?from ?to
             { 
@@ -165,11 +188,10 @@ class InchikeyToChEBI(WikidataMapping):
             ?compound wdt:P683 ?to .
             }
         """
-        super(InchikeyToChEBI, self).__init__(query=query, 
-                                            name=name)
+        super(InchikeyToChEBI, self).__init__(query=query)
 
 class InchikeyToChEMBL(WikidataMapping):
-    def __init__(self, name = 'InchikeyToChEMBL'):
+    def __init__(self):
         query = """
         SELECT ?from ?to
             { 
@@ -177,11 +199,21 @@ class InchikeyToChEMBL(WikidataMapping):
             ?compound wdt:P592 ?to .
             }
         """
-        super(InchikeyToChEMBL, self).__init__(query=query, 
-                                            name=name)
+        super(InchikeyToChEMBL, self).__init__(query=query)
+        
+class InchikeyToMeSH(WikidataMapping):
+    def __init__(self):
+        query = """
+        SELECT ?from ?to
+            { 
+            ?compound wdt:P235 ?from .
+            ?compound wdt:P486 ?to .
+            }
+        """
+        super(InchikeyToChEMBL, self).__init__(query=query)
 
 class NCBIToEOL(WikidataMapping):
-    def __init__(self, name = 'NCBIToEOL'):
+    def __init__(self):
         query = """
         SELECT ?from ?to
             { 
@@ -189,11 +221,13 @@ class NCBIToEOL(WikidataMapping):
             ?taxon wdt:P830 ?to .
             }
         """
-        super(NCBIToEOL, self).__init__(query=query, 
-                                        name=name)
-    
-
-    
-    
+        super(NCBIToEOL, self).__init__(query=query)
+        
+        
+#TODO change ncbi -> ecotox mapping to concensus mappings.
+class NCBIToEcotox(StringGraphMapping):
+    def __init__(self, dataobject1, dataobject2):
+        super(NCBIToEcotox, self).__init__(dataobject1.graph,
+                                           dataobject2.graph)
         
         
