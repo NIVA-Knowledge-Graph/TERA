@@ -145,18 +145,7 @@ class StringGraphMapping(Alignment):
         
         return {k1:k2 for k1,k2 in tmp}
         
-class CasToInchikey(WikidataMapping):
-    def __init__(self):
-        query = """
-        SELECT ?from ?to
-            { 
-            ?compound wdt:P235 ?from .
-            ?compound wdt:P231 ?to .
-            }
-        """
-        super(CasToInchikey, self).__init__(query=query)
-    
-    
+
 class InchikeyToCas(WikidataMapping):
     def __init__(self):
         query = """
@@ -210,7 +199,7 @@ class InchikeyToMeSH(WikidataMapping):
             ?compound wdt:P486 ?to .
             }
         """
-        super(InchikeyToChEMBL, self).__init__(query=query)
+        super(InchikeyToMeSH, self).__init__(query=query)
 
 class NCBIToEOL(WikidataMapping):
     def __init__(self):

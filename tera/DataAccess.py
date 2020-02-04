@@ -10,7 +10,11 @@ import pubchempy
 from .DataIntegration import InchikeyToCas, InchikeyToChEBI, InchikeyToChEMBL, InchikeyToMeSH, InchikeyToPubChem, NCBIToEcotox, NCBIToEOL
 
 class API:
-    def __init__(self, namespace=None, endpoint=None, dataobject=None, name='API'):
+    def __init__(self, 
+                 namespace=None, 
+                 endpoint=None, 
+                 dataobject=None, 
+                 name='API'):
         """
         endpoint :: str
             sparql endpoint url
@@ -60,7 +64,7 @@ class API:
             select ?s where {
                 ?s rdf:type <%s>
             }
-        """ % t
+        """ % str(t)
         return self.query(q, 's')
     
     def query_child(self, t):
@@ -69,7 +73,7 @@ class API:
             select ?s where {
                 ?s rdfs:subClassOf <%s> .
             }
-        """ % t
+        """ % str(t)
         return self.query(q, 's')
     
     def query_label(self, t):
@@ -78,7 +82,7 @@ class API:
             select ?s where {
                 ?s rdfs:label "%s" . 
             }
-        """ % t
+        """ % str(t)
         return self.query(q, 's')
     
     def query_parent(self, t):
@@ -87,7 +91,7 @@ class API:
             select ?s where {
                 <%s> rdfs:subClassOf ?s .
             }
-        """ % t
+        """ % str(t)
         return self.query(q, 's')
     
     def query_siblings(self, t, depth=1):
@@ -97,7 +101,7 @@ class API:
             select ?s where {
                 <%s> rdfs:subClassOf{%s} ?s .
             }
-        """ % (t,str(depth))
+        """ % (str(t),str(depth))
         parents = self.query(q,'s')
         out = set()
         while parents:
@@ -106,7 +110,7 @@ class API:
             select ?s where {
                 ?s rdfs:subClassOf{%s} <%s> .
             }
-            """ % (str(depth),t)
+            """ % (str(depth),str(t))
             out |= self.query(q,'s')
         return s
     
@@ -116,7 +120,7 @@ class API:
             select ?s where {
                 <%s> rdfs:label ?s .
             }
-        """ % t
+        """ % str(t)
         return self.query(q, 's')
     
     def query_alt_labels(self, t):
@@ -126,7 +130,7 @@ class API:
                 <%s> ?p ?s .
                 ?p rdfs:subPropertyOf rdfs:label .
             } filter (isLiteral(?s))
-        """ % t
+        """ % str(t)
         return self.query(q, ['p','s'])
     
     def construct_subgraph(self, t):
@@ -144,7 +148,7 @@ class API:
                     values ?s { <%s> }
                     ?s ?p ?o
                 }
-            """ % curr
+            """ % str(curr)
             res = self.query(q, ['s','p','o'])
             out |= res
             tmp |= set([o for _,_,o in res])
@@ -185,9 +189,9 @@ class API:
             id_ = strip_namespace(id_, ['/','#','CID'])
         
         if f == self.base_identifier and t in self.mappings:
-            return self.mapping[t].convert(id_)
+            return self.mappings[t].convert(id_)
         
-        if f in self.mapping:
+        if f in self.mappings:
             return self.convert_id(self.mappings[f].convert(id_,reverse=True),
                                    f=self.base_identifier,t=t)
         
@@ -205,7 +209,7 @@ class TaxonomyAPI(API):
         self.mappings = {'eol':NCBIToEOL()}
         if mapping_dataobject:
             self.mappings['ecotox'] = NCBIToEcotox(dataobject, mapping_dataobject)
-        elif test_endpoint:
+        elif endpoint and test_endpoint(endpoint):
             self.mappings['ecotox'] = EndpointMapping(endpoint)
         
         self.base_identifier = 'ncbi'
@@ -340,7 +344,7 @@ class TraitsAPI(TaxonomyAPI):
             SELECT ?h WHERE {
                 <%s> <http://rs.tdwg.org/ontology/voc/SPMInfoItems#ConservationStatus> ?h .
             }
-        """ % t
+        """ % str(t)
         return self.query(q,'h')
 
     @do_recursively_in_class
@@ -350,7 +354,7 @@ class TraitsAPI(TaxonomyAPI):
             SELECT ?h WHERE {
                 <%s> <http://eol.org/schema/terms/ExtinctionStatus> ?h .
             }
-        """ % t
+        """ % str(t)
         return self.query(q,'h')
         
     @do_recursively_in_class
@@ -360,7 +364,7 @@ class TraitsAPI(TaxonomyAPI):
             SELECT ?h WHERE {
                 <%s> <http://eol.org/terms/endemic> ?h .
             }
-        """ % t
+        """ % str(t)
         return self.query(q,'h')
     
     @do_recursively_in_class
@@ -370,7 +374,7 @@ class TraitsAPI(TaxonomyAPI):
             SELECT ?h WHERE {
                 <%s> <https://www.wikidata.org/entity/Q295469> ?h .
             }
-        """ % t
+        """ % str(t)
         return self.query(q,'h')
         
     @do_recursively_in_class
@@ -380,7 +384,7 @@ class TraitsAPI(TaxonomyAPI):
             SELECT ?h WHERE {
                 <%s> <http://rs.tdwg.org/dwc/terms/habitat> ?h .
             }
-        """ % t
+        """ % str(t)
         return self.query(q,'h')
     
 class EcotoxChemicalAPI(ChemicalAPI):
@@ -415,7 +419,7 @@ class EffectsAPI(API):
         super(EffectsAPI, self).__init__(namespace, endpoint, dataobject, name)
     
     @do_recursively_in_class
-    def query_chemicals_from_species(self,t: Union[URIRef, str, list, set]):
+    def get_chemicals_from_species(self,t: Union[URIRef, str, list, set]):
         """Return chemical involved in experiment with species t."""
         q = """
         select ?c where {
@@ -423,11 +427,11 @@ class EffectsAPI(API):
             ?t ns:species <%s> .
             ?t ns:chemical ?c .
             } 
-        """ % t
+        """ % str(t)
         return self.query(q,'c')
     
     @do_recursively_in_class
-    def query_species_from_chemicals(self,t: Union[URIRef, str, list, set]):
+    def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
         """Return species involved in experiment with chemical t."""
         q = """
         select ?c where {
@@ -435,30 +439,30 @@ class EffectsAPI(API):
             ?t ns:species ?c .
             ?t ns:chemical <%s> .
             }
-        """ % t
+        """ % str(t)
         return self.query(q,'c')
     
-    def query_chemicals(self):
+    def get_chemicals(self):
         """Return chemicals used in at least one experiment."""
         q = """
         select ?c where {
             ?t rdf:type ns:Test .
             ?t ns:chemical ?c .
             }
-        """ % t
+        """
         return self.query(q,'c')
     
-    def query_species(self):
+    def get_species(self):
         """Return species used in at least one experiment."""
         q = """
         select ?c where {
             ?t rdf:type ns:Test .
             ?t ns:species ?c .
             }
-        """ % t
+        """
         return self.query(q,'c')
     
-    def query_endpoint(self, 
+    def get_endpoint(self, 
                        c: Union[URIRef, str, list, set], 
                        s: Union[URIRef, str, list, set]):
         """
@@ -470,9 +474,9 @@ class EffectsAPI(API):
         if not s:
             s = self.query_species()
         if isinstance(c,(list,set)):
-            return {a:self.query_endpoint(a,s) for a in c}
+            return {a:self.get_endpoint(a,s) for a in c}
         if isinstance(s,(list,set)):
-            return {a:self.query_endpoint(c,a) for a in s}
+            return {a:self.get_endpoint(c,a) for a in s}
         q = """
             SELECT ?cc ?cu ?ep ?ef ?sd ?sdu {
                 ?test rdf:type ns:Test ;
