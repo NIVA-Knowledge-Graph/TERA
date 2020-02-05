@@ -7,6 +7,17 @@ from collections import defaultdict
 nan_values = ['nan', float('nan'),'--','-X','NA','NC',-1,'','sp.', -1,'sp,','var.','variant','NR']
 
 def tanimoto(fp1, fp2):
+    """
+    Calculate tanimoto similarity between two chemical fingerprints.
+    Args:
+        fp1 : str \n
+            Chemical fingerprint on binary form.\n
+        fp2 : str \n
+            Chemical fingerprint on binary form.\n
+    
+    Return:
+        simiarity : float
+    """
     fp1_count = fp1.count('1')
     fp2_count = fp2.count('1')
     both_count = (fp1 & fp2).count('1')

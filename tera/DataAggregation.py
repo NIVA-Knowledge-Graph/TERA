@@ -26,6 +26,20 @@ class DataObject:
     
     def save(self, path):
         self.graph.serialize(path, format=path.split('.').pop(-1))
+        
+    def replace(self, f, t):
+        """Replace list f of entities with t. Usefull after converting between datasets."""
+        assert len(f) == len(t)
+        
+        for old, new in zip(f, t):
+            triples = self.graph.triples(subject=old)
+            tmp = set([(new,p,o) for _,p,o in triples])
+            triples = self.graph.triples(objects=old)
+            tmp |= set([(s,p,new) for s,p,_ in triples])
+            
+            self.graph.remove((old,None,None))
+            self.graph.remove((None,None,old))
+            
 
 class Taxonomy(DataObject):
     def __init__(self, 

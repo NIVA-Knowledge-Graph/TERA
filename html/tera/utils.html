@@ -33,6 +33,17 @@ from collections import defaultdict
 nan_values = [&#39;nan&#39;, float(&#39;nan&#39;),&#39;--&#39;,&#39;-X&#39;,&#39;NA&#39;,&#39;NC&#39;,-1,&#39;&#39;,&#39;sp.&#39;, -1,&#39;sp,&#39;,&#39;var.&#39;,&#39;variant&#39;,&#39;NR&#39;]
 
 def tanimoto(fp1, fp2):
+    &#34;&#34;&#34;
+    Calculate tanimoto similarity between two chemical fingerprints.
+    Args:
+        fp1 : str \n
+            Chemical fingerprint on binary form.\n
+        fp2 : str \n
+            Chemical fingerprint on binary form.\n
+    
+    Return:
+        simiarity : float
+    &#34;&#34;&#34;
     fp1_count = fp1.count(&#39;1&#39;)
     fp2_count = fp2.count(&#39;1&#39;)
     both_count = (fp1 &amp; fp2).count(&#39;1&#39;)
@@ -288,12 +299,35 @@ def graph_to_dict(graph):
 <span>def <span class="ident">tanimoto</span></span>(<span>fp1, fp2)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Calculate tanimoto similarity between two chemical fingerprints.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>fp1</code></strong> :&ensp;<code>str</code></dt>
+<dd>Chemical fingerprint on binary form.</dd>
+<dt><strong><code>fp2</code></strong> :&ensp;<code>str</code></dt>
+<dd>Chemical fingerprint on binary form.</dd>
+</dl>
+<h2 id="return">Return</h2>
+<dl>
+<dt><strong><code>simiarity</code></strong> :&ensp;<code>float</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def tanimoto(fp1, fp2):
+    &#34;&#34;&#34;
+    Calculate tanimoto similarity between two chemical fingerprints.
+    Args:
+        fp1 : str \n
+            Chemical fingerprint on binary form.\n
+        fp2 : str \n
+            Chemical fingerprint on binary form.\n
+    
+    Return:
+        simiarity : float
+    &#34;&#34;&#34;
     fp1_count = fp1.count(&#39;1&#39;)
     fp2_count = fp2.count(&#39;1&#39;)
     both_count = (fp1 &amp; fp2).count(&#39;1&#39;)

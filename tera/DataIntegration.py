@@ -25,7 +25,7 @@ class Alignment:
     @do_recursively_in_class
     def convert(self, id_, reverse=True, strip = False):
         if strip:
-            ids = [strip_namespace(i,['/','#','CID']) for i in ids]
+            id_ = strip_namespace(id_,['/','#','CID'])
         return self.mapping(id_,reverse)
 
 class EndpointMapping(Alignment):
