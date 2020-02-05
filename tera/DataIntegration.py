@@ -1,6 +1,4 @@
 """
-DataIntegration 
-
 A set of classes for aligning data aggregated with tools in DataAggregation.
 """
 
@@ -16,19 +14,29 @@ from collections import defaultdict
 
 class Alignment:
     def __init__(self, name = 'Alignment'):
-        """Base class for alignment of two data sets. """
+        """Base class for alignment of two data sets. 
+        
+        Parameters
+        ----------
+        name : str        
+        """
         self.name = name
     
     def _mapping(self, x, reverse = False):
         """
         Maps from one id type to another. 
-        Args:
-            x : rdflib.URIRef or str \n
-                URI/identifier to map from. \n
-            reverse : bool \n
-                Reverse the direction of mapping. 
-        Return:
-            mapping \n
+        
+        Parameters
+        ----------
+        x : rdflib.URIRef or str 
+            URI/identifier to map from. 
+            
+        reverse : bool 
+            Reverse the direction of mapping. 
+                
+        Returns
+        -------
+        str 
             If no mapping exists, returns 'no mapping'
         """
         tmp = self.mappings
@@ -44,15 +52,21 @@ class Alignment:
     def convert(self, id_, reverse=True, strip = False):
         """
         Convert a set of ids into new identifiers.
-        Args:
-            id_ : rdflib.URIRef, str, list, set \n
-                URI(s)/identifier(s) \n 
-            reverse : bool \n
-                Reverse the direction of mapping. \n
-            strip : bool \n
-                Remove namespace.
-        Return:
-            str or dict
+        
+        Parameters
+        ----------
+        id_ : rdflib.URIRef, str, list, set 
+            URI(s)/identifier(s)  
+        
+        reverse : bool 
+            Reverse the direction of mapping. 
+            
+        strip : bool 
+            Remove namespace.
+                
+        Returns
+        -------
+        str or dict
             Mapped values.
         """
         if strip:
@@ -63,8 +77,10 @@ class EndpointMapping(Alignment):
     def __init__(self, endpoint):
         super(EndpointMapping, self).__init__()
         """Class for loading mappings based on owl:sameAs property.
-        Args:
-            endpoint : str \n
+        
+        Parameters
+        ----------
+        endpoint : str 
             SPARQL endpoint URL.
         """
         self.mappings = self._load_mapping(endpoint)
@@ -72,11 +88,15 @@ class EndpointMapping(Alignment):
     def _load_mapping(self, endpoint):
         """
         Load mappings from endpoint.
-        Args:
-            endpoint : str \n
+        
+        Parameters
+        ----------
+        endpoint : str 
             SPARQL endpoint URL
-        Return:
-            dict\n
+                
+        Returns
+        -------
+        dict
             On the form {from:to}
         """
         query = """
@@ -91,13 +111,17 @@ class WikidataMapping(Alignment):
     def __init__(self, query):
         """
         Class for loading mappings from wikidata.
-        Args:
-            query : str \n
-            Wikidata query with two variables. \n
-            eg. from inchikey to cas \n
-            SELECT ?from ?to {\n  
-            ?compound wdt:P235 ?from . \n
-            ?compound wdt:P231 ?to .} \n
+        
+        Parameters
+        ----------
+        query : str 
+            Wikidata query with two variables. 
+            
+            eg. from inchikey to cas: 
+            
+            SELECT ?from ?to {  
+            ?compound wdt:P235 ?from . 
+            ?compound wdt:P231 ?to .} 
         """
         super(WikidataMapping, self).__init__()
         self.mappings = self._load_mapping(query)
@@ -105,11 +129,15 @@ class WikidataMapping(Alignment):
     def _load_mapping(self, query):
         """
         Load mappings from wikidata.
-        Args:
-            query : str \n
+        
+        Parameters
+        ----------
+        query : str 
             wikidata query. 
-        Return:
-            dict\n
+                
+        Returns
+        -------
+        dict
             On the form {from:to}
         """
         res = query_endpoint('https://query.wikidata.org/sparql', 
@@ -121,11 +149,14 @@ class LogMapMapping(Alignment):
     def __init__(self, filename, threshold=0.95):
         """
         Class for using LogMap (or other system) alignments. 
-        Args:
-            filename : str \n
-                Path to logmap output file (.rdf) \n
-            threshold : float \n
-                Alignment threshold.
+        
+        Parameters
+        ----------
+        filename : str 
+            Path to logmap output file (.rdf) 
+        
+        threshold : float 
+            Alignment threshold.
         """
         super(LogMapMapping, self).__init__()
         
@@ -135,11 +166,15 @@ class LogMapMapping(Alignment):
     def _load_mapping(self, filename):
         """
         Load mappings from alignment system.
-        Args:
-            filename : str \n
+        
+        Parameters
+        ----------
+        filename : str 
             Path to file. 
-        Return:
-            dict\n
+                
+        Returns
+        -------
+        dict
             On the form {from:to}
         """
         out = {}
@@ -162,13 +197,17 @@ class StringMatchingMapping(Alignment):
     def __init__(self, dict1, dict2, threshold = 0.95):
         """
         Class for creating mapping between two label dictonaries using string matching. 
-        Args:
-            dict1 : dict \n
-                Dictonary on the form {entity:list of labels} \n
-            dict2 : dict \n
-                Same as dict1.\n
-            threshold : float \n
-                Alignment threshold.
+        
+        Parameters
+        ----------
+        dict1 : dict 
+            Dictonary on the form {entity:list of labels} 
+        
+        dict2 : dict 
+            Same as dict1.
+            
+        threshold : float 
+            Alignment threshold.
         """
         super(StringMatchingMapping, self).__init__()
         
@@ -177,15 +216,21 @@ class StringMatchingMapping(Alignment):
     
     def _load_mapping(self, dict1, dict2):
         """
-        Args:
-            dict1 : dict \n
-                Dictonary on the form {entity:list of labels} \n
-            dict2 : dict \n
-                Same as dict1.\n
-            threshold : float \n
-                Alignment threshold.
-        Return:
-            dict \n
+        
+        Parameters
+        ----------
+        dict1 : dict 
+            Dictonary on the form {entity:list of labels} 
+        
+        dict2 : dict 
+            Same as dict1.
+            
+        threshold : float 
+            Alignment threshold.
+                
+        Returns
+        -------
+        dict 
             On the form {from:to}
         """
         tmp = defaultdict(float)
@@ -205,13 +250,19 @@ class StringGraphMapping(Alignment):
     def __init__(self, g1, g2, threshold = 0.95):
         """
         Class for creating mapping between two graph using string matching. 
-        Args:
-            g1 : rdflib.Graph \n
-            g2 : rdflib.Graph \n
-            threshold : float \n
-                Alignment threshold.
-        Return:
-            dict \n
+        
+        Parameters
+        ----------
+        g1 : rdflib.Graph 
+        
+        g2 : rdflib.Graph 
+        
+        threshold : float 
+            Alignment threshold.
+                
+        Returns
+        -------
+        dict 
             On the form {from:to}
         """
         super(StringGraphMapping, self).__init__()
@@ -223,15 +274,21 @@ class StringGraphMapping(Alignment):
     
     def _load_mapping(self, dict1, dict2):
         """
-        Args:
-            dict1 : dict \n
-                Dictonary on the form {entity:list of labels} \n
-            dict2 : dict \n
-                Same as dict1.\n
-            threshold : float \n
-                Alignment threshold.
-        Return:
-            dict \n
+        
+        Parameters
+        ----------
+        dict1 : dict 
+            Dictonary on the form {entity:list of labels} 
+        
+        dict2 : dict 
+            Same as dict1.
+        
+        threshold : float 
+            Alignment threshold.
+                
+        Returns
+        -------
+        dict 
             On the form {from:to}
         """
         tmp = defaultdict(float)

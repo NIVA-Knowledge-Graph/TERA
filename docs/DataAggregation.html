@@ -43,8 +43,10 @@ class DataObject:
     def __init__(self, namespace = &#39;http://www.example.org/&#39;, name = &#39;Data Object&#39;):
         &#34;&#34;&#34;
         Base class for aggregation of data.
-        Args:
-            namespace : str \n
+        
+        Parameters
+        ----------
+        namespace : str 
             Base URI for the data set.
         &#34;&#34;&#34;
         self.graph = Graph()
@@ -62,19 +64,24 @@ class DataObject:
     
     def save(self, path):
         &#34;&#34;&#34;Save graph to file.
-        Args:
-            path : str \n
+        
+        Parameters
+        ----------
+        path : str 
             ex: file.nt
         &#34;&#34;&#34;
         self.graph.serialize(path, format=path.split(&#39;.&#39;).pop(-1))
         
     def replace(self, f, t):
         &#34;&#34;&#34;Replace list f of entities with t. Usefull after converting between datasets.
-        Args:
-            f : list \n
-                Old entities to replace.\n
-            t : list \n
-                New entities. 
+        
+        Parameters
+        ----------
+        f : list 
+            Old entities to replace.
+        
+        t : list 
+            New entities. 
         &#34;&#34;&#34;
         assert len(f) == len(t)
         
@@ -95,8 +102,10 @@ class Taxonomy(DataObject):
                  directory = None):
         &#34;&#34;&#34;
         Aggregation of the NCBI Taxonomy. 
-        Args: 
-            directory : str \n
+        
+        Parameters
+        ---------- 
+        directory : str 
             Path to data set. Downloaded from ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.zip
         &#34;&#34;&#34;
         super(Taxonomy, self).__init__(namespace, name)
@@ -172,8 +181,10 @@ class Traits(DataObject):
                  directory = None):
         &#34;&#34;&#34;
         Encyclopedia of Life Traits. 
-        Args:
-            directory : str \n 
+        
+        Parameters
+        ----------
+        directory : str  
             Path to data set. See https://opendata.eol.org/dataset/all-trait-data-large
         &#34;&#34;&#34;
         super(Traits, self).__init__(namespace, name)
@@ -238,8 +249,10 @@ class Effects(DataObject):
                     directory = None):
         &#34;&#34;&#34;
         Ecotox effects data aggregation.
-        Args: 
-            directory : str \n
+        
+        Parameters
+        ---------- 
+        directory : str 
             Path to data set. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
         &#34;&#34;&#34;
         super(Effects, self).__init__(namespace, name)
@@ -320,8 +333,10 @@ class EcotoxTaxonomy(DataObject):
                     directory = None):
         &#34;&#34;&#34;
         Ecotox taxonomy aggregation. 
-        Args:
-            directory : str \n
+        
+        Parameters
+        ----------
+        directory : str 
             Path to dataset. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
         &#34;&#34;&#34;
         super(EcotoxTaxonomy, self).__init__(namespace, name)
@@ -403,8 +418,10 @@ class EcotoxChemicals(DataObject):
                     directory = None):
         &#34;&#34;&#34;
         Ecotox chemicals aggregation. 
-        Args:
-            directory : str \n
+        
+        Parameters
+        ----------
+        directory : str 
             Path to dataset. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
         &#34;&#34;&#34;
         super(EcotoxChemicals, self).__init__(namespace, name)
@@ -444,8 +461,10 @@ class PubChem(DataObject):
                     directory = None):
         &#34;&#34;&#34;
         PubChem data loading.
-        Args:
-            directory : str \n
+        
+        Parameters
+        ----------
+        directory : str 
             Path to turtle RDF files. Downloaded from ftp://ftp.ncbi.nlm.nih.gov/pubchem/RDF/ . Used files: compound/pc_compound_type.ttl and compound/pc_compound2parent.ttl .
         &#34;&#34;&#34;
         super(PubChem, self).__init__(namespace, name)
@@ -463,8 +482,10 @@ class ChEBI(DataObject):
                     directory = None):
         &#34;&#34;&#34;
         ChEBI data loading. 
-        Args: 
-            directory : str \n
+        
+        Parameters
+        ---------- 
+        directory : str 
             Path to turtle RDF files. See https://www.ebi.ac.uk/rdf/datasets/
         &#34;&#34;&#34;
         super(ChEBI, self).__init__(namespace, name)
@@ -482,8 +503,10 @@ class MeSH(DataObject):
                     directory = None):
         &#34;&#34;&#34;
         MeSH data loading. 
-        Args:
-            directory : str \n 
+        
+        Parameters
+        ----------
+        directory : str  
             Path to nt RDF files. See https://id.nlm.nih.gov/mesh/
         &#34;&#34;&#34;
         super(MeSH, self).__init__(namespace, name)
@@ -510,11 +533,10 @@ class MeSH(DataObject):
 <span>(</span><span>namespace='http://purl.obolibrary.org/obo/', name='ChEBI', directory=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>ChEBI data loading.
-Args:
-directory : str </p>
-<pre><code>Path to turtle RDF files. See &lt;https://www.ebi.ac.uk/rdf/datasets/&gt;
-</code></pre></section>
+<section class="desc"><p>ChEBI data loading. </p>
+<h2 id="parameters">Parameters</h2>
+<p>directory : str
+Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">https://www.ebi.ac.uk/rdf/datasets/</a></p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -526,8 +548,10 @@ directory : str </p>
                     directory = None):
         &#34;&#34;&#34;
         ChEBI data loading. 
-        Args: 
-            directory : str \n
+        
+        Parameters
+        ---------- 
+        directory : str 
             Path to turtle RDF files. See https://www.ebi.ac.uk/rdf/datasets/
         &#34;&#34;&#34;
         super(ChEBI, self).__init__(namespace, name)
@@ -558,12 +582,11 @@ directory : str </p>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for aggregation of data.</p>
-<h2 id="args">Args</h2>
+<h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>namespace</code></strong> :&ensp;<code>str</code></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Base URI for the data set.</p></section>
+<dd>Base URI for the data set.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -572,8 +595,10 @@ directory : str </p>
     def __init__(self, namespace = &#39;http://www.example.org/&#39;, name = &#39;Data Object&#39;):
         &#34;&#34;&#34;
         Base class for aggregation of data.
-        Args:
-            namespace : str \n
+        
+        Parameters
+        ----------
+        namespace : str 
             Base URI for the data set.
         &#34;&#34;&#34;
         self.graph = Graph()
@@ -591,19 +616,24 @@ directory : str </p>
     
     def save(self, path):
         &#34;&#34;&#34;Save graph to file.
-        Args:
-            path : str \n
+        
+        Parameters
+        ----------
+        path : str 
             ex: file.nt
         &#34;&#34;&#34;
         self.graph.serialize(path, format=path.split(&#39;.&#39;).pop(-1))
         
     def replace(self, f, t):
         &#34;&#34;&#34;Replace list f of entities with t. Usefull after converting between datasets.
-        Args:
-            f : list \n
-                Old entities to replace.\n
-            t : list \n
-                New entities. 
+        
+        Parameters
+        ----------
+        f : list 
+            Old entities to replace.
+        
+        t : list 
+            New entities. 
         &#34;&#34;&#34;
         assert len(f) == len(t)
         
@@ -634,7 +664,7 @@ directory : str </p>
 </code></dt>
 <dd>
 <section class="desc"><p>Replace list f of entities with t. Usefull after converting between datasets.</p>
-<h2 id="args">Args</h2>
+<h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>f</code></strong> :&ensp;<code>list</code></dt>
 <dd>Old entities to replace.</dd>
@@ -647,11 +677,14 @@ directory : str </p>
 </summary>
 <pre><code class="python">def replace(self, f, t):
     &#34;&#34;&#34;Replace list f of entities with t. Usefull after converting between datasets.
-    Args:
-        f : list \n
-            Old entities to replace.\n
-        t : list \n
-            New entities. 
+    
+    Parameters
+    ----------
+    f : list 
+        Old entities to replace.
+    
+    t : list 
+        New entities. 
     &#34;&#34;&#34;
     assert len(f) == len(t)
     
@@ -670,12 +703,10 @@ directory : str </p>
 </code></dt>
 <dd>
 <section class="desc"><p>Save graph to file.</p>
-<h2 id="args">Args</h2>
+<h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>path</code></strong> :&ensp;<code>str</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>ex</code></strong></dt>
-<dd>file.nt</dd>
+<dd>ex: file.nt</dd>
 </dl></section>
 <details class="source">
 <summary>
@@ -683,8 +714,10 @@ directory : str </p>
 </summary>
 <pre><code class="python">def save(self, path):
     &#34;&#34;&#34;Save graph to file.
-    Args:
-        path : str \n
+    
+    Parameters
+    ----------
+    path : str 
         ex: file.nt
     &#34;&#34;&#34;
     self.graph.serialize(path, format=path.split(&#39;.&#39;).pop(-1))</code></pre>
@@ -698,12 +731,11 @@ directory : str </p>
 </code></dt>
 <dd>
 <section class="desc"><p>Ecotox chemicals aggregation. </p>
-<h2 id="args">Args</h2>
+<h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>directory</code></strong> :&ensp;<code>str</code></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Path to dataset. Downloaded from <a href="ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe">ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe</a></p></section>
+<dd>Path to dataset. Downloaded from <a href="ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe">ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe</a></dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -715,8 +747,10 @@ directory : str </p>
                     directory = None):
         &#34;&#34;&#34;
         Ecotox chemicals aggregation. 
-        Args:
-            directory : str \n
+        
+        Parameters
+        ----------
+        directory : str 
             Path to dataset. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
         &#34;&#34;&#34;
         super(EcotoxChemicals, self).__init__(namespace, name)
@@ -769,12 +803,11 @@ directory : str </p>
 </code></dt>
 <dd>
 <section class="desc"><p>Ecotox taxonomy aggregation. </p>
-<h2 id="args">Args</h2>
+<h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>directory</code></strong> :&ensp;<code>str</code></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Path to dataset. Downloaded from <a href="ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe">ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe</a></p></section>
+<dd>Path to dataset. Downloaded from <a href="ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe">ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe</a></dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -786,8 +819,10 @@ directory : str </p>
                     directory = None):
         &#34;&#34;&#34;
         Ecotox taxonomy aggregation. 
-        Args:
-            directory : str \n
+        
+        Parameters
+        ----------
+        directory : str 
             Path to dataset. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
         &#34;&#34;&#34;
         super(EcotoxTaxonomy, self).__init__(namespace, name)
@@ -880,11 +915,10 @@ directory : str </p>
 <span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', name='Ecotox Effects', directory=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Ecotox effects data aggregation.
-Args:
-directory : str </p>
-<pre><code>Path to data set. Downloaded from &lt;ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe&gt;
-</code></pre></section>
+<section class="desc"><p>Ecotox effects data aggregation.</p>
+<h2 id="parameters">Parameters</h2>
+<p>directory : str
+Path to data set. Downloaded from <a href="ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe">ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe</a></p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -896,8 +930,10 @@ directory : str </p>
                     directory = None):
         &#34;&#34;&#34;
         Ecotox effects data aggregation.
-        Args: 
-            directory : str \n
+        
+        Parameters
+        ---------- 
+        directory : str 
             Path to data set. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
         &#34;&#34;&#34;
         super(Effects, self).__init__(namespace, name)
@@ -990,12 +1026,11 @@ directory : str </p>
 </code></dt>
 <dd>
 <section class="desc"><p>MeSH data loading. </p>
-<h2 id="args">Args</h2>
+<h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>directory</code></strong> :&ensp;<code>str</code></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Path to nt RDF files. See <a href="https://id.nlm.nih.gov/mesh/">https://id.nlm.nih.gov/mesh/</a></p></section>
+<dd>Path to nt RDF files. See <a href="https://id.nlm.nih.gov/mesh/">https://id.nlm.nih.gov/mesh/</a></dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1007,8 +1042,10 @@ directory : str </p>
                     directory = None):
         &#34;&#34;&#34;
         MeSH data loading. 
-        Args:
-            directory : str \n 
+        
+        Parameters
+        ----------
+        directory : str  
             Path to nt RDF files. See https://id.nlm.nih.gov/mesh/
         &#34;&#34;&#34;
         super(MeSH, self).__init__(namespace, name)
@@ -1039,12 +1076,11 @@ directory : str </p>
 </code></dt>
 <dd>
 <section class="desc"><p>PubChem data loading.</p>
-<h2 id="args">Args</h2>
+<h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>directory</code></strong> :&ensp;<code>str</code></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Path to turtle RDF files. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pubchem/RDF/">ftp://ftp.ncbi.nlm.nih.gov/pubchem/RDF/</a> . Used files: compound/pc_compound_type.ttl and compound/pc_compound2parent.ttl .</p></section>
+<dd>Path to turtle RDF files. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pubchem/RDF/">ftp://ftp.ncbi.nlm.nih.gov/pubchem/RDF/</a> . Used files: compound/pc_compound_type.ttl and compound/pc_compound2parent.ttl .</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1056,8 +1092,10 @@ directory : str </p>
                     directory = None):
         &#34;&#34;&#34;
         PubChem data loading.
-        Args:
-            directory : str \n
+        
+        Parameters
+        ----------
+        directory : str 
             Path to turtle RDF files. Downloaded from ftp://ftp.ncbi.nlm.nih.gov/pubchem/RDF/ . Used files: compound/pc_compound_type.ttl and compound/pc_compound2parent.ttl .
         &#34;&#34;&#34;
         super(PubChem, self).__init__(namespace, name)
@@ -1087,11 +1125,10 @@ directory : str </p>
 <span>(</span><span>namespace='https://www.ncbi.nlm.nih.gov/taxonomy', name='NCBI Taxonomy', directory=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Aggregation of the NCBI Taxonomy.
-Args:
-directory : str </p>
-<pre><code>Path to data set. Downloaded from &lt;ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.zip&gt;
-</code></pre></section>
+<section class="desc"><p>Aggregation of the NCBI Taxonomy. </p>
+<h2 id="parameters">Parameters</h2>
+<p>directory : str
+Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.zip">ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.zip</a></p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1103,8 +1140,10 @@ directory : str </p>
                  directory = None):
         &#34;&#34;&#34;
         Aggregation of the NCBI Taxonomy. 
-        Args: 
-            directory : str \n
+        
+        Parameters
+        ---------- 
+        directory : str 
             Path to data set. Downloaded from ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.zip
         &#34;&#34;&#34;
         super(Taxonomy, self).__init__(namespace, name)
@@ -1192,12 +1231,11 @@ directory : str </p>
 </code></dt>
 <dd>
 <section class="desc"><p>Encyclopedia of Life Traits. </p>
-<h2 id="args">Args</h2>
+<h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>directory</code></strong> :&ensp;<code>str</code></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Path to data set. See <a href="https://opendata.eol.org/dataset/all-trait-data-large">https://opendata.eol.org/dataset/all-trait-data-large</a></p></section>
+<dd>Path to data set. See <a href="https://opendata.eol.org/dataset/all-trait-data-large">https://opendata.eol.org/dataset/all-trait-data-large</a></dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1209,8 +1247,10 @@ directory : str </p>
                  directory = None):
         &#34;&#34;&#34;
         Encyclopedia of Life Traits. 
-        Args:
-            directory : str \n 
+        
+        Parameters
+        ----------
+        directory : str  
             Path to data set. See https://opendata.eol.org/dataset/all-trait-data-large
         &#34;&#34;&#34;
         super(Traits, self).__init__(namespace, name)

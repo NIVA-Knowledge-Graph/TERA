@@ -1,6 +1,4 @@
 """
-utils 
-
 Utilities used by other modules.
 """
 from SPARQLWrapper import SPARQLWrapper, JSON
@@ -13,13 +11,18 @@ nan_values = ['nan', float('nan'),'--','-X','NA','NC',-1,'','sp.', -1,'sp,','var
 def tanimoto(fp1, fp2):
     """
     Calculate tanimoto similarity between two chemical fingerprints.
-    Args:
-        fp1 : str \n
-            Chemical fingerprint on binary form.\n
-        fp2 : str \n
-            Chemical fingerprint on binary form.\n
-    Return:
-        simiarity : float
+    
+    Parameters 
+    ----------
+    fp1 : str
+        Chemical fingerprint on binary form.
+        
+    fp2 : str
+        Chemical fingerprint on binary form.
+    
+    Returns
+    -------
+    float
     """
     fp1_count = fp1.count('1')
     fp2_count = fp2.count('1')
@@ -30,12 +33,15 @@ def tanimoto(fp1, fp2):
 def test_endpoint(endpoint):
     """
     Test SPARQL endpoint.
-    Args:
-        endpoint : str \n
-            SPARQL endpoint URL. ex: https://query.wikidata.org/sparql \n
-    Return:
-        bool \n
-            If endpoint returns data.
+    
+    Parameters 
+    ----------
+    endpoint : str 
+        SPARQL endpoint URL. ex: https://query.wikidata.org/sparql 
+    
+    Returns
+    -------
+    bool
     """
     sparql = SPARQLWrapper(endpoint)
     q = """
@@ -56,16 +62,22 @@ def test_endpoint(endpoint):
 def query_endpoint(endpoint, q, var = 'p'):
     """
     Wrapper for quering SPARQL endpoint with SPARQLWrapper.
-    Args:
-        endpoint : str\n
-            SPARQL endpoint URL. \n
-        q : str \n
-            SPARQL query. \n
-        var : str or list \n
-            Query variables to return.
-    Return:
-        set \n
-            Set of tuple query results. Tuple in order specified in input var. 
+    
+    Parameters 
+    ----------
+    endpoint : str
+        SPARQL endpoint URL. 
+    
+    q : str 
+        SPARQL query. 
+        
+    var : str or list 
+        Query variables to return.
+    
+    Returns
+    -------
+    set 
+        Set of tuple query results. Tuple in order specified in input var. 
     """
     if not isinstance(var, list):
         var = [var]
@@ -90,13 +102,17 @@ def query_endpoint(endpoint, q, var = 'p'):
 def query_graph(graph, q):
     """
     Query rdflib.Graph. 
-    Args:
-        graph : rdflib.Graph \n
-        q : str \n
-            SPARQL query
-    Return:
-        set \n
-            Query results.
+    
+    Parameters 
+    ----------
+    graph : rdflib.Graph 
+    
+    q : str 
+        SPARQL query
+   
+    Returns
+    -------
+    set 
     """
     try:
         return set(graph.query(q))
@@ -106,12 +122,15 @@ def query_graph(graph, q):
 def prefixes(initNs):
     """
     Format prefixes for SPARQL. 
-    Args:
-        initNs : dict \n
+    
+    Parameters 
+    ----------
+    initNs : dict 
         ex : {'ex':'http://example.org'} 
-    Return:
-        str \n
-        SPARQL formatted prefixes.
+    
+    Returns
+    -------
+    str 
     """
     q = ''
     for k,i in initNs.items():
@@ -121,14 +140,17 @@ def prefixes(initNs):
 def strip_namespace(string, var = ['/']):
     """
     Remove namespace from URI.
-    Args:
-        string : str \n
-            URI \n
-        var : str or list \n
-            Symbols to split string. ex. / or #.
-    Return:
-        str \n
-            Shortest remaining string after var.
+    
+    Parameters 
+    ----------
+    string : str 
+        URI 
+    var : str or list 
+        Symbols to split string. ex. / or #.
+    
+    Returns
+    -------
+    str
     """
     if not isinstance(var,list):
         var = [var]
@@ -139,12 +161,16 @@ def strip_namespace(string, var = ['/']):
             tmp1 = tmp2
     return tmp1
 
-
 def do_recursively_in_class(func):
-    """Enables function to take either element or iterable as input."""
+    """Enables function to take either element or iterable as input.
+    
+    Returns
+    -------
+    function
+    """
     @wraps(func)
     def call_recursively(my_class_instance, x, **kwargs):
-        if isinstance(x, (list,set,tuple)):
+        if isinstance(x, (list,set,tuple,iter)):
             return {j: func(my_class_instance, j, **kwargs) for j in x}
         else:
             return func(my_class_instance, x, **kwargs)
@@ -155,10 +181,14 @@ def do_recursively_in_class(func):
 def graph_to_dict(graph):
     """
     Map entities in graph to a dict.
-    Args:
-        graph : rdflib.Graph
-    Return:
-        dict \n
+    
+    Parameters 
+    ----------
+    graph : rdflib.Graph
+    
+    Returns
+    -------
+    dict 
         On the form {entity : list of literals connected to entity}
     """
     entities = graph.subjects()

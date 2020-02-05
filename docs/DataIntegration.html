@@ -41,19 +41,29 @@ from collections import defaultdict
 
 class Alignment:
     def __init__(self, name = &#39;Alignment&#39;):
-        &#34;&#34;&#34;Base class for alignment of two data sets. &#34;&#34;&#34;
+        &#34;&#34;&#34;Base class for alignment of two data sets. 
+        
+        Parameters
+        ----------
+        name : str        
+        &#34;&#34;&#34;
         self.name = name
     
     def _mapping(self, x, reverse = False):
         &#34;&#34;&#34;
         Maps from one id type to another. 
-        Args:
-            x : rdflib.URIRef or str \n
-                URI/identifier to map from. \n
-            reverse : bool \n
-                Reverse the direction of mapping. 
-        Return:
-            mapping \n
+        
+        Parameters
+        ----------
+        x : rdflib.URIRef or str 
+            URI/identifier to map from. 
+            
+        reverse : bool 
+            Reverse the direction of mapping. 
+                
+        Returns
+        -------
+        str 
             If no mapping exists, returns &#39;no mapping&#39;
         &#34;&#34;&#34;
         tmp = self.mappings
@@ -69,15 +79,21 @@ class Alignment:
     def convert(self, id_, reverse=True, strip = False):
         &#34;&#34;&#34;
         Convert a set of ids into new identifiers.
-        Args:
-            id_ : rdflib.URIRef, str, list, set \n
-                URI(s)/identifier(s) \n 
-            reverse : bool \n
-                Reverse the direction of mapping. \n
-            strip : bool \n
-                Remove namespace.
-        Return:
-            str or dict
+        
+        Parameters
+        ----------
+        id_ : rdflib.URIRef, str, list, set 
+            URI(s)/identifier(s)  
+        
+        reverse : bool 
+            Reverse the direction of mapping. 
+            
+        strip : bool 
+            Remove namespace.
+                
+        Returns
+        -------
+        str or dict
             Mapped values.
         &#34;&#34;&#34;
         if strip:
@@ -88,8 +104,10 @@ class EndpointMapping(Alignment):
     def __init__(self, endpoint):
         super(EndpointMapping, self).__init__()
         &#34;&#34;&#34;Class for loading mappings based on owl:sameAs property.
-        Args:
-            endpoint : str \n
+        
+        Parameters
+        ----------
+        endpoint : str 
             SPARQL endpoint URL.
         &#34;&#34;&#34;
         self.mappings = self._load_mapping(endpoint)
@@ -97,11 +115,15 @@ class EndpointMapping(Alignment):
     def _load_mapping(self, endpoint):
         &#34;&#34;&#34;
         Load mappings from endpoint.
-        Args:
-            endpoint : str \n
+        
+        Parameters
+        ----------
+        endpoint : str 
             SPARQL endpoint URL
-        Return:
-            dict\n
+                
+        Returns
+        -------
+        dict
             On the form {from:to}
         &#34;&#34;&#34;
         query = &#34;&#34;&#34;
@@ -116,13 +138,17 @@ class WikidataMapping(Alignment):
     def __init__(self, query):
         &#34;&#34;&#34;
         Class for loading mappings from wikidata.
-        Args:
-            query : str \n
-            Wikidata query with two variables. \n
-            eg. from inchikey to cas \n
-            SELECT ?from ?to {\n  
-            ?compound wdt:P235 ?from . \n
-            ?compound wdt:P231 ?to .} \n
+        
+        Parameters
+        ----------
+        query : str 
+            Wikidata query with two variables. 
+            
+            eg. from inchikey to cas: 
+            
+            SELECT ?from ?to {  
+            ?compound wdt:P235 ?from . 
+            ?compound wdt:P231 ?to .} 
         &#34;&#34;&#34;
         super(WikidataMapping, self).__init__()
         self.mappings = self._load_mapping(query)
@@ -130,11 +156,15 @@ class WikidataMapping(Alignment):
     def _load_mapping(self, query):
         &#34;&#34;&#34;
         Load mappings from wikidata.
-        Args:
-            query : str \n
+        
+        Parameters
+        ----------
+        query : str 
             wikidata query. 
-        Return:
-            dict\n
+                
+        Returns
+        -------
+        dict
             On the form {from:to}
         &#34;&#34;&#34;
         res = query_endpoint(&#39;https://query.wikidata.org/sparql&#39;, 
@@ -146,11 +176,14 @@ class LogMapMapping(Alignment):
     def __init__(self, filename, threshold=0.95):
         &#34;&#34;&#34;
         Class for using LogMap (or other system) alignments. 
-        Args:
-            filename : str \n
-                Path to logmap output file (.rdf) \n
-            threshold : float \n
-                Alignment threshold.
+        
+        Parameters
+        ----------
+        filename : str 
+            Path to logmap output file (.rdf) 
+        
+        threshold : float 
+            Alignment threshold.
         &#34;&#34;&#34;
         super(LogMapMapping, self).__init__()
         
@@ -160,11 +193,15 @@ class LogMapMapping(Alignment):
     def _load_mapping(self, filename):
         &#34;&#34;&#34;
         Load mappings from alignment system.
-        Args:
-            filename : str \n
+        
+        Parameters
+        ----------
+        filename : str 
             Path to file. 
-        Return:
-            dict\n
+                
+        Returns
+        -------
+        dict
             On the form {from:to}
         &#34;&#34;&#34;
         out = {}
@@ -187,13 +224,17 @@ class StringMatchingMapping(Alignment):
     def __init__(self, dict1, dict2, threshold = 0.95):
         &#34;&#34;&#34;
         Class for creating mapping between two label dictonaries using string matching. 
-        Args:
-            dict1 : dict \n
-                Dictonary on the form {entity:list of labels} \n
-            dict2 : dict \n
-                Same as dict1.\n
-            threshold : float \n
-                Alignment threshold.
+        
+        Parameters
+        ----------
+        dict1 : dict 
+            Dictonary on the form {entity:list of labels} 
+        
+        dict2 : dict 
+            Same as dict1.
+            
+        threshold : float 
+            Alignment threshold.
         &#34;&#34;&#34;
         super(StringMatchingMapping, self).__init__()
         
@@ -202,15 +243,21 @@ class StringMatchingMapping(Alignment):
     
     def _load_mapping(self, dict1, dict2):
         &#34;&#34;&#34;
-        Args:
-            dict1 : dict \n
-                Dictonary on the form {entity:list of labels} \n
-            dict2 : dict \n
-                Same as dict1.\n
-            threshold : float \n
-                Alignment threshold.
-        Return:
-            dict \n
+        
+        Parameters
+        ----------
+        dict1 : dict 
+            Dictonary on the form {entity:list of labels} 
+        
+        dict2 : dict 
+            Same as dict1.
+            
+        threshold : float 
+            Alignment threshold.
+                
+        Returns
+        -------
+        dict 
             On the form {from:to}
         &#34;&#34;&#34;
         tmp = defaultdict(float)
@@ -230,13 +277,19 @@ class StringGraphMapping(Alignment):
     def __init__(self, g1, g2, threshold = 0.95):
         &#34;&#34;&#34;
         Class for creating mapping between two graph using string matching. 
-        Args:
-            g1 : rdflib.Graph \n
-            g2 : rdflib.Graph \n
-            threshold : float \n
-                Alignment threshold.
-        Return:
-            dict \n
+        
+        Parameters
+        ----------
+        g1 : rdflib.Graph 
+        
+        g2 : rdflib.Graph 
+        
+        threshold : float 
+            Alignment threshold.
+                
+        Returns
+        -------
+        dict 
             On the form {from:to}
         &#34;&#34;&#34;
         super(StringGraphMapping, self).__init__()
@@ -248,15 +301,21 @@ class StringGraphMapping(Alignment):
     
     def _load_mapping(self, dict1, dict2):
         &#34;&#34;&#34;
-        Args:
-            dict1 : dict \n
-                Dictonary on the form {entity:list of labels} \n
-            dict2 : dict \n
-                Same as dict1.\n
-            threshold : float \n
-                Alignment threshold.
-        Return:
-            dict \n
+        
+        Parameters
+        ----------
+        dict1 : dict 
+            Dictonary on the form {entity:list of labels} 
+        
+        dict2 : dict 
+            Same as dict1.
+        
+        threshold : float 
+            Alignment threshold.
+                
+        Returns
+        -------
+        dict 
             On the form {from:to}
         &#34;&#34;&#34;
         tmp = defaultdict(float)
@@ -369,26 +428,41 @@ class NCBIToEcotox(StringGraphMapping):
 <span>(</span><span>name='Alignment')</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Base class for alignment of two data sets.</p></section>
+<section class="desc"><p>Base class for alignment of two data sets. </p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Alignment:
     def __init__(self, name = &#39;Alignment&#39;):
-        &#34;&#34;&#34;Base class for alignment of two data sets. &#34;&#34;&#34;
+        &#34;&#34;&#34;Base class for alignment of two data sets. 
+        
+        Parameters
+        ----------
+        name : str        
+        &#34;&#34;&#34;
         self.name = name
     
     def _mapping(self, x, reverse = False):
         &#34;&#34;&#34;
         Maps from one id type to another. 
-        Args:
-            x : rdflib.URIRef or str \n
-                URI/identifier to map from. \n
-            reverse : bool \n
-                Reverse the direction of mapping. 
-        Return:
-            mapping \n
+        
+        Parameters
+        ----------
+        x : rdflib.URIRef or str 
+            URI/identifier to map from. 
+            
+        reverse : bool 
+            Reverse the direction of mapping. 
+                
+        Returns
+        -------
+        str 
             If no mapping exists, returns &#39;no mapping&#39;
         &#34;&#34;&#34;
         tmp = self.mappings
@@ -404,15 +478,21 @@ class NCBIToEcotox(StringGraphMapping):
     def convert(self, id_, reverse=True, strip = False):
         &#34;&#34;&#34;
         Convert a set of ids into new identifiers.
-        Args:
-            id_ : rdflib.URIRef, str, list, set \n
-                URI(s)/identifier(s) \n 
-            reverse : bool \n
-                Reverse the direction of mapping. \n
-            strip : bool \n
-                Remove namespace.
-        Return:
-            str or dict
+        
+        Parameters
+        ----------
+        id_ : rdflib.URIRef, str, list, set 
+            URI(s)/identifier(s)  
+        
+        reverse : bool 
+            Reverse the direction of mapping. 
+            
+        strip : bool 
+            Remove namespace.
+                
+        Returns
+        -------
+        str or dict
             Mapped values.
         &#34;&#34;&#34;
         if strip:
@@ -434,7 +514,7 @@ class NCBIToEcotox(StringGraphMapping):
 </code></dt>
 <dd>
 <section class="desc"><p>Convert a set of ids into new identifiers.</p>
-<h2 id="args">Args</h2>
+<h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>id_</code></strong> :&ensp;<code>rdflib.URIRef</code>, <code>str</code>, <code>list</code>, <code>set</code></dt>
 <dd>URI(s)/identifier(s)</dd>
@@ -443,9 +523,11 @@ class NCBIToEcotox(StringGraphMapping):
 <dt><strong><code>strip</code></strong> :&ensp;<code>bool</code></dt>
 <dd>Remove namespace.</dd>
 </dl>
-<h2 id="return">Return</h2>
-<p>str or dict
-Mapped values.</p></section>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code> or <code>dict</code></dt>
+<dd>Mapped values.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -454,15 +536,21 @@ Mapped values.</p></section>
 def convert(self, id_, reverse=True, strip = False):
     &#34;&#34;&#34;
     Convert a set of ids into new identifiers.
-    Args:
-        id_ : rdflib.URIRef, str, list, set \n
-            URI(s)/identifier(s) \n 
-        reverse : bool \n
-            Reverse the direction of mapping. \n
-        strip : bool \n
-            Remove namespace.
-    Return:
-        str or dict
+    
+    Parameters
+    ----------
+    id_ : rdflib.URIRef, str, list, set 
+        URI(s)/identifier(s)  
+    
+    reverse : bool 
+        Reverse the direction of mapping. 
+        
+    strip : bool 
+        Remove namespace.
+            
+    Returns
+    -------
+    str or dict
         Mapped values.
     &#34;&#34;&#34;
     if strip:
@@ -477,7 +565,12 @@ def convert(self, id_, reverse=True, strip = False):
 <span>(</span><span>endpoint)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Base class for alignment of two data sets.</p></section>
+<section class="desc"><p>Base class for alignment of two data sets. </p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -486,8 +579,10 @@ def convert(self, id_, reverse=True, strip = False):
     def __init__(self, endpoint):
         super(EndpointMapping, self).__init__()
         &#34;&#34;&#34;Class for loading mappings based on owl:sameAs property.
-        Args:
-            endpoint : str \n
+        
+        Parameters
+        ----------
+        endpoint : str 
             SPARQL endpoint URL.
         &#34;&#34;&#34;
         self.mappings = self._load_mapping(endpoint)
@@ -495,11 +590,15 @@ def convert(self, id_, reverse=True, strip = False):
     def _load_mapping(self, endpoint):
         &#34;&#34;&#34;
         Load mappings from endpoint.
-        Args:
-            endpoint : str \n
+        
+        Parameters
+        ----------
+        endpoint : str 
             SPARQL endpoint URL
-        Return:
-            dict\n
+                
+        Returns
+        -------
+        dict
             On the form {from:to}
         &#34;&#34;&#34;
         query = &#34;&#34;&#34;
@@ -704,7 +803,7 @@ def convert(self, id_, reverse=True, strip = False):
 </code></dt>
 <dd>
 <section class="desc"><p>Class for using LogMap (or other system) alignments. </p>
-<h2 id="args">Args</h2>
+<h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>filename</code></strong> :&ensp;<code>str</code></dt>
 <dd>Path to logmap output file (.rdf)</dd>
@@ -719,11 +818,14 @@ def convert(self, id_, reverse=True, strip = False):
     def __init__(self, filename, threshold=0.95):
         &#34;&#34;&#34;
         Class for using LogMap (or other system) alignments. 
-        Args:
-            filename : str \n
-                Path to logmap output file (.rdf) \n
-            threshold : float \n
-                Alignment threshold.
+        
+        Parameters
+        ----------
+        filename : str 
+            Path to logmap output file (.rdf) 
+        
+        threshold : float 
+            Alignment threshold.
         &#34;&#34;&#34;
         super(LogMapMapping, self).__init__()
         
@@ -733,11 +835,15 @@ def convert(self, id_, reverse=True, strip = False):
     def _load_mapping(self, filename):
         &#34;&#34;&#34;
         Load mappings from alignment system.
-        Args:
-            filename : str \n
+        
+        Parameters
+        ----------
+        filename : str 
             Path to file. 
-        Return:
-            dict\n
+                
+        Returns
+        -------
+        dict
             On the form {from:to}
         &#34;&#34;&#34;
         out = {}
@@ -839,7 +945,7 @@ def convert(self, id_, reverse=True, strip = False):
 </code></dt>
 <dd>
 <section class="desc"><p>Class for creating mapping between two graph using string matching. </p>
-<h2 id="args">Args</h2>
+<h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>g1</code></strong> :&ensp;<code>rdflib.Graph</code></dt>
 <dd>&nbsp;</dd>
@@ -848,9 +954,11 @@ def convert(self, id_, reverse=True, strip = False):
 <dt><strong><code>threshold</code></strong> :&ensp;<code>float</code></dt>
 <dd>Alignment threshold.</dd>
 </dl>
-<h2 id="return">Return</h2>
-<p>dict </p>
-<p>On the form {from:to}</p></section>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>On the form {from:to}</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -859,13 +967,19 @@ def convert(self, id_, reverse=True, strip = False):
     def __init__(self, g1, g2, threshold = 0.95):
         &#34;&#34;&#34;
         Class for creating mapping between two graph using string matching. 
-        Args:
-            g1 : rdflib.Graph \n
-            g2 : rdflib.Graph \n
-            threshold : float \n
-                Alignment threshold.
-        Return:
-            dict \n
+        
+        Parameters
+        ----------
+        g1 : rdflib.Graph 
+        
+        g2 : rdflib.Graph 
+        
+        threshold : float 
+            Alignment threshold.
+                
+        Returns
+        -------
+        dict 
             On the form {from:to}
         &#34;&#34;&#34;
         super(StringGraphMapping, self).__init__()
@@ -877,15 +991,21 @@ def convert(self, id_, reverse=True, strip = False):
     
     def _load_mapping(self, dict1, dict2):
         &#34;&#34;&#34;
-        Args:
-            dict1 : dict \n
-                Dictonary on the form {entity:list of labels} \n
-            dict2 : dict \n
-                Same as dict1.\n
-            threshold : float \n
-                Alignment threshold.
-        Return:
-            dict \n
+        
+        Parameters
+        ----------
+        dict1 : dict 
+            Dictonary on the form {entity:list of labels} 
+        
+        dict2 : dict 
+            Same as dict1.
+        
+        threshold : float 
+            Alignment threshold.
+                
+        Returns
+        -------
+        dict 
             On the form {from:to}
         &#34;&#34;&#34;
         tmp = defaultdict(float)
@@ -924,7 +1044,7 @@ def convert(self, id_, reverse=True, strip = False):
 </code></dt>
 <dd>
 <section class="desc"><p>Class for creating mapping between two label dictonaries using string matching. </p>
-<h2 id="args">Args</h2>
+<h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>dict1</code></strong> :&ensp;<code>dict</code></dt>
 <dd>Dictonary on the form {entity:list of labels}</dd>
@@ -941,13 +1061,17 @@ def convert(self, id_, reverse=True, strip = False):
     def __init__(self, dict1, dict2, threshold = 0.95):
         &#34;&#34;&#34;
         Class for creating mapping between two label dictonaries using string matching. 
-        Args:
-            dict1 : dict \n
-                Dictonary on the form {entity:list of labels} \n
-            dict2 : dict \n
-                Same as dict1.\n
-            threshold : float \n
-                Alignment threshold.
+        
+        Parameters
+        ----------
+        dict1 : dict 
+            Dictonary on the form {entity:list of labels} 
+        
+        dict2 : dict 
+            Same as dict1.
+            
+        threshold : float 
+            Alignment threshold.
         &#34;&#34;&#34;
         super(StringMatchingMapping, self).__init__()
         
@@ -956,15 +1080,21 @@ def convert(self, id_, reverse=True, strip = False):
     
     def _load_mapping(self, dict1, dict2):
         &#34;&#34;&#34;
-        Args:
-            dict1 : dict \n
-                Dictonary on the form {entity:list of labels} \n
-            dict2 : dict \n
-                Same as dict1.\n
-            threshold : float \n
-                Alignment threshold.
-        Return:
-            dict \n
+        
+        Parameters
+        ----------
+        dict1 : dict 
+            Dictonary on the form {entity:list of labels} 
+        
+        dict2 : dict 
+            Same as dict1.
+            
+        threshold : float 
+            Alignment threshold.
+                
+        Returns
+        -------
+        dict 
             On the form {from:to}
         &#34;&#34;&#34;
         tmp = defaultdict(float)
@@ -999,16 +1129,17 @@ def convert(self, id_, reverse=True, strip = False):
 </code></dt>
 <dd>
 <section class="desc"><p>Class for loading mappings from wikidata.</p>
-<h2 id="args">Args</h2>
+<h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>query</code></strong> :&ensp;<code>str</code></dt>
-<dd>&nbsp;</dd>
-</dl>
+<dd>
 <p>Wikidata query with two variables. </p>
-<p>eg. from inchikey to cas </p>
-<p>SELECT ?from ?to {</p>
-<p>?compound wdt:P235 ?from . </p>
-<p>?compound wdt:P231 ?to .}</p></section>
+<p>eg. from inchikey to cas: </p>
+<p>SELECT ?from ?to {<br>
+?compound wdt:P235 ?from .
+?compound wdt:P231 ?to .}</p>
+</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1017,13 +1148,17 @@ def convert(self, id_, reverse=True, strip = False):
     def __init__(self, query):
         &#34;&#34;&#34;
         Class for loading mappings from wikidata.
-        Args:
-            query : str \n
-            Wikidata query with two variables. \n
-            eg. from inchikey to cas \n
-            SELECT ?from ?to {\n  
-            ?compound wdt:P235 ?from . \n
-            ?compound wdt:P231 ?to .} \n
+        
+        Parameters
+        ----------
+        query : str 
+            Wikidata query with two variables. 
+            
+            eg. from inchikey to cas: 
+            
+            SELECT ?from ?to {  
+            ?compound wdt:P235 ?from . 
+            ?compound wdt:P231 ?to .} 
         &#34;&#34;&#34;
         super(WikidataMapping, self).__init__()
         self.mappings = self._load_mapping(query)
@@ -1031,11 +1166,15 @@ def convert(self, id_, reverse=True, strip = False):
     def _load_mapping(self, query):
         &#34;&#34;&#34;
         Load mappings from wikidata.
-        Args:
-            query : str \n
+        
+        Parameters
+        ----------
+        query : str 
             wikidata query. 
-        Return:
-            dict\n
+                
+        Returns
+        -------
+        dict
             On the form {from:to}
         &#34;&#34;&#34;
         res = query_endpoint(&#39;https://query.wikidata.org/sparql&#39;, 

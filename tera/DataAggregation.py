@@ -1,6 +1,4 @@
 """
-DataAggregation 
-
 A set of classes for aggregation of TERA data sources into common formats.
 """
 
@@ -18,8 +16,10 @@ class DataObject:
     def __init__(self, namespace = 'http://www.example.org/', name = 'Data Object'):
         """
         Base class for aggregation of data.
-        Args:
-            namespace : str \n
+        
+        Parameters
+        ----------
+        namespace : str 
             Base URI for the data set.
         """
         self.graph = Graph()
@@ -37,19 +37,24 @@ class DataObject:
     
     def save(self, path):
         """Save graph to file.
-        Args:
-            path : str \n
+        
+        Parameters
+        ----------
+        path : str 
             ex: file.nt
         """
         self.graph.serialize(path, format=path.split('.').pop(-1))
         
     def replace(self, f, t):
         """Replace list f of entities with t. Usefull after converting between datasets.
-        Args:
-            f : list \n
-                Old entities to replace.\n
-            t : list \n
-                New entities. 
+        
+        Parameters
+        ----------
+        f : list 
+            Old entities to replace.
+        
+        t : list 
+            New entities. 
         """
         assert len(f) == len(t)
         
@@ -70,8 +75,10 @@ class Taxonomy(DataObject):
                  directory = None):
         """
         Aggregation of the NCBI Taxonomy. 
-        Args: 
-            directory : str \n
+        
+        Parameters
+        ---------- 
+        directory : str 
             Path to data set. Downloaded from ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.zip
         """
         super(Taxonomy, self).__init__(namespace, name)
@@ -147,8 +154,10 @@ class Traits(DataObject):
                  directory = None):
         """
         Encyclopedia of Life Traits. 
-        Args:
-            directory : str \n 
+        
+        Parameters
+        ----------
+        directory : str  
             Path to data set. See https://opendata.eol.org/dataset/all-trait-data-large
         """
         super(Traits, self).__init__(namespace, name)
@@ -213,8 +222,10 @@ class Effects(DataObject):
                     directory = None):
         """
         Ecotox effects data aggregation.
-        Args: 
-            directory : str \n
+        
+        Parameters
+        ---------- 
+        directory : str 
             Path to data set. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
         """
         super(Effects, self).__init__(namespace, name)
@@ -295,8 +306,10 @@ class EcotoxTaxonomy(DataObject):
                     directory = None):
         """
         Ecotox taxonomy aggregation. 
-        Args:
-            directory : str \n
+        
+        Parameters
+        ----------
+        directory : str 
             Path to dataset. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
         """
         super(EcotoxTaxonomy, self).__init__(namespace, name)
@@ -378,8 +391,10 @@ class EcotoxChemicals(DataObject):
                     directory = None):
         """
         Ecotox chemicals aggregation. 
-        Args:
-            directory : str \n
+        
+        Parameters
+        ----------
+        directory : str 
             Path to dataset. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
         """
         super(EcotoxChemicals, self).__init__(namespace, name)
@@ -419,8 +434,10 @@ class PubChem(DataObject):
                     directory = None):
         """
         PubChem data loading.
-        Args:
-            directory : str \n
+        
+        Parameters
+        ----------
+        directory : str 
             Path to turtle RDF files. Downloaded from ftp://ftp.ncbi.nlm.nih.gov/pubchem/RDF/ . Used files: compound/pc_compound_type.ttl and compound/pc_compound2parent.ttl .
         """
         super(PubChem, self).__init__(namespace, name)
@@ -438,8 +455,10 @@ class ChEBI(DataObject):
                     directory = None):
         """
         ChEBI data loading. 
-        Args: 
-            directory : str \n
+        
+        Parameters
+        ---------- 
+        directory : str 
             Path to turtle RDF files. See https://www.ebi.ac.uk/rdf/datasets/
         """
         super(ChEBI, self).__init__(namespace, name)
@@ -457,8 +476,10 @@ class MeSH(DataObject):
                     directory = None):
         """
         MeSH data loading. 
-        Args:
-            directory : str \n 
+        
+        Parameters
+        ----------
+        directory : str  
             Path to nt RDF files. See https://id.nlm.nih.gov/mesh/
         """
         super(MeSH, self).__init__(namespace, name)
