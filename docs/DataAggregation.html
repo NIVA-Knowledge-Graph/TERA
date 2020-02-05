@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.4" />
 <title>tera.DataAggregation API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="DataAggregation …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,11 +20,19 @@
 <h1 class="title">Module <code>tera.DataAggregation</code></h1>
 </header>
 <section id="section-intro">
+<p>DataAggregation </p>
+<p>A set of classes for aggregation of TERA data sources into common formats.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from rdflib import Graph, Namespace, Literal, URIRef, BNode
+<pre><code class="python">&#34;&#34;&#34;
+DataAggregation 
+
+A set of classes for aggregation of TERA data sources into common formats.
+&#34;&#34;&#34;
+
+from rdflib import Graph, Namespace, Literal, URIRef, BNode
 from rdflib.namespace import RDF, OWL, RDFS
 UNIT = Namespace(&#39;http://qudt.org/vocab/unit#&#39;)
 import pandas as pd
@@ -36,6 +44,12 @@ nan_values = [&#39;nan&#39;, float(&#39;nan&#39;),&#39;--&#39;,&#39;-X&#39;,&#39
 
 class DataObject:
     def __init__(self, namespace = &#39;http://www.example.org/&#39;, name = &#39;Data Object&#39;):
+        &#34;&#34;&#34;
+        Base class for aggregation of data.
+        Args:
+            namespace : str \n
+            Base URI for the data set.
+        &#34;&#34;&#34;
         self.graph = Graph()
         self.namespace = Namespace(namespace)
         self.name = name 
@@ -50,10 +64,21 @@ class DataObject:
             }
     
     def save(self, path):
+        &#34;&#34;&#34;Save graph to file.
+        Args:
+            path : str \n
+            ex: file.nt
+        &#34;&#34;&#34;
         self.graph.serialize(path, format=path.split(&#39;.&#39;).pop(-1))
         
     def replace(self, f, t):
-        &#34;&#34;&#34;Replace list f of entities with t. Usefull after converting between datasets.&#34;&#34;&#34;
+        &#34;&#34;&#34;Replace list f of entities with t. Usefull after converting between datasets.
+        Args:
+            f : list \n
+                Old entities to replace.\n
+            t : list \n
+                New entities. 
+        &#34;&#34;&#34;
         assert len(f) == len(t)
         
         for old, new in zip(f, t):
@@ -71,6 +96,12 @@ class Taxonomy(DataObject):
                  namespace = &#39;https://www.ncbi.nlm.nih.gov/taxonomy&#39;,
                  name = &#39;NCBI Taxonomy&#39;,
                  directory = None):
+        &#34;&#34;&#34;
+        Aggregation of the NCBI Taxonomy. 
+        Args: 
+            directory : str \n
+            Path to data set. Downloaded from ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.zip
+        &#34;&#34;&#34;
         super(Taxonomy, self).__init__(namespace, name)
         
         if directory:
@@ -142,6 +173,12 @@ class Traits(DataObject):
                  namespace = &#39;https://eol.org/schema/terms/&#39;,
                  name = &#39;EOL Traits&#39;,
                  directory = None):
+        &#34;&#34;&#34;
+        Encyclopedia of Life Traits. 
+        Args:
+            directory : str \n 
+            Path to data set. See https://opendata.eol.org/dataset/all-trait-data-large
+        &#34;&#34;&#34;
         super(Traits, self).__init__(namespace, name)
         
         if directory:
@@ -202,6 +239,12 @@ class Effects(DataObject):
                     namespace = &#39;https://cfpub.epa.gov/ecotox/&#39;,
                     name = &#39;Ecotox Effects&#39;,
                     directory = None):
+        &#34;&#34;&#34;
+        Ecotox effects data aggregation.
+        Args: 
+            directory : str \n
+            Path to data set. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
+        &#34;&#34;&#34;
         super(Effects, self).__init__(namespace, name)
         
         self._load_effect_data(directory + &#39;tests.txt&#39;, directory + &#39;results.txt&#39;)
@@ -278,6 +321,12 @@ class EcotoxTaxonomy(DataObject):
                     namespace = &#39;https://cfpub.epa.gov/ecotox/&#39;,
                     name = &#39;Ecotox Taxonomy&#39;,
                     directory = None):
+        &#34;&#34;&#34;
+        Ecotox taxonomy aggregation. 
+        Args:
+            directory : str \n
+            Path to dataset. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
+        &#34;&#34;&#34;
         super(EcotoxTaxonomy, self).__init__(namespace, name)
         
         self._load_species(directory + &#39;validation/species.txt&#39; )
@@ -355,6 +404,12 @@ class EcotoxChemicals(DataObject):
                     namespace = &#39;https://cfpub.epa.gov/ecotox/&#39;,
                     name = &#39;Ecotox Chemicals&#39;,
                     directory = None):
+        &#34;&#34;&#34;
+        Ecotox chemicals aggregation. 
+        Args:
+            directory : str \n
+            Path to dataset. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
+        &#34;&#34;&#34;
         super(EcotoxChemicals, self).__init__(namespace, name)
         
         self._load_chemicals(directory + &#39;validation/chemicals.txt&#39;)
@@ -390,6 +445,12 @@ class PubChem(DataObject):
                     namespace = &#39;http://rdf.ncbi.nlm.nih.gov/pubchem/compound/&#39;,
                     name = &#39;PubChem&#39;,
                     directory = None):
+        &#34;&#34;&#34;
+        PubChem data loading.
+        Args:
+            directory : str \n
+            Path to turtle RDF files. Downloaded from ftp://ftp.ncbi.nlm.nih.gov/pubchem/RDF/ . Used files: compound/pc_compound_type.ttl and compound/pc_compound2parent.ttl .
+        &#34;&#34;&#34;
         super(PubChem, self).__init__(namespace, name)
         
         for f in glob.glob(directory+&#39;*.ttl&#39;):
@@ -403,6 +464,12 @@ class ChEBI(DataObject):
                     namespace = &#39;http://purl.obolibrary.org/obo/&#39;,
                     name = &#39;ChEBI&#39;,
                     directory = None):
+        &#34;&#34;&#34;
+        ChEBI data loading. 
+        Args: 
+            directory : str \n
+            Path to turtle RDF files. See https://www.ebi.ac.uk/rdf/datasets/
+        &#34;&#34;&#34;
         super(ChEBI, self).__init__(namespace, name)
         
         for f in glob.glob(directory+&#39;*.ttl&#39;):
@@ -416,6 +483,12 @@ class MeSH(DataObject):
                     namespace = &#39;http://id.nlm.nih.gov/mesh/&#39;,
                     name = &#39;MeSH&#39;,
                     directory = None):
+        &#34;&#34;&#34;
+        MeSH data loading. 
+        Args:
+            directory : str \n 
+            Path to nt RDF files. See https://id.nlm.nih.gov/mesh/
+        &#34;&#34;&#34;
         super(MeSH, self).__init__(namespace, name)
         
         for f in glob.glob(directory+&#39;*.nt&#39;):
@@ -440,7 +513,11 @@ class MeSH(DataObject):
 <span>(</span><span>namespace='http://purl.obolibrary.org/obo/', name='ChEBI', directory=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>ChEBI data loading.
+Args:
+directory : str </p>
+<pre><code>Path to turtle RDF files. See &lt;https://www.ebi.ac.uk/rdf/datasets/&gt;
+</code></pre></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -450,6 +527,12 @@ class MeSH(DataObject):
                     namespace = &#39;http://purl.obolibrary.org/obo/&#39;,
                     name = &#39;ChEBI&#39;,
                     directory = None):
+        &#34;&#34;&#34;
+        ChEBI data loading. 
+        Args: 
+            directory : str \n
+            Path to turtle RDF files. See https://www.ebi.ac.uk/rdf/datasets/
+        &#34;&#34;&#34;
         super(ChEBI, self).__init__(namespace, name)
         
         for f in glob.glob(directory+&#39;*.ttl&#39;):
@@ -467,6 +550,7 @@ class MeSH(DataObject):
 <li><code><b><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></b></code>:
 <ul class="hlist">
 <li><code><a title="tera.DataAggregation.DataObject.replace" href="#tera.DataAggregation.DataObject.replace">replace</a></code></li>
+<li><code><a title="tera.DataAggregation.DataObject.save" href="#tera.DataAggregation.DataObject.save">save</a></code></li>
 </ul>
 </li>
 </ul>
@@ -476,13 +560,25 @@ class MeSH(DataObject):
 <span>(</span><span>namespace='http://www.example.org/', name='Data Object')</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Base class for aggregation of data.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>namespace</code></strong> :&ensp;<code>str</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Base URI for the data set.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class DataObject:
     def __init__(self, namespace = &#39;http://www.example.org/&#39;, name = &#39;Data Object&#39;):
+        &#34;&#34;&#34;
+        Base class for aggregation of data.
+        Args:
+            namespace : str \n
+            Base URI for the data set.
+        &#34;&#34;&#34;
         self.graph = Graph()
         self.namespace = Namespace(namespace)
         self.name = name 
@@ -497,10 +593,21 @@ class MeSH(DataObject):
             }
     
     def save(self, path):
+        &#34;&#34;&#34;Save graph to file.
+        Args:
+            path : str \n
+            ex: file.nt
+        &#34;&#34;&#34;
         self.graph.serialize(path, format=path.split(&#39;.&#39;).pop(-1))
         
     def replace(self, f, t):
-        &#34;&#34;&#34;Replace list f of entities with t. Usefull after converting between datasets.&#34;&#34;&#34;
+        &#34;&#34;&#34;Replace list f of entities with t. Usefull after converting between datasets.
+        Args:
+            f : list \n
+                Old entities to replace.\n
+            t : list \n
+                New entities. 
+        &#34;&#34;&#34;
         assert len(f) == len(t)
         
         for old, new in zip(f, t):
@@ -529,13 +636,26 @@ class MeSH(DataObject):
 <span>def <span class="ident">replace</span></span>(<span>self, f, t)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Replace list f of entities with t. Usefull after converting between datasets.</p></section>
+<section class="desc"><p>Replace list f of entities with t. Usefull after converting between datasets.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>f</code></strong> :&ensp;<code>list</code></dt>
+<dd>Old entities to replace.</dd>
+<dt><strong><code>t</code></strong> :&ensp;<code>list</code></dt>
+<dd>New entities.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def replace(self, f, t):
-    &#34;&#34;&#34;Replace list f of entities with t. Usefull after converting between datasets.&#34;&#34;&#34;
+    &#34;&#34;&#34;Replace list f of entities with t. Usefull after converting between datasets.
+    Args:
+        f : list \n
+            Old entities to replace.\n
+        t : list \n
+            New entities. 
+    &#34;&#34;&#34;
     assert len(f) == len(t)
     
     for old, new in zip(f, t):
@@ -552,12 +672,24 @@ class MeSH(DataObject):
 <span>def <span class="ident">save</span></span>(<span>self, path)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Save graph to file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>path</code></strong> :&ensp;<code>str</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>ex</code></strong></dt>
+<dd>file.nt</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def save(self, path):
+    &#34;&#34;&#34;Save graph to file.
+    Args:
+        path : str \n
+        ex: file.nt
+    &#34;&#34;&#34;
     self.graph.serialize(path, format=path.split(&#39;.&#39;).pop(-1))</code></pre>
 </details>
 </dd>
@@ -568,7 +700,13 @@ class MeSH(DataObject):
 <span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', name='Ecotox Chemicals', directory=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Ecotox chemicals aggregation. </p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>directory</code></strong> :&ensp;<code>str</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Path to dataset. Downloaded from <a href="ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe">ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe</a></p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -578,6 +716,12 @@ class MeSH(DataObject):
                     namespace = &#39;https://cfpub.epa.gov/ecotox/&#39;,
                     name = &#39;Ecotox Chemicals&#39;,
                     directory = None):
+        &#34;&#34;&#34;
+        Ecotox chemicals aggregation. 
+        Args:
+            directory : str \n
+            Path to dataset. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
+        &#34;&#34;&#34;
         super(EcotoxChemicals, self).__init__(namespace, name)
         
         self._load_chemicals(directory + &#39;validation/chemicals.txt&#39;)
@@ -617,6 +761,7 @@ class MeSH(DataObject):
 <li><code><b><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></b></code>:
 <ul class="hlist">
 <li><code><a title="tera.DataAggregation.DataObject.replace" href="#tera.DataAggregation.DataObject.replace">replace</a></code></li>
+<li><code><a title="tera.DataAggregation.DataObject.save" href="#tera.DataAggregation.DataObject.save">save</a></code></li>
 </ul>
 </li>
 </ul>
@@ -626,7 +771,13 @@ class MeSH(DataObject):
 <span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', name='Ecotox Taxonomy', directory=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Ecotox taxonomy aggregation. </p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>directory</code></strong> :&ensp;<code>str</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Path to dataset. Downloaded from <a href="ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe">ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe</a></p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -636,6 +787,12 @@ class MeSH(DataObject):
                     namespace = &#39;https://cfpub.epa.gov/ecotox/&#39;,
                     name = &#39;Ecotox Taxonomy&#39;,
                     directory = None):
+        &#34;&#34;&#34;
+        Ecotox taxonomy aggregation. 
+        Args:
+            directory : str \n
+            Path to dataset. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
+        &#34;&#34;&#34;
         super(EcotoxTaxonomy, self).__init__(namespace, name)
         
         self._load_species(directory + &#39;validation/species.txt&#39; )
@@ -716,6 +873,7 @@ class MeSH(DataObject):
 <li><code><b><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></b></code>:
 <ul class="hlist">
 <li><code><a title="tera.DataAggregation.DataObject.replace" href="#tera.DataAggregation.DataObject.replace">replace</a></code></li>
+<li><code><a title="tera.DataAggregation.DataObject.save" href="#tera.DataAggregation.DataObject.save">save</a></code></li>
 </ul>
 </li>
 </ul>
@@ -725,7 +883,11 @@ class MeSH(DataObject):
 <span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', name='Ecotox Effects', directory=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Ecotox effects data aggregation.
+Args:
+directory : str </p>
+<pre><code>Path to data set. Downloaded from &lt;ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe&gt;
+</code></pre></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -735,6 +897,12 @@ class MeSH(DataObject):
                     namespace = &#39;https://cfpub.epa.gov/ecotox/&#39;,
                     name = &#39;Ecotox Effects&#39;,
                     directory = None):
+        &#34;&#34;&#34;
+        Ecotox effects data aggregation.
+        Args: 
+            directory : str \n
+            Path to data set. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
+        &#34;&#34;&#34;
         super(Effects, self).__init__(namespace, name)
         
         self._load_effect_data(directory + &#39;tests.txt&#39;, directory + &#39;results.txt&#39;)
@@ -814,6 +982,7 @@ class MeSH(DataObject):
 <li><code><b><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></b></code>:
 <ul class="hlist">
 <li><code><a title="tera.DataAggregation.DataObject.replace" href="#tera.DataAggregation.DataObject.replace">replace</a></code></li>
+<li><code><a title="tera.DataAggregation.DataObject.save" href="#tera.DataAggregation.DataObject.save">save</a></code></li>
 </ul>
 </li>
 </ul>
@@ -823,7 +992,13 @@ class MeSH(DataObject):
 <span>(</span><span>namespace='http://id.nlm.nih.gov/mesh/', name='MeSH', directory=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>MeSH data loading. </p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>directory</code></strong> :&ensp;<code>str</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Path to nt RDF files. See <a href="https://id.nlm.nih.gov/mesh/">https://id.nlm.nih.gov/mesh/</a></p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -833,6 +1008,12 @@ class MeSH(DataObject):
                     namespace = &#39;http://id.nlm.nih.gov/mesh/&#39;,
                     name = &#39;MeSH&#39;,
                     directory = None):
+        &#34;&#34;&#34;
+        MeSH data loading. 
+        Args:
+            directory : str \n 
+            Path to nt RDF files. See https://id.nlm.nih.gov/mesh/
+        &#34;&#34;&#34;
         super(MeSH, self).__init__(namespace, name)
         
         for f in glob.glob(directory+&#39;*.nt&#39;):
@@ -850,6 +1031,7 @@ class MeSH(DataObject):
 <li><code><b><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></b></code>:
 <ul class="hlist">
 <li><code><a title="tera.DataAggregation.DataObject.replace" href="#tera.DataAggregation.DataObject.replace">replace</a></code></li>
+<li><code><a title="tera.DataAggregation.DataObject.save" href="#tera.DataAggregation.DataObject.save">save</a></code></li>
 </ul>
 </li>
 </ul>
@@ -859,7 +1041,13 @@ class MeSH(DataObject):
 <span>(</span><span>namespace='http://rdf.ncbi.nlm.nih.gov/pubchem/compound/', name='PubChem', directory=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>PubChem data loading.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>directory</code></strong> :&ensp;<code>str</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Path to turtle RDF files. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pubchem/RDF/">ftp://ftp.ncbi.nlm.nih.gov/pubchem/RDF/</a> . Used files: compound/pc_compound_type.ttl and compound/pc_compound2parent.ttl .</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -869,6 +1057,12 @@ class MeSH(DataObject):
                     namespace = &#39;http://rdf.ncbi.nlm.nih.gov/pubchem/compound/&#39;,
                     name = &#39;PubChem&#39;,
                     directory = None):
+        &#34;&#34;&#34;
+        PubChem data loading.
+        Args:
+            directory : str \n
+            Path to turtle RDF files. Downloaded from ftp://ftp.ncbi.nlm.nih.gov/pubchem/RDF/ . Used files: compound/pc_compound_type.ttl and compound/pc_compound2parent.ttl .
+        &#34;&#34;&#34;
         super(PubChem, self).__init__(namespace, name)
         
         for f in glob.glob(directory+&#39;*.ttl&#39;):
@@ -886,6 +1080,7 @@ class MeSH(DataObject):
 <li><code><b><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></b></code>:
 <ul class="hlist">
 <li><code><a title="tera.DataAggregation.DataObject.replace" href="#tera.DataAggregation.DataObject.replace">replace</a></code></li>
+<li><code><a title="tera.DataAggregation.DataObject.save" href="#tera.DataAggregation.DataObject.save">save</a></code></li>
 </ul>
 </li>
 </ul>
@@ -895,7 +1090,11 @@ class MeSH(DataObject):
 <span>(</span><span>namespace='https://www.ncbi.nlm.nih.gov/taxonomy', name='NCBI Taxonomy', directory=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Aggregation of the NCBI Taxonomy.
+Args:
+directory : str </p>
+<pre><code>Path to data set. Downloaded from &lt;ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.zip&gt;
+</code></pre></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -905,6 +1104,12 @@ class MeSH(DataObject):
                  namespace = &#39;https://www.ncbi.nlm.nih.gov/taxonomy&#39;,
                  name = &#39;NCBI Taxonomy&#39;,
                  directory = None):
+        &#34;&#34;&#34;
+        Aggregation of the NCBI Taxonomy. 
+        Args: 
+            directory : str \n
+            Path to data set. Downloaded from ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.zip
+        &#34;&#34;&#34;
         super(Taxonomy, self).__init__(namespace, name)
         
         if directory:
@@ -979,6 +1184,7 @@ class MeSH(DataObject):
 <li><code><b><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></b></code>:
 <ul class="hlist">
 <li><code><a title="tera.DataAggregation.DataObject.replace" href="#tera.DataAggregation.DataObject.replace">replace</a></code></li>
+<li><code><a title="tera.DataAggregation.DataObject.save" href="#tera.DataAggregation.DataObject.save">save</a></code></li>
 </ul>
 </li>
 </ul>
@@ -988,7 +1194,13 @@ class MeSH(DataObject):
 <span>(</span><span>namespace='https://eol.org/schema/terms/', name='EOL Traits', directory=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Encyclopedia of Life Traits. </p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>directory</code></strong> :&ensp;<code>str</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Path to data set. See <a href="https://opendata.eol.org/dataset/all-trait-data-large">https://opendata.eol.org/dataset/all-trait-data-large</a></p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -998,6 +1210,12 @@ class MeSH(DataObject):
                  namespace = &#39;https://eol.org/schema/terms/&#39;,
                  name = &#39;EOL Traits&#39;,
                  directory = None):
+        &#34;&#34;&#34;
+        Encyclopedia of Life Traits. 
+        Args:
+            directory : str \n 
+            Path to data set. See https://opendata.eol.org/dataset/all-trait-data-large
+        &#34;&#34;&#34;
         super(Traits, self).__init__(namespace, name)
         
         if directory:
@@ -1061,6 +1279,7 @@ class MeSH(DataObject):
 <li><code><b><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></b></code>:
 <ul class="hlist">
 <li><code><a title="tera.DataAggregation.DataObject.replace" href="#tera.DataAggregation.DataObject.replace">replace</a></code></li>
+<li><code><a title="tera.DataAggregation.DataObject.save" href="#tera.DataAggregation.DataObject.save">save</a></code></li>
 </ul>
 </li>
 </ul>

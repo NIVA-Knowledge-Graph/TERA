@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.4" />
 <title>tera.DataIntegration API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="DataIntegration …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,11 +20,20 @@
 <h1 class="title">Module <code>tera.DataIntegration</code></h1>
 </header>
 <section id="section-intro">
+<p>DataIntegration </p>
+<p>A set of classes for aligning data aggregated with tools in DataAggregation.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from rdflib import Graph, Namespace, Literal, URIRef
+<pre><code class="python">&#34;&#34;&#34;
+DataIntegration 
+
+A set of classes for aligning data aggregated with tools in DataAggregation.
+&#34;&#34;&#34;
+
+
+from rdflib import Graph, Namespace, Literal, URIRef
 from rdflib.namespace import RDF, OWL, RDFS
 import pandas as pd
 import validators
@@ -35,9 +44,21 @@ from collections import defaultdict
 
 class Alignment:
     def __init__(self, name = &#39;Alignment&#39;):
+        &#34;&#34;&#34;Base class for alignment of two data sets. &#34;&#34;&#34;
         self.name = name
     
-    def mapping(self, x, reverse = False):
+    def _mapping(self, x, reverse = False):
+        &#34;&#34;&#34;
+        Maps from one id type to another. 
+        Args:
+            x : rdflib.URIRef or str \n
+                URI/identifier to map from. \n
+            reverse : bool \n
+                Reverse the direction of mapping. 
+        Return:
+            mapping \n
+            If no mapping exists, returns &#39;no mapping&#39;
+        &#34;&#34;&#34;
         tmp = self.mappings
         if reverse:
             tmp = {tmp[k]:k for k in tmp}
@@ -49,16 +70,43 @@ class Alignment:
     
     @do_recursively_in_class
     def convert(self, id_, reverse=True, strip = False):
+        &#34;&#34;&#34;
+        Convert a set of ids into new identifiers.
+        Args:
+            id_ : rdflib.URIRef, str, list, set \n
+                URI(s)/identifier(s) \n 
+            reverse : bool \n
+                Reverse the direction of mapping. \n
+            strip : bool \n
+                Remove namespace.
+        Return:
+            str or dict
+            Mapped values.
+        &#34;&#34;&#34;
         if strip:
-            id_ = strip_namespace(id_,[&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
-        return self.mapping(id_,reverse)
+            id_ = strip_namespace(str(id_),[&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
+        return self._mapping(id_,reverse)
 
 class EndpointMapping(Alignment):
     def __init__(self, endpoint):
         super(EndpointMapping, self).__init__()
-        self.mappings = self.load_mapping(endpoint)
+        &#34;&#34;&#34;Class for loading mappings based on owl:sameAs property.
+        Args:
+            endpoint : str \n
+            SPARQL endpoint URL.
+        &#34;&#34;&#34;
+        self.mappings = self._load_mapping(endpoint)
     
-    def load_mapping(self, endpoint):
+    def _load_mapping(self, endpoint):
+        &#34;&#34;&#34;
+        Load mappings from endpoint.
+        Args:
+            endpoint : str \n
+            SPARQL endpoint URL
+        Return:
+            dict\n
+            On the form {from:to}
+        &#34;&#34;&#34;
         query = &#34;&#34;&#34;
         SELECT ?s ?o WHERE {
             ?s &lt;http://www.w3.org/2002/07/owl#sameAs&gt; ?o .
@@ -70,19 +118,28 @@ class EndpointMapping(Alignment):
 class WikidataMapping(Alignment):
     def __init__(self, query):
         &#34;&#34;&#34;
-        query :: str
-            Wikidata query with two variables. 
-            ex: from inchikey to cas
-            SELECT ?from ?to
-            { 
-            ?compound wdt:P235 ?from .
-            ?compound wdt:P231 ?to .
-            } 
+        Class for loading mappings from wikidata.
+        Args:
+            query : str \n
+            Wikidata query with two variables. \n
+            eg. from inchikey to cas \n
+            SELECT ?from ?to {\n  
+            ?compound wdt:P235 ?from . \n
+            ?compound wdt:P231 ?to .} \n
         &#34;&#34;&#34;
         super(WikidataMapping, self).__init__()
-        self.mappings = self.load_mapping(query)
+        self.mappings = self._load_mapping(query)
         
-    def load_mapping(self, query):
+    def _load_mapping(self, query):
+        &#34;&#34;&#34;
+        Load mappings from wikidata.
+        Args:
+            query : str \n
+            wikidata query. 
+        Return:
+            dict\n
+            On the form {from:to}
+        &#34;&#34;&#34;
         res = query_endpoint(&#39;https://query.wikidata.org/sparql&#39;, 
                              query, 
                              var = [&#39;from&#39;, &#39;to&#39;])
@@ -91,15 +148,28 @@ class WikidataMapping(Alignment):
 class LogMapMapping(Alignment):
     def __init__(self, filename, threshold=0.95):
         &#34;&#34;&#34;
-        filename :: str
-            path to logmap output file (.rdf)
+        Class for using LogMap (or other system) alignments. 
+        Args:
+            filename : str \n
+                Path to logmap output file (.rdf) \n
+            threshold : float \n
+                Alignment threshold.
         &#34;&#34;&#34;
         super(LogMapMapping, self).__init__()
         
         self.threshold = threshold
-        self.mappings = self.load_mapping(filename)
+        self.mappings = self._load_mapping(filename)
     
-    def load_mapping(self, filename):
+    def _load_mapping(self, filename):
+        &#34;&#34;&#34;
+        Load mappings from alignment system.
+        Args:
+            filename : str \n
+            Path to file. 
+        Return:
+            dict\n
+            On the form {from:to}
+        &#34;&#34;&#34;
         out = {}
         g = Graph()
         g.parse(filename)
@@ -117,18 +187,35 @@ class LogMapMapping(Alignment):
 
         
 class StringMatchingMapping(Alignment):
-    def __init__(self, dict1, dict2):
+    def __init__(self, dict1, dict2, threshold = 0.95):
         &#34;&#34;&#34;
-        g1 :: dict 
-        g2 :: dict
-            {entity:list of strings}
+        Class for creating mapping between two label dictonaries using string matching. 
+        Args:
+            dict1 : dict \n
+                Dictonary on the form {entity:list of labels} \n
+            dict2 : dict \n
+                Same as dict1.\n
+            threshold : float \n
+                Alignment threshold.
         &#34;&#34;&#34;
         super(StringMatchingMapping, self).__init__()
         
-        self.threshold = 0.95
-        self.mappings = self.load_mapping(dict1,dict2)
+        self.threshold = threshold
+        self.mappings = self._load_mapping(dict1,dict2)
     
-    def load_mapping(self, dict1, dict2):
+    def _load_mapping(self, dict1, dict2):
+        &#34;&#34;&#34;
+        Args:
+            dict1 : dict \n
+                Dictonary on the form {entity:list of labels} \n
+            dict2 : dict \n
+                Same as dict1.\n
+            threshold : float \n
+                Alignment threshold.
+        Return:
+            dict \n
+            On the form {from:to}
+        &#34;&#34;&#34;
         tmp = defaultdict(float)
         for k1 in dict1:
             for k2 in dict2:
@@ -143,20 +230,38 @@ class StringMatchingMapping(Alignment):
         return {k1:k2 for k1,k2 in tmp}
     
 class StringGraphMapping(Alignment):
-    def __init__(self, g1, g2):
+    def __init__(self, g1, g2, threshold = 0.95):
         &#34;&#34;&#34;
-        g1 :: Graph
-        g2 :: Graph
-        Uses literal to align entities in g1 and g2.
+        Class for creating mapping between two graph using string matching. 
+        Args:
+            g1 : rdflib.Graph \n
+            g2 : rdflib.Graph \n
+            threshold : float \n
+                Alignment threshold.
+        Return:
+            dict \n
+            On the form {from:to}
         &#34;&#34;&#34;
         super(StringGraphMapping, self).__init__()
         
-        self.threshold = 0.95
+        self.threshold = threshold
         dict1 = graph_to_dict(g1)
         dict2 = graph_to_dict(g2)
-        self.mappings = self.load_mapping(dict1, dict2)
+        self.mappings = self._load_mapping(dict1, dict2)
     
-    def load_mapping(self, dict1, dict2):
+    def _load_mapping(self, dict1, dict2):
+        &#34;&#34;&#34;
+        Args:
+            dict1 : dict \n
+                Dictonary on the form {entity:list of labels} \n
+            dict2 : dict \n
+                Same as dict1.\n
+            threshold : float \n
+                Alignment threshold.
+        Return:
+            dict \n
+            On the form {from:to}
+        &#34;&#34;&#34;
         tmp = defaultdict(float)
         for k1 in dict1:
             for k2 in dict2:
@@ -173,6 +278,7 @@ class StringGraphMapping(Alignment):
 
 class InchikeyToCas(WikidataMapping):
     def __init__(self):
+        &#34;&#34;&#34;Class which creates inchikey to cas mapping.&#34;&#34;&#34;
         query = &#34;&#34;&#34;
         SELECT ?from ?to
             { 
@@ -184,6 +290,7 @@ class InchikeyToCas(WikidataMapping):
     
 class InchikeyToPubChem(WikidataMapping):
     def __init__(self):
+        &#34;&#34;&#34;Class which creates inchikey to pubchem mapping.&#34;&#34;&#34;
         query = &#34;&#34;&#34;
         SELECT ?from ?to
             { 
@@ -195,6 +302,7 @@ class InchikeyToPubChem(WikidataMapping):
     
 class InchikeyToChEBI(WikidataMapping):
     def __init__(self):
+        &#34;&#34;&#34;Class which creates inchikey to chebi mapping.&#34;&#34;&#34;
         query = &#34;&#34;&#34;
         SELECT ?from ?to
             { 
@@ -206,6 +314,7 @@ class InchikeyToChEBI(WikidataMapping):
 
 class InchikeyToChEMBL(WikidataMapping):
     def __init__(self):
+        &#34;&#34;&#34;Class which creates inchikey to chemble mapping.&#34;&#34;&#34;
         query = &#34;&#34;&#34;
         SELECT ?from ?to
             { 
@@ -217,6 +326,7 @@ class InchikeyToChEMBL(WikidataMapping):
         
 class InchikeyToMeSH(WikidataMapping):
     def __init__(self):
+        &#34;&#34;&#34;Class which creates inchikey to mesh mapping.&#34;&#34;&#34;
         query = &#34;&#34;&#34;
         SELECT ?from ?to
             { 
@@ -228,6 +338,7 @@ class InchikeyToMeSH(WikidataMapping):
 
 class NCBIToEOL(WikidataMapping):
     def __init__(self):
+        &#34;&#34;&#34;Class which creates ncbi to eol mapping.&#34;&#34;&#34;
         query = &#34;&#34;&#34;
         SELECT ?from ?to
             { 
@@ -241,9 +352,9 @@ class NCBIToEOL(WikidataMapping):
 #TODO change ncbi -&gt; ecotox mapping to concensus mappings.
 class NCBIToEcotox(StringGraphMapping):
     def __init__(self, dataobject1, dataobject2):
+        &#34;&#34;&#34;Class which creates ncbi to ecotox mapping.&#34;&#34;&#34;
         super(NCBIToEcotox, self).__init__(dataobject1.graph,
                                            dataobject2.graph)
-        
         </code></pre>
 </details>
 </section>
@@ -261,16 +372,28 @@ class NCBIToEcotox(StringGraphMapping):
 <span>(</span><span>name='Alignment')</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Base class for alignment of two data sets.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Alignment:
     def __init__(self, name = &#39;Alignment&#39;):
+        &#34;&#34;&#34;Base class for alignment of two data sets. &#34;&#34;&#34;
         self.name = name
     
-    def mapping(self, x, reverse = False):
+    def _mapping(self, x, reverse = False):
+        &#34;&#34;&#34;
+        Maps from one id type to another. 
+        Args:
+            x : rdflib.URIRef or str \n
+                URI/identifier to map from. \n
+            reverse : bool \n
+                Reverse the direction of mapping. 
+        Return:
+            mapping \n
+            If no mapping exists, returns &#39;no mapping&#39;
+        &#34;&#34;&#34;
         tmp = self.mappings
         if reverse:
             tmp = {tmp[k]:k for k in tmp}
@@ -282,9 +405,22 @@ class NCBIToEcotox(StringGraphMapping):
     
     @do_recursively_in_class
     def convert(self, id_, reverse=True, strip = False):
+        &#34;&#34;&#34;
+        Convert a set of ids into new identifiers.
+        Args:
+            id_ : rdflib.URIRef, str, list, set \n
+                URI(s)/identifier(s) \n 
+            reverse : bool \n
+                Reverse the direction of mapping. \n
+            strip : bool \n
+                Remove namespace.
+        Return:
+            str or dict
+            Mapped values.
+        &#34;&#34;&#34;
         if strip:
-            id_ = strip_namespace(id_,[&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
-        return self.mapping(id_,reverse)</code></pre>
+            id_ = strip_namespace(str(id_),[&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
+        return self._mapping(id_,reverse)</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -300,36 +436,41 @@ class NCBIToEcotox(StringGraphMapping):
 <span>def <span class="ident">convert</span></span>(<span>self, id_, reverse=True, strip=False)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Convert a set of ids into new identifiers.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>id_</code></strong> :&ensp;<code>rdflib.URIRef</code>, <code>str</code>, <code>list</code>, <code>set</code></dt>
+<dd>URI(s)/identifier(s)</dd>
+<dt><strong><code>reverse</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Reverse the direction of mapping.</dd>
+<dt><strong><code>strip</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Remove namespace.</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>str or dict
+Mapped values.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@do_recursively_in_class
 def convert(self, id_, reverse=True, strip = False):
+    &#34;&#34;&#34;
+    Convert a set of ids into new identifiers.
+    Args:
+        id_ : rdflib.URIRef, str, list, set \n
+            URI(s)/identifier(s) \n 
+        reverse : bool \n
+            Reverse the direction of mapping. \n
+        strip : bool \n
+            Remove namespace.
+    Return:
+        str or dict
+        Mapped values.
+    &#34;&#34;&#34;
     if strip:
-        id_ = strip_namespace(id_,[&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
-    return self.mapping(id_,reverse)</code></pre>
-</details>
-</dd>
-<dt id="tera.DataIntegration.Alignment.mapping"><code class="name flex">
-<span>def <span class="ident">mapping</span></span>(<span>self, x, reverse=False)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def mapping(self, x, reverse = False):
-    tmp = self.mappings
-    if reverse:
-        tmp = {tmp[k]:k for k in tmp}
-    x = str(x)
-    if x in tmp:
-        return tmp[x]
-    else:
-        return &#39;no mapping&#39;</code></pre>
+        id_ = strip_namespace(str(id_),[&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
+    return self._mapping(id_,reverse)</code></pre>
 </details>
 </dd>
 </dl>
@@ -339,7 +480,7 @@ def convert(self, id_, reverse=True, strip = False):
 <span>(</span><span>endpoint)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Base class for alignment of two data sets.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -347,9 +488,23 @@ def convert(self, id_, reverse=True, strip = False):
 <pre><code class="python">class EndpointMapping(Alignment):
     def __init__(self, endpoint):
         super(EndpointMapping, self).__init__()
-        self.mappings = self.load_mapping(endpoint)
+        &#34;&#34;&#34;Class for loading mappings based on owl:sameAs property.
+        Args:
+            endpoint : str \n
+            SPARQL endpoint URL.
+        &#34;&#34;&#34;
+        self.mappings = self._load_mapping(endpoint)
     
-    def load_mapping(self, endpoint):
+    def _load_mapping(self, endpoint):
+        &#34;&#34;&#34;
+        Load mappings from endpoint.
+        Args:
+            endpoint : str \n
+            SPARQL endpoint URL
+        Return:
+            dict\n
+            On the form {from:to}
+        &#34;&#34;&#34;
         query = &#34;&#34;&#34;
         SELECT ?s ?o WHERE {
             ?s &lt;http://www.w3.org/2002/07/owl#sameAs&gt; ?o .
@@ -362,47 +517,27 @@ def convert(self, id_, reverse=True, strip = False):
 <ul class="hlist">
 <li><a title="tera.DataIntegration.Alignment" href="#tera.DataIntegration.Alignment">Alignment</a></li>
 </ul>
-<h3>Methods</h3>
-<dl>
-<dt id="tera.DataIntegration.EndpointMapping.load_mapping"><code class="name flex">
-<span>def <span class="ident">load_mapping</span></span>(<span>self, endpoint)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def load_mapping(self, endpoint):
-    query = &#34;&#34;&#34;
-    SELECT ?s ?o WHERE {
-        ?s &lt;http://www.w3.org/2002/07/owl#sameAs&gt; ?o .
-    } 
-    &#34;&#34;&#34;
-    res = query_endpoint(endpoint, query, var = [&#39;s&#39;,&#39;o&#39;])
-    return {str(s):str(o) for s,o in res}</code></pre>
-</details>
-</dd>
-</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataIntegration.Alignment" href="#tera.DataIntegration.Alignment">Alignment</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataIntegration.Alignment.convert" href="#tera.DataIntegration.Alignment.convert">convert</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="tera.DataIntegration.InchikeyToCas"><code class="flex name class">
 <span>class <span class="ident">InchikeyToCas</span></span>
 </code></dt>
 <dd>
-<section class="desc"><p>query :: str
-Wikidata query with two variables.
-ex: from inchikey to cas
-SELECT ?from ?to
-{
-?compound wdt:P235 ?from .
-?compound wdt:P231 ?to .
-}</p></section>
+<section class="desc"><p>Class which creates inchikey to cas mapping.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class InchikeyToCas(WikidataMapping):
     def __init__(self):
+        &#34;&#34;&#34;Class which creates inchikey to cas mapping.&#34;&#34;&#34;
         query = &#34;&#34;&#34;
         SELECT ?from ?to
             { 
@@ -417,25 +552,27 @@ SELECT ?from ?to
 <li><a title="tera.DataIntegration.WikidataMapping" href="#tera.DataIntegration.WikidataMapping">WikidataMapping</a></li>
 <li><a title="tera.DataIntegration.Alignment" href="#tera.DataIntegration.Alignment">Alignment</a></li>
 </ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataIntegration.WikidataMapping" href="#tera.DataIntegration.WikidataMapping">WikidataMapping</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataIntegration.WikidataMapping.convert" href="#tera.DataIntegration.Alignment.convert">convert</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="tera.DataIntegration.InchikeyToChEBI"><code class="flex name class">
 <span>class <span class="ident">InchikeyToChEBI</span></span>
 </code></dt>
 <dd>
-<section class="desc"><p>query :: str
-Wikidata query with two variables.
-ex: from inchikey to cas
-SELECT ?from ?to
-{
-?compound wdt:P235 ?from .
-?compound wdt:P231 ?to .
-}</p></section>
+<section class="desc"><p>Class which creates inchikey to chebi mapping.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class InchikeyToChEBI(WikidataMapping):
     def __init__(self):
+        &#34;&#34;&#34;Class which creates inchikey to chebi mapping.&#34;&#34;&#34;
         query = &#34;&#34;&#34;
         SELECT ?from ?to
             { 
@@ -450,25 +587,27 @@ SELECT ?from ?to
 <li><a title="tera.DataIntegration.WikidataMapping" href="#tera.DataIntegration.WikidataMapping">WikidataMapping</a></li>
 <li><a title="tera.DataIntegration.Alignment" href="#tera.DataIntegration.Alignment">Alignment</a></li>
 </ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataIntegration.WikidataMapping" href="#tera.DataIntegration.WikidataMapping">WikidataMapping</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataIntegration.WikidataMapping.convert" href="#tera.DataIntegration.Alignment.convert">convert</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="tera.DataIntegration.InchikeyToChEMBL"><code class="flex name class">
 <span>class <span class="ident">InchikeyToChEMBL</span></span>
 </code></dt>
 <dd>
-<section class="desc"><p>query :: str
-Wikidata query with two variables.
-ex: from inchikey to cas
-SELECT ?from ?to
-{
-?compound wdt:P235 ?from .
-?compound wdt:P231 ?to .
-}</p></section>
+<section class="desc"><p>Class which creates inchikey to chemble mapping.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class InchikeyToChEMBL(WikidataMapping):
     def __init__(self):
+        &#34;&#34;&#34;Class which creates inchikey to chemble mapping.&#34;&#34;&#34;
         query = &#34;&#34;&#34;
         SELECT ?from ?to
             { 
@@ -483,25 +622,27 @@ SELECT ?from ?to
 <li><a title="tera.DataIntegration.WikidataMapping" href="#tera.DataIntegration.WikidataMapping">WikidataMapping</a></li>
 <li><a title="tera.DataIntegration.Alignment" href="#tera.DataIntegration.Alignment">Alignment</a></li>
 </ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataIntegration.WikidataMapping" href="#tera.DataIntegration.WikidataMapping">WikidataMapping</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataIntegration.WikidataMapping.convert" href="#tera.DataIntegration.Alignment.convert">convert</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="tera.DataIntegration.InchikeyToMeSH"><code class="flex name class">
 <span>class <span class="ident">InchikeyToMeSH</span></span>
 </code></dt>
 <dd>
-<section class="desc"><p>query :: str
-Wikidata query with two variables.
-ex: from inchikey to cas
-SELECT ?from ?to
-{
-?compound wdt:P235 ?from .
-?compound wdt:P231 ?to .
-}</p></section>
+<section class="desc"><p>Class which creates inchikey to mesh mapping.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class InchikeyToMeSH(WikidataMapping):
     def __init__(self):
+        &#34;&#34;&#34;Class which creates inchikey to mesh mapping.&#34;&#34;&#34;
         query = &#34;&#34;&#34;
         SELECT ?from ?to
             { 
@@ -516,25 +657,27 @@ SELECT ?from ?to
 <li><a title="tera.DataIntegration.WikidataMapping" href="#tera.DataIntegration.WikidataMapping">WikidataMapping</a></li>
 <li><a title="tera.DataIntegration.Alignment" href="#tera.DataIntegration.Alignment">Alignment</a></li>
 </ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataIntegration.WikidataMapping" href="#tera.DataIntegration.WikidataMapping">WikidataMapping</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataIntegration.WikidataMapping.convert" href="#tera.DataIntegration.Alignment.convert">convert</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="tera.DataIntegration.InchikeyToPubChem"><code class="flex name class">
 <span>class <span class="ident">InchikeyToPubChem</span></span>
 </code></dt>
 <dd>
-<section class="desc"><p>query :: str
-Wikidata query with two variables.
-ex: from inchikey to cas
-SELECT ?from ?to
-{
-?compound wdt:P235 ?from .
-?compound wdt:P231 ?to .
-}</p></section>
+<section class="desc"><p>Class which creates inchikey to pubchem mapping.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class InchikeyToPubChem(WikidataMapping):
     def __init__(self):
+        &#34;&#34;&#34;Class which creates inchikey to pubchem mapping.&#34;&#34;&#34;
         query = &#34;&#34;&#34;
         SELECT ?from ?to
             { 
@@ -549,14 +692,28 @@ SELECT ?from ?to
 <li><a title="tera.DataIntegration.WikidataMapping" href="#tera.DataIntegration.WikidataMapping">WikidataMapping</a></li>
 <li><a title="tera.DataIntegration.Alignment" href="#tera.DataIntegration.Alignment">Alignment</a></li>
 </ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataIntegration.WikidataMapping" href="#tera.DataIntegration.WikidataMapping">WikidataMapping</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataIntegration.WikidataMapping.convert" href="#tera.DataIntegration.Alignment.convert">convert</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="tera.DataIntegration.LogMapMapping"><code class="flex name class">
 <span>class <span class="ident">LogMapMapping</span></span>
 <span>(</span><span>filename, threshold=0.95)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>filename :: str
-path to logmap output file (.rdf)</p></section>
+<section class="desc"><p>Class for using LogMap (or other system) alignments. </p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>filename</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to logmap output file (.rdf)</dd>
+<dt><strong><code>threshold</code></strong> :&ensp;<code>float</code></dt>
+<dd>Alignment threshold.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -564,15 +721,28 @@ path to logmap output file (.rdf)</p></section>
 <pre><code class="python">class LogMapMapping(Alignment):
     def __init__(self, filename, threshold=0.95):
         &#34;&#34;&#34;
-        filename :: str
-            path to logmap output file (.rdf)
+        Class for using LogMap (or other system) alignments. 
+        Args:
+            filename : str \n
+                Path to logmap output file (.rdf) \n
+            threshold : float \n
+                Alignment threshold.
         &#34;&#34;&#34;
         super(LogMapMapping, self).__init__()
         
         self.threshold = threshold
-        self.mappings = self.load_mapping(filename)
+        self.mappings = self._load_mapping(filename)
     
-    def load_mapping(self, filename):
+    def _load_mapping(self, filename):
+        &#34;&#34;&#34;
+        Load mappings from alignment system.
+        Args:
+            filename : str \n
+            Path to file. 
+        Return:
+            dict\n
+            On the form {from:to}
+        &#34;&#34;&#34;
         out = {}
         g = Graph()
         g.parse(filename)
@@ -592,54 +762,27 @@ path to logmap output file (.rdf)</p></section>
 <ul class="hlist">
 <li><a title="tera.DataIntegration.Alignment" href="#tera.DataIntegration.Alignment">Alignment</a></li>
 </ul>
-<h3>Methods</h3>
-<dl>
-<dt id="tera.DataIntegration.LogMapMapping.load_mapping"><code class="name flex">
-<span>def <span class="ident">load_mapping</span></span>(<span>self, filename)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def load_mapping(self, filename):
-    out = {}
-    g = Graph()
-    g.parse(filename)
-    o = URIRef(&#39;http://knowledgeweb.semanticweb.org/heterogeneity/alignmentCell&#39;)
-    for s in g.subjects(predicate=RDF.type, object = o):
-        e1 = list(g.objects(subject=s,predicate=URIRef(&#39;http://knowledgeweb.semanticweb.org/heterogeneity/alignmententity1&#39;))).pop(0)
-        e2 = list(g.objects(subject=s,predicate=URIRef(&#39;http://knowledgeweb.semanticweb.org/heterogeneity/alignmententity2&#39;))).pop(0)
-        score = list(g.objects(subject=s,predicate=URIRef(&#39;http://knowledgeweb.semanticweb.org/heterogeneity/alignmentmeasure&#39;))).pop(0)
-        
-        score = float(score)
-        if score &gt;= self.threshold:
-            out[str(e1)] = str(e2)
-    
-    return out</code></pre>
-</details>
-</dd>
-</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataIntegration.Alignment" href="#tera.DataIntegration.Alignment">Alignment</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataIntegration.Alignment.convert" href="#tera.DataIntegration.Alignment.convert">convert</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="tera.DataIntegration.NCBIToEOL"><code class="flex name class">
 <span>class <span class="ident">NCBIToEOL</span></span>
 </code></dt>
 <dd>
-<section class="desc"><p>query :: str
-Wikidata query with two variables.
-ex: from inchikey to cas
-SELECT ?from ?to
-{
-?compound wdt:P235 ?from .
-?compound wdt:P231 ?to .
-}</p></section>
+<section class="desc"><p>Class which creates ncbi to eol mapping.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class NCBIToEOL(WikidataMapping):
     def __init__(self):
+        &#34;&#34;&#34;Class which creates ncbi to eol mapping.&#34;&#34;&#34;
         query = &#34;&#34;&#34;
         SELECT ?from ?to
             { 
@@ -654,21 +797,28 @@ SELECT ?from ?to
 <li><a title="tera.DataIntegration.WikidataMapping" href="#tera.DataIntegration.WikidataMapping">WikidataMapping</a></li>
 <li><a title="tera.DataIntegration.Alignment" href="#tera.DataIntegration.Alignment">Alignment</a></li>
 </ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataIntegration.WikidataMapping" href="#tera.DataIntegration.WikidataMapping">WikidataMapping</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataIntegration.WikidataMapping.convert" href="#tera.DataIntegration.Alignment.convert">convert</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="tera.DataIntegration.NCBIToEcotox"><code class="flex name class">
 <span>class <span class="ident">NCBIToEcotox</span></span>
 <span>(</span><span>dataobject1, dataobject2)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>g1 :: Graph
-g2 :: Graph
-Uses literal to align entities in g1 and g2.</p></section>
+<section class="desc"><p>Class which creates ncbi to ecotox mapping.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class NCBIToEcotox(StringGraphMapping):
     def __init__(self, dataobject1, dataobject2):
+        &#34;&#34;&#34;Class which creates ncbi to ecotox mapping.&#34;&#34;&#34;
         super(NCBIToEcotox, self).__init__(dataobject1.graph,
                                            dataobject2.graph)</code></pre>
 </details>
@@ -677,34 +827,70 @@ Uses literal to align entities in g1 and g2.</p></section>
 <li><a title="tera.DataIntegration.StringGraphMapping" href="#tera.DataIntegration.StringGraphMapping">StringGraphMapping</a></li>
 <li><a title="tera.DataIntegration.Alignment" href="#tera.DataIntegration.Alignment">Alignment</a></li>
 </ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataIntegration.StringGraphMapping" href="#tera.DataIntegration.StringGraphMapping">StringGraphMapping</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataIntegration.StringGraphMapping.convert" href="#tera.DataIntegration.Alignment.convert">convert</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="tera.DataIntegration.StringGraphMapping"><code class="flex name class">
 <span>class <span class="ident">StringGraphMapping</span></span>
-<span>(</span><span>g1, g2)</span>
+<span>(</span><span>g1, g2, threshold=0.95)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>g1 :: Graph
-g2 :: Graph
-Uses literal to align entities in g1 and g2.</p></section>
+<section class="desc"><p>Class for creating mapping between two graph using string matching. </p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>g1</code></strong> :&ensp;<code>rdflib.Graph</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>g2</code></strong> :&ensp;<code>rdflib.Graph</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>threshold</code></strong> :&ensp;<code>float</code></dt>
+<dd>Alignment threshold.</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>dict </p>
+<p>On the form {from:to}</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class StringGraphMapping(Alignment):
-    def __init__(self, g1, g2):
+    def __init__(self, g1, g2, threshold = 0.95):
         &#34;&#34;&#34;
-        g1 :: Graph
-        g2 :: Graph
-        Uses literal to align entities in g1 and g2.
+        Class for creating mapping between two graph using string matching. 
+        Args:
+            g1 : rdflib.Graph \n
+            g2 : rdflib.Graph \n
+            threshold : float \n
+                Alignment threshold.
+        Return:
+            dict \n
+            On the form {from:to}
         &#34;&#34;&#34;
         super(StringGraphMapping, self).__init__()
         
-        self.threshold = 0.95
+        self.threshold = threshold
         dict1 = graph_to_dict(g1)
         dict2 = graph_to_dict(g2)
-        self.mappings = self.load_mapping(dict1, dict2)
+        self.mappings = self._load_mapping(dict1, dict2)
     
-    def load_mapping(self, dict1, dict2):
+    def _load_mapping(self, dict1, dict2):
+        &#34;&#34;&#34;
+        Args:
+            dict1 : dict \n
+                Dictonary on the form {entity:list of labels} \n
+            dict2 : dict \n
+                Same as dict1.\n
+            threshold : float \n
+                Alignment threshold.
+        Return:
+            dict \n
+            On the form {from:to}
+        &#34;&#34;&#34;
         tmp = defaultdict(float)
         for k1 in dict1:
             for k2 in dict2:
@@ -726,58 +912,64 @@ Uses literal to align entities in g1 and g2.</p></section>
 <ul class="hlist">
 <li><a title="tera.DataIntegration.NCBIToEcotox" href="#tera.DataIntegration.NCBIToEcotox">NCBIToEcotox</a></li>
 </ul>
-<h3>Methods</h3>
-<dl>
-<dt id="tera.DataIntegration.StringGraphMapping.load_mapping"><code class="name flex">
-<span>def <span class="ident">load_mapping</span></span>(<span>self, dict1, dict2)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def load_mapping(self, dict1, dict2):
-    tmp = defaultdict(float)
-    for k1 in dict1:
-        for k2 in dict2:
-            try:
-                _, score = process.extractOne(dict1[k1],dict2[k2])
-            except TypeError:
-                score = 0
-                
-            if score &gt;= self.threshold:
-                tmp[k1,k2] = max(tmp[k1,k2],score)
-    
-    return {k1:k2 for k1,k2 in tmp}</code></pre>
-</details>
-</dd>
-</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataIntegration.Alignment" href="#tera.DataIntegration.Alignment">Alignment</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataIntegration.Alignment.convert" href="#tera.DataIntegration.Alignment.convert">convert</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="tera.DataIntegration.StringMatchingMapping"><code class="flex name class">
 <span>class <span class="ident">StringMatchingMapping</span></span>
-<span>(</span><span>dict1, dict2)</span>
+<span>(</span><span>dict1, dict2, threshold=0.95)</span>
 </code></dt>
 <dd>
-<section class="desc"><p entity:list of strings>g1 :: dict
-g2 :: dict</p></section>
+<section class="desc"><p>Class for creating mapping between two label dictonaries using string matching. </p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>dict1</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Dictonary on the form {entity:list of labels}</dd>
+<dt><strong><code>dict2</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Same as dict1.</dd>
+<dt><strong><code>threshold</code></strong> :&ensp;<code>float</code></dt>
+<dd>Alignment threshold.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class StringMatchingMapping(Alignment):
-    def __init__(self, dict1, dict2):
+    def __init__(self, dict1, dict2, threshold = 0.95):
         &#34;&#34;&#34;
-        g1 :: dict 
-        g2 :: dict
-            {entity:list of strings}
+        Class for creating mapping between two label dictonaries using string matching. 
+        Args:
+            dict1 : dict \n
+                Dictonary on the form {entity:list of labels} \n
+            dict2 : dict \n
+                Same as dict1.\n
+            threshold : float \n
+                Alignment threshold.
         &#34;&#34;&#34;
         super(StringMatchingMapping, self).__init__()
         
-        self.threshold = 0.95
-        self.mappings = self.load_mapping(dict1,dict2)
+        self.threshold = threshold
+        self.mappings = self._load_mapping(dict1,dict2)
     
-    def load_mapping(self, dict1, dict2):
+    def _load_mapping(self, dict1, dict2):
+        &#34;&#34;&#34;
+        Args:
+            dict1 : dict \n
+                Dictonary on the form {entity:list of labels} \n
+            dict2 : dict \n
+                Same as dict1.\n
+            threshold : float \n
+                Alignment threshold.
+        Return:
+            dict \n
+            On the form {from:to}
+        &#34;&#34;&#34;
         tmp = defaultdict(float)
         for k1 in dict1:
             for k2 in dict2:
@@ -795,47 +987,31 @@ g2 :: dict</p></section>
 <ul class="hlist">
 <li><a title="tera.DataIntegration.Alignment" href="#tera.DataIntegration.Alignment">Alignment</a></li>
 </ul>
-<h3>Methods</h3>
-<dl>
-<dt id="tera.DataIntegration.StringMatchingMapping.load_mapping"><code class="name flex">
-<span>def <span class="ident">load_mapping</span></span>(<span>self, dict1, dict2)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def load_mapping(self, dict1, dict2):
-    tmp = defaultdict(float)
-    for k1 in dict1:
-        for k2 in dict2:
-            try:
-                _, score = process.extractOne(dict1[k1],dict2[k2])
-            except TypeError:
-                score = 0
-                
-            if score &gt;= self.threshold:
-                tmp[k1,k2] = max(tmp[k1,k2],score)
-    
-    return {k1:k2 for k1,k2 in tmp}</code></pre>
-</details>
-</dd>
-</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataIntegration.Alignment" href="#tera.DataIntegration.Alignment">Alignment</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataIntegration.Alignment.convert" href="#tera.DataIntegration.Alignment.convert">convert</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="tera.DataIntegration.WikidataMapping"><code class="flex name class">
 <span>class <span class="ident">WikidataMapping</span></span>
 <span>(</span><span>query)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>query :: str
-Wikidata query with two variables.
-ex: from inchikey to cas
-SELECT ?from ?to
-{
-?compound wdt:P235 ?from .
-?compound wdt:P231 ?to .
-}</p></section>
+<section class="desc"><p>Class for loading mappings from wikidata.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>query</code></strong> :&ensp;<code>str</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Wikidata query with two variables. </p>
+<p>eg. from inchikey to cas </p>
+<p>SELECT ?from ?to {</p>
+<p>?compound wdt:P235 ?from . </p>
+<p>?compound wdt:P231 ?to .}</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -843,19 +1019,28 @@ SELECT ?from ?to
 <pre><code class="python">class WikidataMapping(Alignment):
     def __init__(self, query):
         &#34;&#34;&#34;
-        query :: str
-            Wikidata query with two variables. 
-            ex: from inchikey to cas
-            SELECT ?from ?to
-            { 
-            ?compound wdt:P235 ?from .
-            ?compound wdt:P231 ?to .
-            } 
+        Class for loading mappings from wikidata.
+        Args:
+            query : str \n
+            Wikidata query with two variables. \n
+            eg. from inchikey to cas \n
+            SELECT ?from ?to {\n  
+            ?compound wdt:P235 ?from . \n
+            ?compound wdt:P231 ?to .} \n
         &#34;&#34;&#34;
         super(WikidataMapping, self).__init__()
-        self.mappings = self.load_mapping(query)
+        self.mappings = self._load_mapping(query)
         
-    def load_mapping(self, query):
+    def _load_mapping(self, query):
+        &#34;&#34;&#34;
+        Load mappings from wikidata.
+        Args:
+            query : str \n
+            wikidata query. 
+        Return:
+            dict\n
+            On the form {from:to}
+        &#34;&#34;&#34;
         res = query_endpoint(&#39;https://query.wikidata.org/sparql&#39;, 
                              query, 
                              var = [&#39;from&#39;, &#39;to&#39;])
@@ -874,25 +1059,14 @@ SELECT ?from ?to
 <li><a title="tera.DataIntegration.InchikeyToPubChem" href="#tera.DataIntegration.InchikeyToPubChem">InchikeyToPubChem</a></li>
 <li><a title="tera.DataIntegration.NCBIToEOL" href="#tera.DataIntegration.NCBIToEOL">NCBIToEOL</a></li>
 </ul>
-<h3>Methods</h3>
-<dl>
-<dt id="tera.DataIntegration.WikidataMapping.load_mapping"><code class="name flex">
-<span>def <span class="ident">load_mapping</span></span>(<span>self, query)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def load_mapping(self, query):
-    res = query_endpoint(&#39;https://query.wikidata.org/sparql&#39;, 
-                         query, 
-                         var = [&#39;from&#39;, &#39;to&#39;])
-    return {str(f):str(t) for f,t in res}</code></pre>
-</details>
-</dd>
-</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataIntegration.Alignment" href="#tera.DataIntegration.Alignment">Alignment</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataIntegration.Alignment.convert" href="#tera.DataIntegration.Alignment.convert">convert</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 </dl>
 </section>
@@ -914,14 +1088,10 @@ SELECT ?from ?to
 <h4><code><a title="tera.DataIntegration.Alignment" href="#tera.DataIntegration.Alignment">Alignment</a></code></h4>
 <ul class="">
 <li><code><a title="tera.DataIntegration.Alignment.convert" href="#tera.DataIntegration.Alignment.convert">convert</a></code></li>
-<li><code><a title="tera.DataIntegration.Alignment.mapping" href="#tera.DataIntegration.Alignment.mapping">mapping</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="tera.DataIntegration.EndpointMapping" href="#tera.DataIntegration.EndpointMapping">EndpointMapping</a></code></h4>
-<ul class="">
-<li><code><a title="tera.DataIntegration.EndpointMapping.load_mapping" href="#tera.DataIntegration.EndpointMapping.load_mapping">load_mapping</a></code></li>
-</ul>
 </li>
 <li>
 <h4><code><a title="tera.DataIntegration.InchikeyToCas" href="#tera.DataIntegration.InchikeyToCas">InchikeyToCas</a></code></h4>
@@ -940,9 +1110,6 @@ SELECT ?from ?to
 </li>
 <li>
 <h4><code><a title="tera.DataIntegration.LogMapMapping" href="#tera.DataIntegration.LogMapMapping">LogMapMapping</a></code></h4>
-<ul class="">
-<li><code><a title="tera.DataIntegration.LogMapMapping.load_mapping" href="#tera.DataIntegration.LogMapMapping.load_mapping">load_mapping</a></code></li>
-</ul>
 </li>
 <li>
 <h4><code><a title="tera.DataIntegration.NCBIToEOL" href="#tera.DataIntegration.NCBIToEOL">NCBIToEOL</a></code></h4>
@@ -952,21 +1119,12 @@ SELECT ?from ?to
 </li>
 <li>
 <h4><code><a title="tera.DataIntegration.StringGraphMapping" href="#tera.DataIntegration.StringGraphMapping">StringGraphMapping</a></code></h4>
-<ul class="">
-<li><code><a title="tera.DataIntegration.StringGraphMapping.load_mapping" href="#tera.DataIntegration.StringGraphMapping.load_mapping">load_mapping</a></code></li>
-</ul>
 </li>
 <li>
 <h4><code><a title="tera.DataIntegration.StringMatchingMapping" href="#tera.DataIntegration.StringMatchingMapping">StringMatchingMapping</a></code></h4>
-<ul class="">
-<li><code><a title="tera.DataIntegration.StringMatchingMapping.load_mapping" href="#tera.DataIntegration.StringMatchingMapping.load_mapping">load_mapping</a></code></li>
-</ul>
 </li>
 <li>
 <h4><code><a title="tera.DataIntegration.WikidataMapping" href="#tera.DataIntegration.WikidataMapping">WikidataMapping</a></code></h4>
-<ul class="">
-<li><code><a title="tera.DataIntegration.WikidataMapping.load_mapping" href="#tera.DataIntegration.WikidataMapping.load_mapping">load_mapping</a></code></li>
-</ul>
 </li>
 </ul>
 </li>

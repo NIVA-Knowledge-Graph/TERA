@@ -1,3 +1,8 @@
+"""
+DataAggregation 
+
+A set of classes for aggregation of TERA data sources into common formats.
+"""
 
 from rdflib import Graph, Namespace, Literal, URIRef, BNode
 from rdflib.namespace import RDF, OWL, RDFS

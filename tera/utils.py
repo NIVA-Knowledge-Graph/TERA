@@ -1,4 +1,8 @@
-#utils 
+"""
+utils 
+
+Utilities used by other modules.
+"""
 from SPARQLWrapper import SPARQLWrapper, JSON
 from functools import wraps
 from rdflib import Literal
@@ -28,7 +32,7 @@ def test_endpoint(endpoint):
     Test SPARQL endpoint.
     Args:
         endpoint : str \n
-            SPARQL endpoint URL. ex: https://query.wikidata.org/sparql \
+            SPARQL endpoint URL. ex: https://query.wikidata.org/sparql \n
     Return:
         bool \n
             If endpoint returns data.
@@ -80,7 +84,6 @@ def query_endpoint(endpoint, q, var = 'p'):
                 out[v] = [None] * len(results['results']['bindings'])
         return set(zip(*[out[k] for k in out]))
     except Exception as e:
-        print(e.message)
         return set()
 
 
@@ -98,9 +101,7 @@ def query_graph(graph, q):
     try:
         return set(graph.query(q))
     except Exception as e:
-        print(e.message)
         return set()
-    
 
 def prefixes(initNs):
     """

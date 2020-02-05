@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.4" />
 <title>tera.utils API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="utils …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,11 +20,17 @@
 <h1 class="title">Module <code>tera.utils</code></h1>
 </header>
 <section id="section-intro">
+<p>utils </p>
+<p>Utilities used by other modules.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">#utils 
+<pre><code class="python">&#34;&#34;&#34;
+utils 
+
+Utilities used by other modules.
+&#34;&#34;&#34;
 from SPARQLWrapper import SPARQLWrapper, JSON
 from functools import wraps
 from rdflib import Literal
@@ -54,7 +60,7 @@ def test_endpoint(endpoint):
     Test SPARQL endpoint.
     Args:
         endpoint : str \n
-            SPARQL endpoint URL. ex: https://query.wikidata.org/sparql \
+            SPARQL endpoint URL. ex: https://query.wikidata.org/sparql \n
     Return:
         bool \n
             If endpoint returns data.
@@ -106,7 +112,6 @@ def query_endpoint(endpoint, q, var = &#39;p&#39;):
                 out[v] = [None] * len(results[&#39;results&#39;][&#39;bindings&#39;])
         return set(zip(*[out[k] for k in out]))
     except Exception as e:
-        print(e.message)
         return set()
 
 
@@ -124,9 +129,7 @@ def query_graph(graph, q):
     try:
         return set(graph.query(q))
     except Exception as e:
-        print(e.message)
         return set()
-    
 
 def prefixes(initNs):
     &#34;&#34;&#34;
@@ -344,7 +347,6 @@ def graph_to_dict(graph):
                 out[v] = [None] * len(results[&#39;results&#39;][&#39;bindings&#39;])
         return set(zip(*[out[k] for k in out]))
     except Exception as e:
-        print(e.message)
         return set()</code></pre>
 </details>
 </dd>
@@ -382,7 +384,6 @@ def graph_to_dict(graph):
     try:
         return set(graph.query(q))
     except Exception as e:
-        print(e.message)
         return set()</code></pre>
 </details>
 </dd>
@@ -474,9 +475,9 @@ def graph_to_dict(graph):
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>endpoint</code></strong> :&ensp;<code>str</code></dt>
-<dd>SPARQL endpoint URL. ex: <a href="https://query.wikidata.org/sparql">https://query.wikidata.org/sparql</a>
-Return:</dd>
+<dd>SPARQL endpoint URL. ex: <a href="https://query.wikidata.org/sparql">https://query.wikidata.org/sparql</a></dd>
 </dl>
+<h2 id="return">Return</h2>
 <p>bool </p>
 <pre><code>If endpoint returns data.
 </code></pre></section>
@@ -489,7 +490,7 @@ Return:</dd>
     Test SPARQL endpoint.
     Args:
         endpoint : str \n
-            SPARQL endpoint URL. ex: https://query.wikidata.org/sparql \
+            SPARQL endpoint URL. ex: https://query.wikidata.org/sparql \n
     Return:
         bool \n
             If endpoint returns data.

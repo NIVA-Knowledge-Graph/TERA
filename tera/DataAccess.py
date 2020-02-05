@@ -1,3 +1,8 @@
+"""
+DataAccess
+
+A set of APIs to access data created with DataAggregation and DataIntegration moduels.
+"""
 
 from rdflib import Graph, Namespace, URIRef
 from rdflib.namespace import RDF, RDFS, OWL

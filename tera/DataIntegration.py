@@ -1,3 +1,9 @@
+"""
+DataIntegration 
+
+A set of classes for aligning data aggregated with tools in DataAggregation.
+"""
+
 
 from rdflib import Graph, Namespace, Literal, URIRef
 from rdflib.namespace import RDF, OWL, RDFS

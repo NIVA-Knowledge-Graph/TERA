@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.4" />
 <title>tera.DataAccess API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="DataAccess …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,11 +20,19 @@
 <h1 class="title">Module <code>tera.DataAccess</code></h1>
 </header>
 <section id="section-intro">
+<p>DataAccess</p>
+<p>A set of APIs to access data created with DataAggregation and DataIntegration moduels.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from rdflib import Graph, Namespace, URIRef
+<pre><code class="python">&#34;&#34;&#34;
+DataAccess
+
+A set of APIs to access data created with DataAggregation and DataIntegration moduels.
+&#34;&#34;&#34;
+
+from rdflib import Graph, Namespace, URIRef
 from rdflib.namespace import RDF, RDFS, OWL
 UNIT = Namespace(&#39;http://qudt.org/vocab/unit#&#39;)
 from .utils import query_endpoint, test_endpoint, query_graph, prefixes, do_recursively_in_class, strip_namespace, tanimoto
@@ -41,10 +49,13 @@ class API:
                  dataobject=None, 
                  name=&#39;API&#39;):
         &#34;&#34;&#34;
-        endpoint :: str
-            sparql endpoint url
-        dataobject :: DataObject 
-            see DataAggregation
+        Args:
+        namespace : str \n
+            Base URI for API. \n
+        endpoint : str \n 
+            SPARQL endpoint url \n 
+        dataobject : tera.DataObject \n  
+            see DataAggregation \n 
         &#34;&#34;&#34;
         if not endpoint and not dataobject:
             raise NotImplementedError
@@ -76,7 +87,16 @@ class API:
         self.base_query = prefixes(self.initNs)
             
     def query(self, q, var):
-        &#34;&#34;&#34;Pass SPARQL to graph or endpoint&#34;&#34;&#34;
+        &#34;&#34;&#34;Pass SPARQL to graph or endpoint.,
+        
+        Args:
+            q : str \n
+                sparql query \n
+            var : str or list \n
+                Bindings to return from query.
+        Return:
+            Query result.
+        &#34;&#34;&#34;
         q = self.base_query + q
         if self.use_endpoint:
             return query_endpoint(self.endpoint, q, var)
@@ -84,7 +104,14 @@ class API:
             return query_graph(self.dataobject.graph, q)
         
     def query_type(self, t):
-        &#34;&#34;&#34;Return entities of type t.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return entities of type.
+        Args:
+            t : str or rdflib.URIRef \n
+            Type URI.
+        Return:
+            set \n
+            Entities of type t. 
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
             select ?s where {
                 ?s rdf:type &lt;%s&gt;
@@ -93,7 +120,14 @@ class API:
         return self.query(q, &#39;s&#39;)
     
     def query_child(self, t):
-        &#34;&#34;&#34;Return children of t.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return children.
+        Args:
+            t : str or rdflib.URIRef \n
+            Parent URI.
+        Return:
+            set \n
+            Entities in t. 
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
             select ?s where {
                 ?s rdfs:subClassOf &lt;%s&gt; .
@@ -102,7 +136,14 @@ class API:
         return self.query(q, &#39;s&#39;)
     
     def query_label(self, t):
-        &#34;&#34;&#34;Return entities with label t.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return entities with label t.
+        Args:
+            t : str or rdflib.URIRef \n
+            URI.
+        Return:
+            set \n
+            Labels of t. 
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
             select ?s where {
                 ?s rdfs:label &#34;%s&#34; . 
@@ -111,7 +152,14 @@ class API:
         return self.query(q, &#39;s&#39;)
     
     def query_parent(self, t):
-        &#34;&#34;&#34;Return parent of t.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return parent of t.
+        Args:
+            t : str or rdflib.URIRef \n
+            Child URI.
+        Return:
+            set \n
+            Parents of t.
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
             select ?s where {
                 &lt;%s&gt; rdfs:subClassOf ?s .
@@ -120,7 +168,16 @@ class API:
         return self.query(q, &#39;s&#39;)
     
     def query_siblings(self, t, depth=1):
-        &#34;&#34;&#34;Return (depth-1)-cusins of t.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return (depth-1)-cousins.
+        Args:
+            t : str or rdflib.URIRef \n
+                URI. \n 
+            depth : int \n 
+                Number of generation to search. 1 -&gt; siblings, 1 -&gt; 1st cousins, etc. 
+        Return:
+            set \n
+            Cousins of t.
+        &#34;&#34;&#34;
         if depth == -1: depth = &#39;1,&#39;
         q = &#34;&#34;&#34;
             select ?s where {
@@ -139,17 +196,15 @@ class API:
             out |= self.query(q,&#39;s&#39;)
         return s
     
-    def query_labels(self, t):
-        &#34;&#34;&#34;Get rdfs:labels of t&#34;&#34;&#34;
-        q = &#34;&#34;&#34;
-            select ?s where {
-                &lt;%s&gt; rdfs:label ?s .
-            }
-        &#34;&#34;&#34; % str(t)
-        return self.query(q, &#39;s&#39;)
-    
     def query_alt_labels(self, t):
-        &#34;&#34;&#34;Get literals of t where p =&lt; rdfs:label.&#34;&#34;&#34;
+        &#34;&#34;&#34;Get literals where prop =&lt; rdfs:label.
+        Args:
+            t : str or rdflib.URIRef \n
+                URI. \n 
+        Return:
+            set \n
+            Alt labels of t.
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
             select ?p ?s where {
                 &lt;%s&gt; ?p ?s .
@@ -160,7 +215,13 @@ class API:
     
     def construct_subgraph(self, t):
         &#34;&#34;&#34;
-        Return all triples *-connected to t.
+        Return all triples connected to input.
+        Args:
+            t : str or rdflib.URIRef \n
+                URI
+        Return:
+            set \n
+            Set of triples connected by arbitrary links to input. 
         &#34;&#34;&#34;
         out = set()
         tmp = set([t])
@@ -185,20 +246,20 @@ class API:
     def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
         &#34;&#34;&#34;
         Convert between types of ids used in data.
-        
         Args:
-            from_ :: str 
-                input id type, inchikey, cas, chemical_id or cid.
-            to_ :: str 
-                output id type, inchikey, cas, chemical_id or cid.
-            id_ :: list or element
-                list of ids, &#39;no mapping&#39; if no mapping between from_ and to_ exists.
-            strip :: bool
+            f : str \n 
+                input id type. \n
+            f : str  \n
+                output id type.\n
+            id_ : element or list \n 
+                list of ids, &#39;no mapping&#39; if no mapping between f and t exists. \n
+            strip : bool \n  
                 remove namespace from inputs
         Return:
-            converted ids.
+            str or dict \n
+            If single input, returns string. Else, dict on the form {from:to}. 
         Raises:
-            NotImplementedError: if from_ or to_ not in (inchikey, cas, cid, mesh, chebi, chemble)
+            NotImplementedError: if cannot convert between f and t.
         &#34;&#34;&#34;
 
         if f == t: return id_
@@ -206,8 +267,6 @@ class API:
         if not hasattr(self, &#39;mappings&#39;):
             raise AttributeError(self.name + &#39; has not attribute mappings.&#39;)
     
-        if isinstance(id_, (list, set)):
-            return {i:self.convert_id(i) for i in id_}
         if isinstance(id_, URIRef):
             id_ = str(id_)
         if strip:
@@ -222,60 +281,115 @@ class API:
         
         raise NotImplementedError(&#39;From %s to %s is not supported. \n Supported from/to values are %s&#39;, (f,t,&#39;,&#39;.join(self.mappings.keys())))
     
+    def avalible_convertions(self):
+        &#34;&#34;&#34;Returns id types that can be converted between.&#34;&#34;&#34;
+        return set([self.base_identifier]) | set(self.mappings.keys())
+    
 class TaxonomyAPI(API):
     def __init__(self, 
                  namespace=None, 
-                 endpoint = None,
+                 endpoint=None,
                  dataobject = None,
-                 mapping_dataobject = None,
+                 mappings = {&#39;eol&#39;,NCBIToEOL()},
                  name = &#39;Taxonomy API&#39;):
+        &#34;&#34;&#34;
+        Base class for accessing taxonomic data. 
+        Args:
+            dataobject : tera.Taxonomy \n
+                Data set to access using API. \n
+            mappings : dict \n
+                Mappings from base_identifier (eg. ncbi) to other datasets. 
+        &#34;&#34;&#34;
         super(TaxonomyAPI, self).__init__(namespace, endpoint, dataobject, name)
         
-        self.mappings = {&#39;eol&#39;:NCBIToEOL()}
-        if mapping_dataobject:
-            self.mappings[&#39;ecotox&#39;] = NCBIToEcotox(dataobject, mapping_dataobject)
-        elif endpoint and test_endpoint(endpoint):
-            self.mappings[&#39;ecotox&#39;] = EndpointMapping(endpoint)
-        
+        self.mappings = mappings
         self.base_identifier = &#39;ncbi&#39;
         
-    def get_species(self):
-        &#34;&#34;&#34;All species&#34;&#34;&#34;
+    def get_taxa(self):
+        &#34;&#34;&#34;Return all taxa in taxonomy.&#34;&#34;&#34;
         return self.query_type(self.namespace[&#39;Taxon&#39;])
     
     @do_recursively_in_class
     def get_division(self, t: Union[URIRef, str, list, set]):
-        &#34;&#34;&#34;Return all species in division t&#34;&#34;&#34;
+        &#34;&#34;&#34;Return all taxa in division.
+        Args:
+            t : rdflib.URIRef, str, list, or set \n
+            Division URI \n
+        Return:
+            set \n
+            Set of taxa in devision.
+        &#34;&#34;&#34;
         return self.query_subclassof(a)
     
     @do_recursively_in_class
     def get_ssd(self, t: Union[URIRef, str, list, set]):
-        &#34;&#34;&#34;Return all species in ssd t&#34;&#34;&#34;
+        &#34;&#34;&#34;Return all taxa in SSD.
+        Args:
+            t : rdflib.URIRef, str, list, or set \n
+            SSD URI \n
+        Return:
+            set \n
+            Set of taxa in SSD.
+        &#34;&#34;&#34;
         return self.query_subclassof(t)
     
     def get_ranks(self):
-        &#34;&#34;&#34;Get all taxonomic ranks&#34;&#34;&#34;
+        &#34;&#34;&#34;Return all ranks (taxonomic level).
+        Return:
+            set \n
+            Set of ranks.
+        &#34;&#34;&#34;
         return self.query_type(self.namespace[&#39;Rank&#39;])
     
     @do_recursively_in_class
     def get_rank(self, t: Union[URIRef, str, list, set]):
-        &#34;&#34;&#34;Return all taxons with rank t&#34;&#34;&#34;
+        &#34;&#34;&#34;Return all taxa with rank.
+        Args:
+            t : rdflib.URIRef, str, list, or set \n
+            Rank URI \n
+        Return:
+            set \n
+            Set of taxa at rank.
+        &#34;&#34;&#34;
         return self.query_subclassof(t)
 
 class ChemicalAPI(API):
-    def __init__(self, namespace=&#39;&#39;, endpoint = None, dataobject = None, name = &#39;Chemical API&#39;):
+    def __init__(self, 
+                 namespace=None, 
+                 endpoint = None, 
+                 dataobject = None, 
+                 mappings = {&#39;cas&#39;:InchikeyToCas(),
+                            &#39;cid&#39;:InchikeyToPubChem(),
+                            &#39;chebi&#39;:InchikeyToChEBI(),
+                            &#39;chemble&#39;:InchikeyToChEMBL(),
+                            &#39;mesh&#39;:InchikeyToMeSH()},
+                 name = &#39;Chemical API&#39;):
+        &#34;&#34;&#34;
+        Base class for accessing chemical data. 
+        Args:
+            dataobject : tera.DataObject \n
+                Data set to access using API. \n
+            mappings : dict \n
+                Mappings from base_identifier (eg. ncbi) to other datasets. 
+        &#34;&#34;&#34;
         super(ChemicalAPI, self).__init__(namespace, endpoint, dataobject, name)
-        
-        self.mappings = {&#39;cas&#39;:InchikeyToCas(),
-                         &#39;cid&#39;:InchikeyToPubChem(),
-                         &#39;chebi&#39;:InchikeyToChEBI(),
-                         &#39;chemble&#39;:InchikeyToChEMBL(),
-                         &#39;mesh&#39;:InchikeyToMeSH()}
+        self.mappings = mappings
         self.base_identifier = &#39;inchikey&#39;
    
     @do_recursively_in_class
     def get_fingerprint(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip = False):
-        &#34;&#34;&#34;Get bin fingerprints for id_.&#34;&#34;&#34;
+        &#34;&#34;&#34;Get binary fingerprints.
+        Args:
+            id_ : rdflib.URIRef, str, list, or set \n
+                URI or identifier. \n
+            f : str \n
+                Input identifier type. \n
+            strip : bool \n
+                Remove namespace. Should be true if URI is passed.
+        Return:
+            fp : str \n
+            Binary fingerprint.
+        &#34;&#34;&#34;
         c = self.convert_id(id_, f, &#39;cid&#39;, strip)
         
         fp = None
@@ -291,7 +405,18 @@ class ChemicalAPI(API):
     
     @do_recursively_in_class
     def get_names(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip = False):
-        &#34;&#34;&#34;Get synonyms for id_.&#34;&#34;&#34;
+        &#34;&#34;&#34;Get synonyms for id_.
+        Args:
+            id_ : rdflib.URIRef, str, list, or set \n
+                URI or identifier. \n
+            f : str \n
+                Input identifier type. \n
+            strip : bool \n
+                Remove namespace. Should be true if URI is passed.
+        Return:
+            list \n
+            Synonyms.
+        &#34;&#34;&#34;
         c = self.convert_id(id_, f, &#39;cid&#39;, strip)
         out = []
         try:
@@ -305,7 +430,18 @@ class ChemicalAPI(API):
     
     @do_recursively_in_class
     def class_hierarchy(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip=False):
-        &#34;&#34;&#34;Return all triples connceted to id_.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return all triples connceted to input.
+        Args:
+            id_ : rdflib.URIRef, str, list, or set \n
+                URI or identifier. \n
+            f : str \n
+                Input identifier type. \n
+            strip : bool \n
+                Remove namespace. Should be true if URI is passed.
+        Return:
+            set \n
+            Triples.
+        &#34;&#34;&#34;
         a = self.convert_id(id_, f, &#39;cid&#39;, strip = strip)
         b = self.convert_id(id_, f, &#39;mesh&#39;, strip = strip)
         a = self.initNs[&#39;compound&#39;][a]
@@ -315,10 +451,20 @@ class ChemicalAPI(API):
     @do_recursively_in_class
     def get_features(self, id_: Union[URIRef, str, list, set], params=None, f=&#39;inchikey&#39;, strip=False):
         &#34;&#34;&#34;Return chemical features.
-            params :: list 
-                properties to return
-                ex: params = [&#39;charge&#39;,&#39;molecular_weight&#39;,&#39;xlogp&#39;]
-                To see all avalible features use which_features() . 
+        Args:
+            id_ : rdflib.URIRef, str, list, or set \n
+                URI or identifier. \n
+            params : list \n
+                Properties to return \n 
+                eg. params = [&#39;charge&#39;,&#39;molecular_weight&#39;,&#39;xlogp&#39;] \n
+                To see all avalible features use which_features(). \n
+            f : str \n
+                Input identifier type. \n
+            strip : bool \n
+                Remove namespace. Should be true if URI is passed.
+        Return:
+            dict \n
+            Chemical features.
         &#34;&#34;&#34;
         id_ = self.convert_id(id_, f, &#39;cid&#39;, strip=strip)
         id_ = self.initNs[&#39;compound&#39;][id_]
@@ -338,18 +484,46 @@ class ChemicalAPI(API):
     
     @do_recursively_in_class
     def which_features(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip=False):
-        &#34;&#34;&#34;Chemical features avalible.&#34;&#34;&#34;
-        return self.get_features(id_, f, strip).keys()
+        &#34;&#34;&#34;Chemical features avalible.
+        Args:
+            id_ : rdflib.URIRef, str, list, or set \n
+                URI or identifier. \n
+            f : str \n
+                Input identifier type. \n
+            strip : bool \n
+                Remove namespace. Should be true if URI is passed.
+        Return:
+            list \n
+            Chemical features.
+        &#34;&#34;&#34;
+        return [p for p in dir(Compound) if isinstance(getattr(Compound, p), property)]
     
     @do_recursively_in_class
     def simiarity(self, id_: Union[URIRef, str, list, set], ids, f=&#39;inchikey&#39;,strip=False):
-        &#34;&#34;&#34;Returns chemical simiarity between id and ids&#34;&#34;&#34;
+        &#34;&#34;&#34;Returns chemical simiarity between id and ids
+        Args:
+            id_ : rdflib.URIRef, str, list, or set \n
+                URI or identifier. \n
+            ids : list or set \n
+                URI or identifiers to compare against. 
+            f : str \n
+                Input identifier type. \n
+            strip : bool \n
+                Remove namespace. Should be true if URI is passed.
+        Return:
+            dict \n
+            Chemical simiarity.
+        &#34;&#34;&#34;
         fp = self.get_fingerprint(id_, f, strip)
         fps = self.get_fingerprint(ids, f, strip)
-        return {i:tanimoto(fp,f) for i,f in zip(ids,fps) if f and fp}
+        return {i:tanimoto(fp,f) for i,f in fps.items() if f and fp}
         
     def compounds(self):
-        &#34;&#34;&#34;Return all compounds.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return all compounds.
+        Return:
+            set \n
+            All compounds.
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
             SELECT ?s {
             ?s  ?o  ?z
@@ -359,12 +533,30 @@ class ChemicalAPI(API):
         return self.query(q, var = &#39;s&#39;)
     
 class TraitsAPI(TaxonomyAPI):
-    def __init__(self, namespace=&#39;https://eol.org/schema/terms/&#39;, endpoint = None, dataobject = None, name = &#39;EOL API&#39;):
-        super(TraitsAPI, self).__init__(namespace, endpoint, dataobject, name)
+    def __init__(self, 
+                 namespace=&#39;https://eol.org/schema/terms/&#39;, 
+                 endpoint = None, 
+                 dataobject = None,
+                 mappings = {&#39;eol&#39;,NCBIToEOL()},
+                 name = &#39;EOL API&#39;):
+        &#34;&#34;&#34;
+        Class for accessing EOL traits data.
+        &#34;&#34;&#34;
+        super(TraitsAPI, self).__init__(namespace, 
+                                        endpoint, 
+                                        dataobject, 
+                                        mappings,
+                                        name)
     
     @do_recursively_in_class
     def get_concervation_status(self,t: Union[URIRef, str, list, set]):
-        &#34;&#34;&#34;Return concervation status of t.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return concervation status of t.
+        Args: 
+            t : rdflib.URIRef, str, list, or set \n
+            URI 
+        Return:
+            concervation status
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
             SELECT ?h WHERE {
                 &lt;%s&gt; &lt;http://rs.tdwg.org/ontology/voc/SPMInfoItems#ConservationStatus&gt; ?h .
@@ -374,7 +566,14 @@ class TraitsAPI(TaxonomyAPI):
 
     @do_recursively_in_class
     def get_extinct_status(self,t: Union[URIRef, str, list, set]):
-        &#34;&#34;&#34;Return extinct status (true/false) of t. &#34;&#34;&#34;
+        &#34;&#34;&#34;Return extinct status (true/false).
+        Args:
+            t : rdflib.URIRef, str, list, or set\n
+                URI
+        Return:
+            str \n
+                extinct status
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
             SELECT ?h WHERE {
                 &lt;%s&gt; &lt;http://eol.org/schema/terms/ExtinctionStatus&gt; ?h .
@@ -384,7 +583,13 @@ class TraitsAPI(TaxonomyAPI):
         
     @do_recursively_in_class
     def get_endemic_to(self,t: Union[URIRef, str, list, set]):
-        &#34;&#34;&#34;Return endemic region of t.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return endemic region.
+        Args:
+            t : rdflib.URIRef, str, list, or set\n
+                URI
+        Return:
+            str \n
+                endemic to&#34;&#34;&#34;
         q = &#34;&#34;&#34;
             SELECT ?h WHERE {
                 &lt;%s&gt; &lt;http://eol.org/terms/endemic&gt; ?h .
@@ -394,7 +599,13 @@ class TraitsAPI(TaxonomyAPI):
     
     @do_recursively_in_class
     def get_ecoregion(self,t: Union[URIRef, str, list, set]):
-        &#34;&#34;&#34;Return ecoregion of t. &#34;&#34;&#34;
+        &#34;&#34;&#34;Return ecoregion.
+        Args:
+            t : rdflib.URIRef, str, list, or set\n
+                URI
+        Return:
+            str \n
+                ecoregion&#34;&#34;&#34;
         q =  &#34;&#34;&#34;
             SELECT ?h WHERE {
                 &lt;%s&gt; &lt;https://www.wikidata.org/entity/Q295469&gt; ?h .
@@ -404,7 +615,13 @@ class TraitsAPI(TaxonomyAPI):
         
     @do_recursively_in_class
     def get_habitat(self,t: Union[URIRef, str, list, set]):
-        &#34;&#34;&#34;Return habiat of t.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return habiat.
+        Args:
+            t : rdflib.URIRef, str, list, or set\n
+                URI
+        Return:
+            str \n
+                habiat&#34;&#34;&#34;
         q = &#34;&#34;&#34;
             SELECT ?h WHERE {
                 &lt;%s&gt; &lt;http://rs.tdwg.org/dwc/terms/habitat&gt; ?h .
@@ -413,14 +630,31 @@ class TraitsAPI(TaxonomyAPI):
         return self.query(q,&#39;h&#39;)
     
 class EcotoxChemicalAPI(ChemicalAPI):
-    def __init__(self, namespace=&#39;https://cfpub.epa.gov/ecotox/&#39;, endpoint = None, dataobject = None, name = &#39;ECOTOX Chemical API&#39;):
+    def __init__(self, 
+                 namespace=&#39;https://cfpub.epa.gov/ecotox/&#39;, 
+                 endpoint = None, 
+                 dataobject = None, 
+                 name = &#39;ECOTOX Chemical API&#39;):
+        &#34;&#34;&#34;
+        Class for accessing chemical data in Ecotox. 
+        &#34;&#34;&#34;
         super(EcotoxChemicalAPI, self).__init__(namespace, endpoint, dataobject, name)
         
     @do_recursively_in_class
     def query_chemical_names(self,t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;
+        Return chemical names.
+        Args: 
+            t : rdflib.URIRef, str, list, set \n
+            URI 
+        Return:
+            str\n
+            Chemical label.
+        &#34;&#34;&#34;
         return self.query_labels(t)
     
     def query_chemicals(self):
+        &#34;&#34;&#34;Return set of all chemicals.&#34;&#34;&#34;
         return self.query_type(self.namespace[&#39;Chemical&#39;])
     
 class EcotoxTaxonomyAPI(TaxonomyAPI):
@@ -429,6 +663,7 @@ class EcotoxTaxonomyAPI(TaxonomyAPI):
                  endpoint = None, 
                  dataobject = None, 
                  name = &#39;ECOTOX Taxonomy API&#39;):
+        &#34;&#34;&#34;Class for accessing Ecotox taxonomic data.&#34;&#34;&#34;
         super(EcotoxTaxonomyAPI, self).__init__(namespace, endpoint, dataobject, name)
         
 class NCBITaxonomyAPI(TaxonomyAPI):
@@ -437,15 +672,28 @@ class NCBITaxonomyAPI(TaxonomyAPI):
                  endpoint = None, 
                  dataobject = None, 
                  name = &#39;NCBI API&#39;):
+        &#34;&#34;&#34;Class for accessing NCBI taxonomic data.&#34;&#34;&#34;
         super(TaxonomyAPI, self).__init__(namespace, endpoint, dataobject, name)
     
 class EffectsAPI(API):
-    def __init__(self, namespace=&#39;https://cfpub.epa.gov/ecotox/&#39;, endpoint = None, dataobject = None, name = &#39;ECOTOX Effects API&#39;):
+    def __init__(self, 
+                 namespace=&#39;https://cfpub.epa.gov/ecotox/&#39;, 
+                 endpoint = None, 
+                 dataobject = None, 
+                 name = &#39;ECOTOX Effects API&#39;):
+        &#34;&#34;&#34;Class for accessing Ecotox effect data.&#34;&#34;&#34;
         super(EffectsAPI, self).__init__(namespace, endpoint, dataobject, name)
     
     @do_recursively_in_class
     def get_chemicals_from_species(self,t: Union[URIRef, str, list, set]):
-        &#34;&#34;&#34;Return chemical involved in experiment with species t.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return chemical involved in experiment with certain species.
+        Args:
+            t : rdflib.URIRef, str, list, set \n
+                Species URI 
+        Return:
+            set \n
+                Chemical URIs
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
         select ?c where {
             ?t rdf:type ns:Test .
@@ -457,7 +705,14 @@ class EffectsAPI(API):
     
     @do_recursively_in_class
     def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
-        &#34;&#34;&#34;Return species involved in experiment with chemical t.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return species involved in experiment using chemical.
+        Args:
+            t : rdflib.URIRef, str, list, set \n
+                Chemical URI 
+        Return:
+            set \n
+                Species URIs
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
         select ?c where {
             ?t rdf:type ns:Test .
@@ -468,7 +723,11 @@ class EffectsAPI(API):
         return self.query(q,&#39;c&#39;)
     
     def get_chemicals(self):
-        &#34;&#34;&#34;Return chemicals used in at least one experiment.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return chemicals used in at least one experiment.
+        Return:
+            set \n
+            Chemical URIs
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
         select ?c where {
             ?t rdf:type ns:Test .
@@ -478,7 +737,10 @@ class EffectsAPI(API):
         return self.query(q,&#39;c&#39;)
     
     def get_species(self):
-        &#34;&#34;&#34;Return species used in at least one experiment.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return species used in at least one experiment.
+        Return:
+            set \n
+            Species URIs&#34;&#34;&#34;
         q = &#34;&#34;&#34;
         select ?c where {
             ?t rdf:type ns:Test .
@@ -492,18 +754,26 @@ class EffectsAPI(API):
                        s: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;
         Return endpoints that use chemical c and species s.
-        If list is none: c = query_chemicals and s = query_species
+        Args: 
+            c : rdflib.URIRef, str, list, set \n
+                Chemical URIs. If None, c &lt;- query_chemicals\n
+            s : rdflib.URIRef, str, list, set \n
+                Species URIs. If None, s &lt;- query_species\n
+        Return:
+            dict \n
+            On the form {chemical:{species:endpoint values}}
         &#34;&#34;&#34;
         if not c:
             c = self.query_chemicals()
         if not s:
             s = self.query_species()
+            
         if isinstance(c,(list,set)):
             return {a:self.get_endpoint(a,s) for a in c}
         if isinstance(s,(list,set)):
             return {a:self.get_endpoint(c,a) for a in s}
         q = &#34;&#34;&#34;
-            SELECT ?cc ?cu ?ep ?ef ?sd ?sdu {
+            SELECT ?cc ?cu ?ep ?ef ?sd ?sdu WHERE {
                 ?test rdf:type ns:Test ;
                   ns:chemical &lt;%s&gt; ;
                    ns:species &lt;%s&gt; ;
@@ -536,10 +806,16 @@ class EffectsAPI(API):
 <span>(</span><span>namespace=None, endpoint=None, dataobject=None, name='API')</span>
 </code></dt>
 <dd>
-<section class="desc"><p>endpoint :: str
-sparql endpoint url
-dataobject :: DataObject
-see DataAggregation</p></section>
+<section class="desc"><p>Args:
+namespace : str </p>
+<pre><code>Base URI for API.
+</code></pre>
+<p>endpoint : str </p>
+<pre><code>SPARQL endpoint url
+</code></pre>
+<p>dataobject : tera.DataObject </p>
+<pre><code>see DataAggregation
+</code></pre></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -551,10 +827,13 @@ see DataAggregation</p></section>
                  dataobject=None, 
                  name=&#39;API&#39;):
         &#34;&#34;&#34;
-        endpoint :: str
-            sparql endpoint url
-        dataobject :: DataObject 
-            see DataAggregation
+        Args:
+        namespace : str \n
+            Base URI for API. \n
+        endpoint : str \n 
+            SPARQL endpoint url \n 
+        dataobject : tera.DataObject \n  
+            see DataAggregation \n 
         &#34;&#34;&#34;
         if not endpoint and not dataobject:
             raise NotImplementedError
@@ -586,7 +865,16 @@ see DataAggregation</p></section>
         self.base_query = prefixes(self.initNs)
             
     def query(self, q, var):
-        &#34;&#34;&#34;Pass SPARQL to graph or endpoint&#34;&#34;&#34;
+        &#34;&#34;&#34;Pass SPARQL to graph or endpoint.,
+        
+        Args:
+            q : str \n
+                sparql query \n
+            var : str or list \n
+                Bindings to return from query.
+        Return:
+            Query result.
+        &#34;&#34;&#34;
         q = self.base_query + q
         if self.use_endpoint:
             return query_endpoint(self.endpoint, q, var)
@@ -594,7 +882,14 @@ see DataAggregation</p></section>
             return query_graph(self.dataobject.graph, q)
         
     def query_type(self, t):
-        &#34;&#34;&#34;Return entities of type t.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return entities of type.
+        Args:
+            t : str or rdflib.URIRef \n
+            Type URI.
+        Return:
+            set \n
+            Entities of type t. 
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
             select ?s where {
                 ?s rdf:type &lt;%s&gt;
@@ -603,7 +898,14 @@ see DataAggregation</p></section>
         return self.query(q, &#39;s&#39;)
     
     def query_child(self, t):
-        &#34;&#34;&#34;Return children of t.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return children.
+        Args:
+            t : str or rdflib.URIRef \n
+            Parent URI.
+        Return:
+            set \n
+            Entities in t. 
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
             select ?s where {
                 ?s rdfs:subClassOf &lt;%s&gt; .
@@ -612,7 +914,14 @@ see DataAggregation</p></section>
         return self.query(q, &#39;s&#39;)
     
     def query_label(self, t):
-        &#34;&#34;&#34;Return entities with label t.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return entities with label t.
+        Args:
+            t : str or rdflib.URIRef \n
+            URI.
+        Return:
+            set \n
+            Labels of t. 
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
             select ?s where {
                 ?s rdfs:label &#34;%s&#34; . 
@@ -621,7 +930,14 @@ see DataAggregation</p></section>
         return self.query(q, &#39;s&#39;)
     
     def query_parent(self, t):
-        &#34;&#34;&#34;Return parent of t.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return parent of t.
+        Args:
+            t : str or rdflib.URIRef \n
+            Child URI.
+        Return:
+            set \n
+            Parents of t.
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
             select ?s where {
                 &lt;%s&gt; rdfs:subClassOf ?s .
@@ -630,7 +946,16 @@ see DataAggregation</p></section>
         return self.query(q, &#39;s&#39;)
     
     def query_siblings(self, t, depth=1):
-        &#34;&#34;&#34;Return (depth-1)-cusins of t.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return (depth-1)-cousins.
+        Args:
+            t : str or rdflib.URIRef \n
+                URI. \n 
+            depth : int \n 
+                Number of generation to search. 1 -&gt; siblings, 1 -&gt; 1st cousins, etc. 
+        Return:
+            set \n
+            Cousins of t.
+        &#34;&#34;&#34;
         if depth == -1: depth = &#39;1,&#39;
         q = &#34;&#34;&#34;
             select ?s where {
@@ -649,17 +974,15 @@ see DataAggregation</p></section>
             out |= self.query(q,&#39;s&#39;)
         return s
     
-    def query_labels(self, t):
-        &#34;&#34;&#34;Get rdfs:labels of t&#34;&#34;&#34;
-        q = &#34;&#34;&#34;
-            select ?s where {
-                &lt;%s&gt; rdfs:label ?s .
-            }
-        &#34;&#34;&#34; % str(t)
-        return self.query(q, &#39;s&#39;)
-    
     def query_alt_labels(self, t):
-        &#34;&#34;&#34;Get literals of t where p =&lt; rdfs:label.&#34;&#34;&#34;
+        &#34;&#34;&#34;Get literals where prop =&lt; rdfs:label.
+        Args:
+            t : str or rdflib.URIRef \n
+                URI. \n 
+        Return:
+            set \n
+            Alt labels of t.
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
             select ?p ?s where {
                 &lt;%s&gt; ?p ?s .
@@ -670,7 +993,13 @@ see DataAggregation</p></section>
     
     def construct_subgraph(self, t):
         &#34;&#34;&#34;
-        Return all triples *-connected to t.
+        Return all triples connected to input.
+        Args:
+            t : str or rdflib.URIRef \n
+                URI
+        Return:
+            set \n
+            Set of triples connected by arbitrary links to input. 
         &#34;&#34;&#34;
         out = set()
         tmp = set([t])
@@ -695,20 +1024,20 @@ see DataAggregation</p></section>
     def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
         &#34;&#34;&#34;
         Convert between types of ids used in data.
-        
         Args:
-            from_ :: str 
-                input id type, inchikey, cas, chemical_id or cid.
-            to_ :: str 
-                output id type, inchikey, cas, chemical_id or cid.
-            id_ :: list or element
-                list of ids, &#39;no mapping&#39; if no mapping between from_ and to_ exists.
-            strip :: bool
+            f : str \n 
+                input id type. \n
+            f : str  \n
+                output id type.\n
+            id_ : element or list \n 
+                list of ids, &#39;no mapping&#39; if no mapping between f and t exists. \n
+            strip : bool \n  
                 remove namespace from inputs
         Return:
-            converted ids.
+            str or dict \n
+            If single input, returns string. Else, dict on the form {from:to}. 
         Raises:
-            NotImplementedError: if from_ or to_ not in (inchikey, cas, cid, mesh, chebi, chemble)
+            NotImplementedError: if cannot convert between f and t.
         &#34;&#34;&#34;
 
         if f == t: return id_
@@ -716,8 +1045,6 @@ see DataAggregation</p></section>
         if not hasattr(self, &#39;mappings&#39;):
             raise AttributeError(self.name + &#39; has not attribute mappings.&#39;)
     
-        if isinstance(id_, (list, set)):
-            return {i:self.convert_id(i) for i in id_}
         if isinstance(id_, URIRef):
             id_ = str(id_)
         if strip:
@@ -730,7 +1057,11 @@ see DataAggregation</p></section>
             return self.convert_id(self.mappings[f].convert(id_,reverse=True),
                                    f=self.base_identifier,t=t)
         
-        raise NotImplementedError(&#39;From %s to %s is not supported. \n Supported from/to values are %s&#39;, (f,t,&#39;,&#39;.join(self.mappings.keys())))</code></pre>
+        raise NotImplementedError(&#39;From %s to %s is not supported. \n Supported from/to values are %s&#39;, (f,t,&#39;,&#39;.join(self.mappings.keys())))
+    
+    def avalible_convertions(self):
+        &#34;&#34;&#34;Returns id types that can be converted between.&#34;&#34;&#34;
+        return set([self.base_identifier]) | set(self.mappings.keys())</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -740,18 +1071,46 @@ see DataAggregation</p></section>
 </ul>
 <h3>Methods</h3>
 <dl>
+<dt id="tera.DataAccess.API.avalible_convertions"><code class="name flex">
+<span>def <span class="ident">avalible_convertions</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns id types that can be converted between.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def avalible_convertions(self):
+    &#34;&#34;&#34;Returns id types that can be converted between.&#34;&#34;&#34;
+    return set([self.base_identifier]) | set(self.mappings.keys())</code></pre>
+</details>
+</dd>
 <dt id="tera.DataAccess.API.construct_subgraph"><code class="name flex">
 <span>def <span class="ident">construct_subgraph</span></span>(<span>self, t)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return all triples *-connected to t.</p></section>
+<section class="desc"><p>Return all triples connected to input.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>str</code> or <code>rdflib.URIRef</code></dt>
+<dd>URI</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>set </p>
+<p>Set of triples connected by arbitrary links to input.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def construct_subgraph(self, t):
     &#34;&#34;&#34;
-    Return all triples *-connected to t.
+    Return all triples connected to input.
+    Args:
+        t : str or rdflib.URIRef \n
+            URI
+    Return:
+        set \n
+        Set of triples connected by arbitrary links to input. 
     &#34;&#34;&#34;
     out = set()
     tmp = set([t])
@@ -779,20 +1138,23 @@ see DataAggregation</p></section>
 <dd>
 <section class="desc"><p>Convert between types of ids used in data.</p>
 <h2 id="args">Args</h2>
-<p>from_ :: str
-input id type, inchikey, cas, chemical_id or cid.
-to_ :: str
-output id type, inchikey, cas, chemical_id or cid.
-id_ :: list or element
-list of ids, 'no mapping' if no mapping between from_ and to_ exists.
-strip :: bool
-remove namespace from inputs</p>
+<dl>
+<dt><strong><code>f</code></strong> :&ensp;<code>str</code></dt>
+<dd>input id type.</dd>
+<dt><strong><code>f</code></strong> :&ensp;<code>str</code></dt>
+<dd>output id type.</dd>
+<dt><strong><code>id_</code></strong> :&ensp;<code>element</code> or <code>list</code></dt>
+<dd>list of ids, 'no mapping' if no mapping between f and t exists.</dd>
+<dt><strong><code>strip</code></strong> :&ensp;<code>bool</code></dt>
+<dd>remove namespace from inputs</dd>
+</dl>
 <h2 id="return">Return</h2>
-<p>converted ids.</p>
+<p>str or dict </p>
+<p>If single input, returns string. Else, dict on the form {from:to}. </p>
 <h2 id="raises">Raises</h2>
 <dl>
 <dt><strong><code>NotImplementedError</code></strong></dt>
-<dd>if from_ or to_ not in (inchikey, cas, cid, mesh, chebi, chemble)</dd>
+<dd>if cannot convert between f and t.</dd>
 </dl></section>
 <details class="source">
 <summary>
@@ -802,20 +1164,20 @@ remove namespace from inputs</p>
 def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
     &#34;&#34;&#34;
     Convert between types of ids used in data.
-    
     Args:
-        from_ :: str 
-            input id type, inchikey, cas, chemical_id or cid.
-        to_ :: str 
-            output id type, inchikey, cas, chemical_id or cid.
-        id_ :: list or element
-            list of ids, &#39;no mapping&#39; if no mapping between from_ and to_ exists.
-        strip :: bool
+        f : str \n 
+            input id type. \n
+        f : str  \n
+            output id type.\n
+        id_ : element or list \n 
+            list of ids, &#39;no mapping&#39; if no mapping between f and t exists. \n
+        strip : bool \n  
             remove namespace from inputs
     Return:
-        converted ids.
+        str or dict \n
+        If single input, returns string. Else, dict on the form {from:to}. 
     Raises:
-        NotImplementedError: if from_ or to_ not in (inchikey, cas, cid, mesh, chebi, chemble)
+        NotImplementedError: if cannot convert between f and t.
     &#34;&#34;&#34;
 
     if f == t: return id_
@@ -823,8 +1185,6 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
     if not hasattr(self, &#39;mappings&#39;):
         raise AttributeError(self.name + &#39; has not attribute mappings.&#39;)
 
-    if isinstance(id_, (list, set)):
-        return {i:self.convert_id(i) for i in id_}
     if isinstance(id_, URIRef):
         id_ = str(id_)
     if strip:
@@ -844,13 +1204,31 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
 <span>def <span class="ident">query</span></span>(<span>self, q, var)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Pass SPARQL to graph or endpoint</p></section>
+<section class="desc"><p>Pass SPARQL to graph or endpoint.,</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>q</code></strong> :&ensp;<code>str</code></dt>
+<dd>sparql query</dd>
+<dt><strong><code>var</code></strong> :&ensp;<code>str</code> or <code>list</code></dt>
+<dd>Bindings to return from query.</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>Query result.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def query(self, q, var):
-    &#34;&#34;&#34;Pass SPARQL to graph or endpoint&#34;&#34;&#34;
+    &#34;&#34;&#34;Pass SPARQL to graph or endpoint.,
+    
+    Args:
+        q : str \n
+            sparql query \n
+        var : str or list \n
+            Bindings to return from query.
+    Return:
+        Query result.
+    &#34;&#34;&#34;
     q = self.base_query + q
     if self.use_endpoint:
         return query_endpoint(self.endpoint, q, var)
@@ -862,13 +1240,28 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
 <span>def <span class="ident">query_alt_labels</span></span>(<span>self, t)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get literals of t where p =&lt; rdfs:label.</p></section>
+<section class="desc"><p>Get literals where prop =&lt; rdfs:label.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>str</code> or <code>rdflib.URIRef</code></dt>
+<dd>URI.</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>set </p>
+<p>Alt labels of t.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def query_alt_labels(self, t):
-    &#34;&#34;&#34;Get literals of t where p =&lt; rdfs:label.&#34;&#34;&#34;
+    &#34;&#34;&#34;Get literals where prop =&lt; rdfs:label.
+    Args:
+        t : str or rdflib.URIRef \n
+            URI. \n 
+    Return:
+        set \n
+        Alt labels of t.
+    &#34;&#34;&#34;
     q = &#34;&#34;&#34;
         select ?p ?s where {
             &lt;%s&gt; ?p ?s .
@@ -882,13 +1275,29 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
 <span>def <span class="ident">query_child</span></span>(<span>self, t)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return children of t.</p></section>
+<section class="desc"><p>Return children.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>str</code> or <code>rdflib.URIRef</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Parent URI.</p>
+<h2 id="return">Return</h2>
+<p>set </p>
+<p>Entities in t.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def query_child(self, t):
-    &#34;&#34;&#34;Return children of t.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return children.
+    Args:
+        t : str or rdflib.URIRef \n
+        Parent URI.
+    Return:
+        set \n
+        Entities in t. 
+    &#34;&#34;&#34;
     q = &#34;&#34;&#34;
         select ?s where {
             ?s rdfs:subClassOf &lt;%s&gt; .
@@ -901,35 +1310,32 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
 <span>def <span class="ident">query_label</span></span>(<span>self, t)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return entities with label t.</p></section>
+<section class="desc"><p>Return entities with label t.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>str</code> or <code>rdflib.URIRef</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>URI.</p>
+<h2 id="return">Return</h2>
+<p>set </p>
+<p>Labels of t.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def query_label(self, t):
-    &#34;&#34;&#34;Return entities with label t.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return entities with label t.
+    Args:
+        t : str or rdflib.URIRef \n
+        URI.
+    Return:
+        set \n
+        Labels of t. 
+    &#34;&#34;&#34;
     q = &#34;&#34;&#34;
         select ?s where {
             ?s rdfs:label &#34;%s&#34; . 
-        }
-    &#34;&#34;&#34; % str(t)
-    return self.query(q, &#39;s&#39;)</code></pre>
-</details>
-</dd>
-<dt id="tera.DataAccess.API.query_labels"><code class="name flex">
-<span>def <span class="ident">query_labels</span></span>(<span>self, t)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Get rdfs:labels of t</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def query_labels(self, t):
-    &#34;&#34;&#34;Get rdfs:labels of t&#34;&#34;&#34;
-    q = &#34;&#34;&#34;
-        select ?s where {
-            &lt;%s&gt; rdfs:label ?s .
         }
     &#34;&#34;&#34; % str(t)
     return self.query(q, &#39;s&#39;)</code></pre>
@@ -939,13 +1345,29 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
 <span>def <span class="ident">query_parent</span></span>(<span>self, t)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return parent of t.</p></section>
+<section class="desc"><p>Return parent of t.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>str</code> or <code>rdflib.URIRef</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Child URI.</p>
+<h2 id="return">Return</h2>
+<p>set </p>
+<p>Parents of t.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def query_parent(self, t):
-    &#34;&#34;&#34;Return parent of t.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return parent of t.
+    Args:
+        t : str or rdflib.URIRef \n
+        Child URI.
+    Return:
+        set \n
+        Parents of t.
+    &#34;&#34;&#34;
     q = &#34;&#34;&#34;
         select ?s where {
             &lt;%s&gt; rdfs:subClassOf ?s .
@@ -958,13 +1380,32 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
 <span>def <span class="ident">query_siblings</span></span>(<span>self, t, depth=1)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return (depth-1)-cusins of t.</p></section>
+<section class="desc"><p>Return (depth-1)-cousins.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>str</code> or <code>rdflib.URIRef</code></dt>
+<dd>URI.</dd>
+<dt><strong><code>depth</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of generation to search. 1 -&gt; siblings, 1 -&gt; 1st cousins, etc.</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>set </p>
+<p>Cousins of t.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def query_siblings(self, t, depth=1):
-    &#34;&#34;&#34;Return (depth-1)-cusins of t.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return (depth-1)-cousins.
+    Args:
+        t : str or rdflib.URIRef \n
+            URI. \n 
+        depth : int \n 
+            Number of generation to search. 1 -&gt; siblings, 1 -&gt; 1st cousins, etc. 
+    Return:
+        set \n
+        Cousins of t.
+    &#34;&#34;&#34;
     if depth == -1: depth = &#39;1,&#39;
     q = &#34;&#34;&#34;
         select ?s where {
@@ -988,13 +1429,29 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
 <span>def <span class="ident">query_type</span></span>(<span>self, t)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return entities of type t.</p></section>
+<section class="desc"><p>Return entities of type.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>str</code> or <code>rdflib.URIRef</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Type URI.</p>
+<h2 id="return">Return</h2>
+<p>set </p>
+<p>Entities of type t.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def query_type(self, t):
-    &#34;&#34;&#34;Return entities of type t.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return entities of type.
+    Args:
+        t : str or rdflib.URIRef \n
+        Type URI.
+    Return:
+        set \n
+        Entities of type t. 
+    &#34;&#34;&#34;
     q = &#34;&#34;&#34;
         select ?s where {
             ?s rdf:type &lt;%s&gt;
@@ -1007,31 +1464,58 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
 </dd>
 <dt id="tera.DataAccess.ChemicalAPI"><code class="flex name class">
 <span>class <span class="ident">ChemicalAPI</span></span>
-<span>(</span><span>namespace='', endpoint=None, dataobject=None, name='Chemical API')</span>
+<span>(</span><span>namespace=None, endpoint=None, dataobject=None, mappings={&#x27;cas&#x27;: &lt;tera.DataIntegration.InchikeyToCas object&gt;, &#x27;cid&#x27;: &lt;tera.DataIntegration.InchikeyToPubChem object&gt;, &#x27;chebi&#x27;: &lt;tera.DataIntegration.InchikeyToChEBI object&gt;, &#x27;chemble&#x27;: &lt;tera.DataIntegration.InchikeyToChEMBL object&gt;, &#x27;mesh&#x27;: &lt;tera.DataIntegration.InchikeyToMeSH object&gt;}, name='Chemical API')</span>
 </code></dt>
 <dd>
-<section class="desc"><p>endpoint :: str
-sparql endpoint url
-dataobject :: DataObject
-see DataAggregation</p></section>
+<section class="desc"><p>Base class for accessing chemical data. </p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>dataobject</code></strong> :&ensp;<code>tera.DataObject</code></dt>
+<dd>Data set to access using API.</dd>
+<dt><strong><code>mappings</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Mappings from base_identifier (eg. ncbi) to other datasets.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ChemicalAPI(API):
-    def __init__(self, namespace=&#39;&#39;, endpoint = None, dataobject = None, name = &#39;Chemical API&#39;):
+    def __init__(self, 
+                 namespace=None, 
+                 endpoint = None, 
+                 dataobject = None, 
+                 mappings = {&#39;cas&#39;:InchikeyToCas(),
+                            &#39;cid&#39;:InchikeyToPubChem(),
+                            &#39;chebi&#39;:InchikeyToChEBI(),
+                            &#39;chemble&#39;:InchikeyToChEMBL(),
+                            &#39;mesh&#39;:InchikeyToMeSH()},
+                 name = &#39;Chemical API&#39;):
+        &#34;&#34;&#34;
+        Base class for accessing chemical data. 
+        Args:
+            dataobject : tera.DataObject \n
+                Data set to access using API. \n
+            mappings : dict \n
+                Mappings from base_identifier (eg. ncbi) to other datasets. 
+        &#34;&#34;&#34;
         super(ChemicalAPI, self).__init__(namespace, endpoint, dataobject, name)
-        
-        self.mappings = {&#39;cas&#39;:InchikeyToCas(),
-                         &#39;cid&#39;:InchikeyToPubChem(),
-                         &#39;chebi&#39;:InchikeyToChEBI(),
-                         &#39;chemble&#39;:InchikeyToChEMBL(),
-                         &#39;mesh&#39;:InchikeyToMeSH()}
+        self.mappings = mappings
         self.base_identifier = &#39;inchikey&#39;
    
     @do_recursively_in_class
     def get_fingerprint(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip = False):
-        &#34;&#34;&#34;Get bin fingerprints for id_.&#34;&#34;&#34;
+        &#34;&#34;&#34;Get binary fingerprints.
+        Args:
+            id_ : rdflib.URIRef, str, list, or set \n
+                URI or identifier. \n
+            f : str \n
+                Input identifier type. \n
+            strip : bool \n
+                Remove namespace. Should be true if URI is passed.
+        Return:
+            fp : str \n
+            Binary fingerprint.
+        &#34;&#34;&#34;
         c = self.convert_id(id_, f, &#39;cid&#39;, strip)
         
         fp = None
@@ -1047,7 +1531,18 @@ see DataAggregation</p></section>
     
     @do_recursively_in_class
     def get_names(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip = False):
-        &#34;&#34;&#34;Get synonyms for id_.&#34;&#34;&#34;
+        &#34;&#34;&#34;Get synonyms for id_.
+        Args:
+            id_ : rdflib.URIRef, str, list, or set \n
+                URI or identifier. \n
+            f : str \n
+                Input identifier type. \n
+            strip : bool \n
+                Remove namespace. Should be true if URI is passed.
+        Return:
+            list \n
+            Synonyms.
+        &#34;&#34;&#34;
         c = self.convert_id(id_, f, &#39;cid&#39;, strip)
         out = []
         try:
@@ -1061,7 +1556,18 @@ see DataAggregation</p></section>
     
     @do_recursively_in_class
     def class_hierarchy(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip=False):
-        &#34;&#34;&#34;Return all triples connceted to id_.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return all triples connceted to input.
+        Args:
+            id_ : rdflib.URIRef, str, list, or set \n
+                URI or identifier. \n
+            f : str \n
+                Input identifier type. \n
+            strip : bool \n
+                Remove namespace. Should be true if URI is passed.
+        Return:
+            set \n
+            Triples.
+        &#34;&#34;&#34;
         a = self.convert_id(id_, f, &#39;cid&#39;, strip = strip)
         b = self.convert_id(id_, f, &#39;mesh&#39;, strip = strip)
         a = self.initNs[&#39;compound&#39;][a]
@@ -1071,10 +1577,20 @@ see DataAggregation</p></section>
     @do_recursively_in_class
     def get_features(self, id_: Union[URIRef, str, list, set], params=None, f=&#39;inchikey&#39;, strip=False):
         &#34;&#34;&#34;Return chemical features.
-            params :: list 
-                properties to return
-                ex: params = [&#39;charge&#39;,&#39;molecular_weight&#39;,&#39;xlogp&#39;]
-                To see all avalible features use which_features() . 
+        Args:
+            id_ : rdflib.URIRef, str, list, or set \n
+                URI or identifier. \n
+            params : list \n
+                Properties to return \n 
+                eg. params = [&#39;charge&#39;,&#39;molecular_weight&#39;,&#39;xlogp&#39;] \n
+                To see all avalible features use which_features(). \n
+            f : str \n
+                Input identifier type. \n
+            strip : bool \n
+                Remove namespace. Should be true if URI is passed.
+        Return:
+            dict \n
+            Chemical features.
         &#34;&#34;&#34;
         id_ = self.convert_id(id_, f, &#39;cid&#39;, strip=strip)
         id_ = self.initNs[&#39;compound&#39;][id_]
@@ -1094,18 +1610,46 @@ see DataAggregation</p></section>
     
     @do_recursively_in_class
     def which_features(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip=False):
-        &#34;&#34;&#34;Chemical features avalible.&#34;&#34;&#34;
-        return self.get_features(id_, f, strip).keys()
+        &#34;&#34;&#34;Chemical features avalible.
+        Args:
+            id_ : rdflib.URIRef, str, list, or set \n
+                URI or identifier. \n
+            f : str \n
+                Input identifier type. \n
+            strip : bool \n
+                Remove namespace. Should be true if URI is passed.
+        Return:
+            list \n
+            Chemical features.
+        &#34;&#34;&#34;
+        return [p for p in dir(Compound) if isinstance(getattr(Compound, p), property)]
     
     @do_recursively_in_class
     def simiarity(self, id_: Union[URIRef, str, list, set], ids, f=&#39;inchikey&#39;,strip=False):
-        &#34;&#34;&#34;Returns chemical simiarity between id and ids&#34;&#34;&#34;
+        &#34;&#34;&#34;Returns chemical simiarity between id and ids
+        Args:
+            id_ : rdflib.URIRef, str, list, or set \n
+                URI or identifier. \n
+            ids : list or set \n
+                URI or identifiers to compare against. 
+            f : str \n
+                Input identifier type. \n
+            strip : bool \n
+                Remove namespace. Should be true if URI is passed.
+        Return:
+            dict \n
+            Chemical simiarity.
+        &#34;&#34;&#34;
         fp = self.get_fingerprint(id_, f, strip)
         fps = self.get_fingerprint(ids, f, strip)
-        return {i:tanimoto(fp,f) for i,f in zip(ids,fps) if f and fp}
+        return {i:tanimoto(fp,f) for i,f in fps.items() if f and fp}
         
     def compounds(self):
-        &#34;&#34;&#34;Return all compounds.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return all compounds.
+        Return:
+            set \n
+            All compounds.
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
             SELECT ?s {
             ?s  ?o  ?z
@@ -1128,14 +1672,37 @@ see DataAggregation</p></section>
 <span>def <span class="ident">class_hierarchy</span></span>(<span>self, id_, f='inchikey', strip=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return all triples connceted to id_.</p></section>
+<section class="desc"><p>Return all triples connceted to input.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>id_</code></strong> :&ensp;<code>rdflib.URIRef</code>, <code>str</code>, <code>list</code>, or <code>set</code></dt>
+<dd>URI or identifier.</dd>
+<dt><strong><code>f</code></strong> :&ensp;<code>str</code></dt>
+<dd>Input identifier type.</dd>
+<dt><strong><code>strip</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Remove namespace. Should be true if URI is passed.</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>set </p>
+<p>Triples.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@do_recursively_in_class
 def class_hierarchy(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip=False):
-    &#34;&#34;&#34;Return all triples connceted to id_.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return all triples connceted to input.
+    Args:
+        id_ : rdflib.URIRef, str, list, or set \n
+            URI or identifier. \n
+        f : str \n
+            Input identifier type. \n
+        strip : bool \n
+            Remove namespace. Should be true if URI is passed.
+    Return:
+        set \n
+        Triples.
+    &#34;&#34;&#34;
     a = self.convert_id(id_, f, &#39;cid&#39;, strip = strip)
     b = self.convert_id(id_, f, &#39;mesh&#39;, strip = strip)
     a = self.initNs[&#39;compound&#39;][a]
@@ -1147,13 +1714,20 @@ def class_hierarchy(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#3
 <span>def <span class="ident">compounds</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return all compounds.</p></section>
+<section class="desc"><p>Return all compounds.</p>
+<h2 id="return">Return</h2>
+<p>set </p>
+<p>All compounds.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def compounds(self):
-    &#34;&#34;&#34;Return all compounds.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return all compounds.
+    Return:
+        set \n
+        All compounds.
+    &#34;&#34;&#34;
     q = &#34;&#34;&#34;
         SELECT ?s {
         ?s  ?o  ?z
@@ -1167,11 +1741,25 @@ def class_hierarchy(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#3
 <span>def <span class="ident">get_features</span></span>(<span>self, id_, params=None, f='inchikey', strip=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return chemical features.
-params :: list
-properties to return
-ex: params = ['charge','molecular_weight','xlogp']
-To see all avalible features use which_features() .</p></section>
+<section class="desc"><p>Return chemical features.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>id_</code></strong> :&ensp;<code>rdflib.URIRef</code>, <code>str</code>, <code>list</code>, or <code>set</code></dt>
+<dd>URI or identifier.</dd>
+<dt><strong><code>params</code></strong> :&ensp;<code>list</code></dt>
+<dd>
+<p>Properties to return </p>
+<p>eg. params = ['charge','molecular_weight','xlogp'] </p>
+<p>To see all avalible features use which_features().</p>
+</dd>
+<dt><strong><code>f</code></strong> :&ensp;<code>str</code></dt>
+<dd>Input identifier type.</dd>
+<dt><strong><code>strip</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Remove namespace. Should be true if URI is passed.</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>dict </p>
+<p>Chemical features.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1179,10 +1767,20 @@ To see all avalible features use which_features() .</p></section>
 <pre><code class="python">@do_recursively_in_class
 def get_features(self, id_: Union[URIRef, str, list, set], params=None, f=&#39;inchikey&#39;, strip=False):
     &#34;&#34;&#34;Return chemical features.
-        params :: list 
-            properties to return
-            ex: params = [&#39;charge&#39;,&#39;molecular_weight&#39;,&#39;xlogp&#39;]
-            To see all avalible features use which_features() . 
+    Args:
+        id_ : rdflib.URIRef, str, list, or set \n
+            URI or identifier. \n
+        params : list \n
+            Properties to return \n 
+            eg. params = [&#39;charge&#39;,&#39;molecular_weight&#39;,&#39;xlogp&#39;] \n
+            To see all avalible features use which_features(). \n
+        f : str \n
+            Input identifier type. \n
+        strip : bool \n
+            Remove namespace. Should be true if URI is passed.
+    Return:
+        dict \n
+        Chemical features.
     &#34;&#34;&#34;
     id_ = self.convert_id(id_, f, &#39;cid&#39;, strip=strip)
     id_ = self.initNs[&#39;compound&#39;][id_]
@@ -1205,14 +1803,40 @@ def get_features(self, id_: Union[URIRef, str, list, set], params=None, f=&#39;i
 <span>def <span class="ident">get_fingerprint</span></span>(<span>self, id_, f='inchikey', strip=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get bin fingerprints for id_.</p></section>
+<section class="desc"><p>Get binary fingerprints.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>id_</code></strong> :&ensp;<code>rdflib.URIRef</code>, <code>str</code>, <code>list</code>, or <code>set</code></dt>
+<dd>URI or identifier.</dd>
+<dt><strong><code>f</code></strong> :&ensp;<code>str</code></dt>
+<dd>Input identifier type.</dd>
+<dt><strong><code>strip</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Remove namespace. Should be true if URI is passed.</dd>
+</dl>
+<h2 id="return">Return</h2>
+<dl>
+<dt><strong><code>fp</code></strong> :&ensp;<code>str</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Binary fingerprint.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@do_recursively_in_class
 def get_fingerprint(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip = False):
-    &#34;&#34;&#34;Get bin fingerprints for id_.&#34;&#34;&#34;
+    &#34;&#34;&#34;Get binary fingerprints.
+    Args:
+        id_ : rdflib.URIRef, str, list, or set \n
+            URI or identifier. \n
+        f : str \n
+            Input identifier type. \n
+        strip : bool \n
+            Remove namespace. Should be true if URI is passed.
+    Return:
+        fp : str \n
+        Binary fingerprint.
+    &#34;&#34;&#34;
     c = self.convert_id(id_, f, &#39;cid&#39;, strip)
     
     fp = None
@@ -1231,14 +1855,37 @@ def get_fingerprint(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#3
 <span>def <span class="ident">get_names</span></span>(<span>self, id_, f='inchikey', strip=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get synonyms for id_.</p></section>
+<section class="desc"><p>Get synonyms for id_.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>id_</code></strong> :&ensp;<code>rdflib.URIRef</code>, <code>str</code>, <code>list</code>, or <code>set</code></dt>
+<dd>URI or identifier.</dd>
+<dt><strong><code>f</code></strong> :&ensp;<code>str</code></dt>
+<dd>Input identifier type.</dd>
+<dt><strong><code>strip</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Remove namespace. Should be true if URI is passed.</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>list </p>
+<p>Synonyms.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@do_recursively_in_class
 def get_names(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip = False):
-    &#34;&#34;&#34;Get synonyms for id_.&#34;&#34;&#34;
+    &#34;&#34;&#34;Get synonyms for id_.
+    Args:
+        id_ : rdflib.URIRef, str, list, or set \n
+            URI or identifier. \n
+        f : str \n
+            Input identifier type. \n
+        strip : bool \n
+            Remove namespace. Should be true if URI is passed.
+    Return:
+        list \n
+        Synonyms.
+    &#34;&#34;&#34;
     c = self.convert_id(id_, f, &#39;cid&#39;, strip)
     out = []
     try:
@@ -1255,32 +1902,82 @@ def get_names(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, st
 <span>def <span class="ident">simiarity</span></span>(<span>self, id_, ids, f='inchikey', strip=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Returns chemical simiarity between id and ids</p></section>
+<section class="desc"><p>Returns chemical simiarity between id and ids</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>id_</code></strong> :&ensp;<code>rdflib.URIRef</code>, <code>str</code>, <code>list</code>, or <code>set</code></dt>
+<dd>URI or identifier.</dd>
+<dt><strong><code>ids</code></strong> :&ensp;<code>list</code> or <code>set</code></dt>
+<dd>URI or identifiers to compare against.</dd>
+<dt><strong><code>f</code></strong> :&ensp;<code>str</code></dt>
+<dd>Input identifier type.</dd>
+<dt><strong><code>strip</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Remove namespace. Should be true if URI is passed.</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>dict </p>
+<p>Chemical simiarity.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@do_recursively_in_class
 def simiarity(self, id_: Union[URIRef, str, list, set], ids, f=&#39;inchikey&#39;,strip=False):
-    &#34;&#34;&#34;Returns chemical simiarity between id and ids&#34;&#34;&#34;
+    &#34;&#34;&#34;Returns chemical simiarity between id and ids
+    Args:
+        id_ : rdflib.URIRef, str, list, or set \n
+            URI or identifier. \n
+        ids : list or set \n
+            URI or identifiers to compare against. 
+        f : str \n
+            Input identifier type. \n
+        strip : bool \n
+            Remove namespace. Should be true if URI is passed.
+    Return:
+        dict \n
+        Chemical simiarity.
+    &#34;&#34;&#34;
     fp = self.get_fingerprint(id_, f, strip)
     fps = self.get_fingerprint(ids, f, strip)
-    return {i:tanimoto(fp,f) for i,f in zip(ids,fps) if f and fp}</code></pre>
+    return {i:tanimoto(fp,f) for i,f in fps.items() if f and fp}</code></pre>
 </details>
 </dd>
 <dt id="tera.DataAccess.ChemicalAPI.which_features"><code class="name flex">
 <span>def <span class="ident">which_features</span></span>(<span>self, id_, f='inchikey', strip=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Chemical features avalible.</p></section>
+<section class="desc"><p>Chemical features avalible.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>id_</code></strong> :&ensp;<code>rdflib.URIRef</code>, <code>str</code>, <code>list</code>, or <code>set</code></dt>
+<dd>URI or identifier.</dd>
+<dt><strong><code>f</code></strong> :&ensp;<code>str</code></dt>
+<dd>Input identifier type.</dd>
+<dt><strong><code>strip</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Remove namespace. Should be true if URI is passed.</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>list </p>
+<p>Chemical features.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@do_recursively_in_class
 def which_features(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip=False):
-    &#34;&#34;&#34;Chemical features avalible.&#34;&#34;&#34;
-    return self.get_features(id_, f, strip).keys()</code></pre>
+    &#34;&#34;&#34;Chemical features avalible.
+    Args:
+        id_ : rdflib.URIRef, str, list, or set \n
+            URI or identifier. \n
+        f : str \n
+            Input identifier type. \n
+        strip : bool \n
+            Remove namespace. Should be true if URI is passed.
+    Return:
+        list \n
+        Chemical features.
+    &#34;&#34;&#34;
+    return [p for p in dir(Compound) if isinstance(getattr(Compound, p), property)]</code></pre>
 </details>
 </dd>
 </dl>
@@ -1288,13 +1985,13 @@ def which_features(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39
 <ul class="hlist">
 <li><code><b><a title="tera.DataAccess.API" href="#tera.DataAccess.API">API</a></b></code>:
 <ul class="hlist">
+<li><code><a title="tera.DataAccess.API.avalible_convertions" href="#tera.DataAccess.API.avalible_convertions">avalible_convertions</a></code></li>
 <li><code><a title="tera.DataAccess.API.construct_subgraph" href="#tera.DataAccess.API.construct_subgraph">construct_subgraph</a></code></li>
 <li><code><a title="tera.DataAccess.API.convert_id" href="#tera.DataAccess.API.convert_id">convert_id</a></code></li>
 <li><code><a title="tera.DataAccess.API.query" href="#tera.DataAccess.API.query">query</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_alt_labels" href="#tera.DataAccess.API.query_alt_labels">query_alt_labels</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_child" href="#tera.DataAccess.API.query_child">query_child</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_label" href="#tera.DataAccess.API.query_label">query_label</a></code></li>
-<li><code><a title="tera.DataAccess.API.query_labels" href="#tera.DataAccess.API.query_labels">query_labels</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_parent" href="#tera.DataAccess.API.query_parent">query_parent</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_siblings" href="#tera.DataAccess.API.query_siblings">query_siblings</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_type" href="#tera.DataAccess.API.query_type">query_type</a></code></li>
@@ -1307,23 +2004,37 @@ def which_features(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39
 <span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', endpoint=None, dataobject=None, name='ECOTOX Chemical API')</span>
 </code></dt>
 <dd>
-<section class="desc"><p>endpoint :: str
-sparql endpoint url
-dataobject :: DataObject
-see DataAggregation</p></section>
+<section class="desc"><p>Class for accessing chemical data in Ecotox.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class EcotoxChemicalAPI(ChemicalAPI):
-    def __init__(self, namespace=&#39;https://cfpub.epa.gov/ecotox/&#39;, endpoint = None, dataobject = None, name = &#39;ECOTOX Chemical API&#39;):
+    def __init__(self, 
+                 namespace=&#39;https://cfpub.epa.gov/ecotox/&#39;, 
+                 endpoint = None, 
+                 dataobject = None, 
+                 name = &#39;ECOTOX Chemical API&#39;):
+        &#34;&#34;&#34;
+        Class for accessing chemical data in Ecotox. 
+        &#34;&#34;&#34;
         super(EcotoxChemicalAPI, self).__init__(namespace, endpoint, dataobject, name)
         
     @do_recursively_in_class
     def query_chemical_names(self,t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;
+        Return chemical names.
+        Args: 
+            t : rdflib.URIRef, str, list, set \n
+            URI 
+        Return:
+            str\n
+            Chemical label.
+        &#34;&#34;&#34;
         return self.query_labels(t)
     
     def query_chemicals(self):
+        &#34;&#34;&#34;Return set of all chemicals.&#34;&#34;&#34;
         return self.query_type(self.namespace[&#39;Chemical&#39;])</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -1337,13 +2048,32 @@ see DataAggregation</p></section>
 <span>def <span class="ident">query_chemical_names</span></span>(<span>self, t)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Return chemical names.
+Args:
+t : rdflib.URIRef, str, list, set </p>
+<pre><code>URI
+</code></pre>
+<h2 id="return">Return</h2>
+<dl>
+<dt><strong><code>str</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Chemical label.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@do_recursively_in_class
 def query_chemical_names(self,t: Union[URIRef, str, list, set]):
+    &#34;&#34;&#34;
+    Return chemical names.
+    Args: 
+        t : rdflib.URIRef, str, list, set \n
+        URI 
+    Return:
+        str\n
+        Chemical label.
+    &#34;&#34;&#34;
     return self.query_labels(t)</code></pre>
 </details>
 </dd>
@@ -1351,12 +2081,13 @@ def query_chemical_names(self,t: Union[URIRef, str, list, set]):
 <span>def <span class="ident">query_chemicals</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Return set of all chemicals.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def query_chemicals(self):
+    &#34;&#34;&#34;Return set of all chemicals.&#34;&#34;&#34;
     return self.query_type(self.namespace[&#39;Chemical&#39;])</code></pre>
 </details>
 </dd>
@@ -1365,6 +2096,7 @@ def query_chemical_names(self,t: Union[URIRef, str, list, set]):
 <ul class="hlist">
 <li><code><b><a title="tera.DataAccess.ChemicalAPI" href="#tera.DataAccess.ChemicalAPI">ChemicalAPI</a></b></code>:
 <ul class="hlist">
+<li><code><a title="tera.DataAccess.ChemicalAPI.avalible_convertions" href="#tera.DataAccess.API.avalible_convertions">avalible_convertions</a></code></li>
 <li><code><a title="tera.DataAccess.ChemicalAPI.class_hierarchy" href="#tera.DataAccess.ChemicalAPI.class_hierarchy">class_hierarchy</a></code></li>
 <li><code><a title="tera.DataAccess.ChemicalAPI.compounds" href="#tera.DataAccess.ChemicalAPI.compounds">compounds</a></code></li>
 <li><code><a title="tera.DataAccess.ChemicalAPI.construct_subgraph" href="#tera.DataAccess.API.construct_subgraph">construct_subgraph</a></code></li>
@@ -1376,7 +2108,6 @@ def query_chemical_names(self,t: Union[URIRef, str, list, set]):
 <li><code><a title="tera.DataAccess.ChemicalAPI.query_alt_labels" href="#tera.DataAccess.API.query_alt_labels">query_alt_labels</a></code></li>
 <li><code><a title="tera.DataAccess.ChemicalAPI.query_child" href="#tera.DataAccess.API.query_child">query_child</a></code></li>
 <li><code><a title="tera.DataAccess.ChemicalAPI.query_label" href="#tera.DataAccess.API.query_label">query_label</a></code></li>
-<li><code><a title="tera.DataAccess.ChemicalAPI.query_labels" href="#tera.DataAccess.API.query_labels">query_labels</a></code></li>
 <li><code><a title="tera.DataAccess.ChemicalAPI.query_parent" href="#tera.DataAccess.API.query_parent">query_parent</a></code></li>
 <li><code><a title="tera.DataAccess.ChemicalAPI.query_siblings" href="#tera.DataAccess.API.query_siblings">query_siblings</a></code></li>
 <li><code><a title="tera.DataAccess.ChemicalAPI.query_type" href="#tera.DataAccess.API.query_type">query_type</a></code></li>
@@ -1391,10 +2122,7 @@ def query_chemical_names(self,t: Union[URIRef, str, list, set]):
 <span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', endpoint=None, dataobject=None, name='ECOTOX Taxonomy API')</span>
 </code></dt>
 <dd>
-<section class="desc"><p>endpoint :: str
-sparql endpoint url
-dataobject :: DataObject
-see DataAggregation</p></section>
+<section class="desc"><p>Class for accessing Ecotox taxonomic data.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1405,6 +2133,7 @@ see DataAggregation</p></section>
                  endpoint = None, 
                  dataobject = None, 
                  name = &#39;ECOTOX Taxonomy API&#39;):
+        &#34;&#34;&#34;Class for accessing Ecotox taxonomic data.&#34;&#34;&#34;
         super(EcotoxTaxonomyAPI, self).__init__(namespace, endpoint, dataobject, name)</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -1416,18 +2145,18 @@ see DataAggregation</p></section>
 <ul class="hlist">
 <li><code><b><a title="tera.DataAccess.TaxonomyAPI" href="#tera.DataAccess.TaxonomyAPI">TaxonomyAPI</a></b></code>:
 <ul class="hlist">
+<li><code><a title="tera.DataAccess.TaxonomyAPI.avalible_convertions" href="#tera.DataAccess.API.avalible_convertions">avalible_convertions</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.construct_subgraph" href="#tera.DataAccess.API.construct_subgraph">construct_subgraph</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.convert_id" href="#tera.DataAccess.API.convert_id">convert_id</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.get_division" href="#tera.DataAccess.TaxonomyAPI.get_division">get_division</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.get_rank" href="#tera.DataAccess.TaxonomyAPI.get_rank">get_rank</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.get_ranks" href="#tera.DataAccess.TaxonomyAPI.get_ranks">get_ranks</a></code></li>
-<li><code><a title="tera.DataAccess.TaxonomyAPI.get_species" href="#tera.DataAccess.TaxonomyAPI.get_species">get_species</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.get_ssd" href="#tera.DataAccess.TaxonomyAPI.get_ssd">get_ssd</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_taxa" href="#tera.DataAccess.TaxonomyAPI.get_taxa">get_taxa</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query" href="#tera.DataAccess.API.query">query</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query_alt_labels" href="#tera.DataAccess.API.query_alt_labels">query_alt_labels</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query_child" href="#tera.DataAccess.API.query_child">query_child</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query_label" href="#tera.DataAccess.API.query_label">query_label</a></code></li>
-<li><code><a title="tera.DataAccess.TaxonomyAPI.query_labels" href="#tera.DataAccess.API.query_labels">query_labels</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query_parent" href="#tera.DataAccess.API.query_parent">query_parent</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query_siblings" href="#tera.DataAccess.API.query_siblings">query_siblings</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query_type" href="#tera.DataAccess.API.query_type">query_type</a></code></li>
@@ -1440,21 +2169,30 @@ see DataAggregation</p></section>
 <span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', endpoint=None, dataobject=None, name='ECOTOX Effects API')</span>
 </code></dt>
 <dd>
-<section class="desc"><p>endpoint :: str
-sparql endpoint url
-dataobject :: DataObject
-see DataAggregation</p></section>
+<section class="desc"><p>Class for accessing Ecotox effect data.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class EffectsAPI(API):
-    def __init__(self, namespace=&#39;https://cfpub.epa.gov/ecotox/&#39;, endpoint = None, dataobject = None, name = &#39;ECOTOX Effects API&#39;):
+    def __init__(self, 
+                 namespace=&#39;https://cfpub.epa.gov/ecotox/&#39;, 
+                 endpoint = None, 
+                 dataobject = None, 
+                 name = &#39;ECOTOX Effects API&#39;):
+        &#34;&#34;&#34;Class for accessing Ecotox effect data.&#34;&#34;&#34;
         super(EffectsAPI, self).__init__(namespace, endpoint, dataobject, name)
     
     @do_recursively_in_class
     def get_chemicals_from_species(self,t: Union[URIRef, str, list, set]):
-        &#34;&#34;&#34;Return chemical involved in experiment with species t.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return chemical involved in experiment with certain species.
+        Args:
+            t : rdflib.URIRef, str, list, set \n
+                Species URI 
+        Return:
+            set \n
+                Chemical URIs
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
         select ?c where {
             ?t rdf:type ns:Test .
@@ -1466,7 +2204,14 @@ see DataAggregation</p></section>
     
     @do_recursively_in_class
     def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
-        &#34;&#34;&#34;Return species involved in experiment with chemical t.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return species involved in experiment using chemical.
+        Args:
+            t : rdflib.URIRef, str, list, set \n
+                Chemical URI 
+        Return:
+            set \n
+                Species URIs
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
         select ?c where {
             ?t rdf:type ns:Test .
@@ -1477,7 +2222,11 @@ see DataAggregation</p></section>
         return self.query(q,&#39;c&#39;)
     
     def get_chemicals(self):
-        &#34;&#34;&#34;Return chemicals used in at least one experiment.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return chemicals used in at least one experiment.
+        Return:
+            set \n
+            Chemical URIs
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
         select ?c where {
             ?t rdf:type ns:Test .
@@ -1487,7 +2236,10 @@ see DataAggregation</p></section>
         return self.query(q,&#39;c&#39;)
     
     def get_species(self):
-        &#34;&#34;&#34;Return species used in at least one experiment.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return species used in at least one experiment.
+        Return:
+            set \n
+            Species URIs&#34;&#34;&#34;
         q = &#34;&#34;&#34;
         select ?c where {
             ?t rdf:type ns:Test .
@@ -1501,18 +2253,26 @@ see DataAggregation</p></section>
                        s: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;
         Return endpoints that use chemical c and species s.
-        If list is none: c = query_chemicals and s = query_species
+        Args: 
+            c : rdflib.URIRef, str, list, set \n
+                Chemical URIs. If None, c &lt;- query_chemicals\n
+            s : rdflib.URIRef, str, list, set \n
+                Species URIs. If None, s &lt;- query_species\n
+        Return:
+            dict \n
+            On the form {chemical:{species:endpoint values}}
         &#34;&#34;&#34;
         if not c:
             c = self.query_chemicals()
         if not s:
             s = self.query_species()
+            
         if isinstance(c,(list,set)):
             return {a:self.get_endpoint(a,s) for a in c}
         if isinstance(s,(list,set)):
             return {a:self.get_endpoint(c,a) for a in s}
         q = &#34;&#34;&#34;
-            SELECT ?cc ?cu ?ep ?ef ?sd ?sdu {
+            SELECT ?cc ?cu ?ep ?ef ?sd ?sdu WHERE {
                 ?test rdf:type ns:Test ;
                   ns:chemical &lt;%s&gt; ;
                    ns:species &lt;%s&gt; ;
@@ -1540,13 +2300,20 @@ see DataAggregation</p></section>
 <span>def <span class="ident">get_chemicals</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return chemicals used in at least one experiment.</p></section>
+<section class="desc"><p>Return chemicals used in at least one experiment.</p>
+<h2 id="return">Return</h2>
+<p>set </p>
+<p>Chemical URIs</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_chemicals(self):
-    &#34;&#34;&#34;Return chemicals used in at least one experiment.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return chemicals used in at least one experiment.
+    Return:
+        set \n
+        Chemical URIs
+    &#34;&#34;&#34;
     q = &#34;&#34;&#34;
     select ?c where {
         ?t rdf:type ns:Test .
@@ -1560,14 +2327,30 @@ see DataAggregation</p></section>
 <span>def <span class="ident">get_chemicals_from_species</span></span>(<span>self, t)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return chemical involved in experiment with species t.</p></section>
+<section class="desc"><p>Return chemical involved in experiment with certain species.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>rdflib.URIRef</code>, <code>str</code>, <code>list</code>, <code>set</code></dt>
+<dd>Species URI</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>set </p>
+<pre><code>Chemical URIs
+</code></pre></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@do_recursively_in_class
 def get_chemicals_from_species(self,t: Union[URIRef, str, list, set]):
-    &#34;&#34;&#34;Return chemical involved in experiment with species t.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return chemical involved in experiment with certain species.
+    Args:
+        t : rdflib.URIRef, str, list, set \n
+            Species URI 
+    Return:
+        set \n
+            Chemical URIs
+    &#34;&#34;&#34;
     q = &#34;&#34;&#34;
     select ?c where {
         ?t rdf:type ns:Test .
@@ -1583,7 +2366,17 @@ def get_chemicals_from_species(self,t: Union[URIRef, str, list, set]):
 </code></dt>
 <dd>
 <section class="desc"><p>Return endpoints that use chemical c and species s.
-If list is none: c = query_chemicals and s = query_species</p></section>
+Args:
+c : rdflib.URIRef, str, list, set </p>
+<pre><code>    Chemical URIs. If None, c &lt;- query_chemicals
+
+s : rdflib.URIRef, str, list, set
+
+    Species URIs. If None, s &lt;- query_species
+</code></pre>
+<h2 id="return">Return</h2>
+<p>dict </p>
+<p>On the form {chemical:{species:endpoint values}}</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1593,18 +2386,26 @@ If list is none: c = query_chemicals and s = query_species</p></section>
                    s: Union[URIRef, str, list, set]):
     &#34;&#34;&#34;
     Return endpoints that use chemical c and species s.
-    If list is none: c = query_chemicals and s = query_species
+    Args: 
+        c : rdflib.URIRef, str, list, set \n
+            Chemical URIs. If None, c &lt;- query_chemicals\n
+        s : rdflib.URIRef, str, list, set \n
+            Species URIs. If None, s &lt;- query_species\n
+    Return:
+        dict \n
+        On the form {chemical:{species:endpoint values}}
     &#34;&#34;&#34;
     if not c:
         c = self.query_chemicals()
     if not s:
         s = self.query_species()
+        
     if isinstance(c,(list,set)):
         return {a:self.get_endpoint(a,s) for a in c}
     if isinstance(s,(list,set)):
         return {a:self.get_endpoint(c,a) for a in s}
     q = &#34;&#34;&#34;
-        SELECT ?cc ?cu ?ep ?ef ?sd ?sdu {
+        SELECT ?cc ?cu ?ep ?ef ?sd ?sdu WHERE {
             ?test rdf:type ns:Test ;
               ns:chemical &lt;%s&gt; ;
                ns:species &lt;%s&gt; ;
@@ -1627,13 +2428,19 @@ If list is none: c = query_chemicals and s = query_species</p></section>
 <span>def <span class="ident">get_species</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return species used in at least one experiment.</p></section>
+<section class="desc"><p>Return species used in at least one experiment.</p>
+<h2 id="return">Return</h2>
+<p>set </p>
+<p>Species URIs</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_species(self):
-    &#34;&#34;&#34;Return species used in at least one experiment.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return species used in at least one experiment.
+    Return:
+        set \n
+        Species URIs&#34;&#34;&#34;
     q = &#34;&#34;&#34;
     select ?c where {
         ?t rdf:type ns:Test .
@@ -1647,14 +2454,30 @@ If list is none: c = query_chemicals and s = query_species</p></section>
 <span>def <span class="ident">get_species_from_chemicals</span></span>(<span>self, t)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return species involved in experiment with chemical t.</p></section>
+<section class="desc"><p>Return species involved in experiment using chemical.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>rdflib.URIRef</code>, <code>str</code>, <code>list</code>, <code>set</code></dt>
+<dd>Chemical URI</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>set </p>
+<pre><code>Species URIs
+</code></pre></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@do_recursively_in_class
 def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
-    &#34;&#34;&#34;Return species involved in experiment with chemical t.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return species involved in experiment using chemical.
+    Args:
+        t : rdflib.URIRef, str, list, set \n
+            Chemical URI 
+    Return:
+        set \n
+            Species URIs
+    &#34;&#34;&#34;
     q = &#34;&#34;&#34;
     select ?c where {
         ?t rdf:type ns:Test .
@@ -1670,13 +2493,13 @@ def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
 <ul class="hlist">
 <li><code><b><a title="tera.DataAccess.API" href="#tera.DataAccess.API">API</a></b></code>:
 <ul class="hlist">
+<li><code><a title="tera.DataAccess.API.avalible_convertions" href="#tera.DataAccess.API.avalible_convertions">avalible_convertions</a></code></li>
 <li><code><a title="tera.DataAccess.API.construct_subgraph" href="#tera.DataAccess.API.construct_subgraph">construct_subgraph</a></code></li>
 <li><code><a title="tera.DataAccess.API.convert_id" href="#tera.DataAccess.API.convert_id">convert_id</a></code></li>
 <li><code><a title="tera.DataAccess.API.query" href="#tera.DataAccess.API.query">query</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_alt_labels" href="#tera.DataAccess.API.query_alt_labels">query_alt_labels</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_child" href="#tera.DataAccess.API.query_child">query_child</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_label" href="#tera.DataAccess.API.query_label">query_label</a></code></li>
-<li><code><a title="tera.DataAccess.API.query_labels" href="#tera.DataAccess.API.query_labels">query_labels</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_parent" href="#tera.DataAccess.API.query_parent">query_parent</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_siblings" href="#tera.DataAccess.API.query_siblings">query_siblings</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_type" href="#tera.DataAccess.API.query_type">query_type</a></code></li>
@@ -1689,10 +2512,7 @@ def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
 <span>(</span><span>namespace='https://www.ncbi.nlm.nih.gov/taxonomy', endpoint=None, dataobject=None, name='NCBI API')</span>
 </code></dt>
 <dd>
-<section class="desc"><p>endpoint :: str
-sparql endpoint url
-dataobject :: DataObject
-see DataAggregation</p></section>
+<section class="desc"><p>Class for accessing NCBI taxonomic data.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1703,6 +2523,7 @@ see DataAggregation</p></section>
                  endpoint = None, 
                  dataobject = None, 
                  name = &#39;NCBI API&#39;):
+        &#34;&#34;&#34;Class for accessing NCBI taxonomic data.&#34;&#34;&#34;
         super(TaxonomyAPI, self).__init__(namespace, endpoint, dataobject, name)</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -1714,18 +2535,18 @@ see DataAggregation</p></section>
 <ul class="hlist">
 <li><code><b><a title="tera.DataAccess.TaxonomyAPI" href="#tera.DataAccess.TaxonomyAPI">TaxonomyAPI</a></b></code>:
 <ul class="hlist">
+<li><code><a title="tera.DataAccess.TaxonomyAPI.avalible_convertions" href="#tera.DataAccess.API.avalible_convertions">avalible_convertions</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.construct_subgraph" href="#tera.DataAccess.API.construct_subgraph">construct_subgraph</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.convert_id" href="#tera.DataAccess.API.convert_id">convert_id</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.get_division" href="#tera.DataAccess.TaxonomyAPI.get_division">get_division</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.get_rank" href="#tera.DataAccess.TaxonomyAPI.get_rank">get_rank</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.get_ranks" href="#tera.DataAccess.TaxonomyAPI.get_ranks">get_ranks</a></code></li>
-<li><code><a title="tera.DataAccess.TaxonomyAPI.get_species" href="#tera.DataAccess.TaxonomyAPI.get_species">get_species</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.get_ssd" href="#tera.DataAccess.TaxonomyAPI.get_ssd">get_ssd</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_taxa" href="#tera.DataAccess.TaxonomyAPI.get_taxa">get_taxa</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query" href="#tera.DataAccess.API.query">query</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query_alt_labels" href="#tera.DataAccess.API.query_alt_labels">query_alt_labels</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query_child" href="#tera.DataAccess.API.query_child">query_child</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query_label" href="#tera.DataAccess.API.query_label">query_label</a></code></li>
-<li><code><a title="tera.DataAccess.TaxonomyAPI.query_labels" href="#tera.DataAccess.API.query_labels">query_labels</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query_parent" href="#tera.DataAccess.API.query_parent">query_parent</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query_siblings" href="#tera.DataAccess.API.query_siblings">query_siblings</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query_type" href="#tera.DataAccess.API.query_type">query_type</a></code></li>
@@ -1735,13 +2556,17 @@ see DataAggregation</p></section>
 </dd>
 <dt id="tera.DataAccess.TaxonomyAPI"><code class="flex name class">
 <span>class <span class="ident">TaxonomyAPI</span></span>
-<span>(</span><span>namespace=None, endpoint=None, dataobject=None, mapping_dataobject=None, name='Taxonomy API')</span>
+<span>(</span><span>namespace=None, endpoint=None, dataobject=None, mappings={&lt;tera.DataIntegration.NCBIToEOL object&gt;, &#x27;eol&#x27;}, name='Taxonomy API')</span>
 </code></dt>
 <dd>
-<section class="desc"><p>endpoint :: str
-sparql endpoint url
-dataobject :: DataObject
-see DataAggregation</p></section>
+<section class="desc"><p>Base class for accessing taxonomic data. </p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>dataobject</code></strong> :&ensp;<code>tera.Taxonomy</code></dt>
+<dd>Data set to access using API.</dd>
+<dt><strong><code>mappings</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Mappings from base_identifier (eg. ncbi) to other datasets.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1749,41 +2574,69 @@ see DataAggregation</p></section>
 <pre><code class="python">class TaxonomyAPI(API):
     def __init__(self, 
                  namespace=None, 
-                 endpoint = None,
+                 endpoint=None,
                  dataobject = None,
-                 mapping_dataobject = None,
+                 mappings = {&#39;eol&#39;,NCBIToEOL()},
                  name = &#39;Taxonomy API&#39;):
+        &#34;&#34;&#34;
+        Base class for accessing taxonomic data. 
+        Args:
+            dataobject : tera.Taxonomy \n
+                Data set to access using API. \n
+            mappings : dict \n
+                Mappings from base_identifier (eg. ncbi) to other datasets. 
+        &#34;&#34;&#34;
         super(TaxonomyAPI, self).__init__(namespace, endpoint, dataobject, name)
         
-        self.mappings = {&#39;eol&#39;:NCBIToEOL()}
-        if mapping_dataobject:
-            self.mappings[&#39;ecotox&#39;] = NCBIToEcotox(dataobject, mapping_dataobject)
-        elif endpoint and test_endpoint(endpoint):
-            self.mappings[&#39;ecotox&#39;] = EndpointMapping(endpoint)
-        
+        self.mappings = mappings
         self.base_identifier = &#39;ncbi&#39;
         
-    def get_species(self):
-        &#34;&#34;&#34;All species&#34;&#34;&#34;
+    def get_taxa(self):
+        &#34;&#34;&#34;Return all taxa in taxonomy.&#34;&#34;&#34;
         return self.query_type(self.namespace[&#39;Taxon&#39;])
     
     @do_recursively_in_class
     def get_division(self, t: Union[URIRef, str, list, set]):
-        &#34;&#34;&#34;Return all species in division t&#34;&#34;&#34;
+        &#34;&#34;&#34;Return all taxa in division.
+        Args:
+            t : rdflib.URIRef, str, list, or set \n
+            Division URI \n
+        Return:
+            set \n
+            Set of taxa in devision.
+        &#34;&#34;&#34;
         return self.query_subclassof(a)
     
     @do_recursively_in_class
     def get_ssd(self, t: Union[URIRef, str, list, set]):
-        &#34;&#34;&#34;Return all species in ssd t&#34;&#34;&#34;
+        &#34;&#34;&#34;Return all taxa in SSD.
+        Args:
+            t : rdflib.URIRef, str, list, or set \n
+            SSD URI \n
+        Return:
+            set \n
+            Set of taxa in SSD.
+        &#34;&#34;&#34;
         return self.query_subclassof(t)
     
     def get_ranks(self):
-        &#34;&#34;&#34;Get all taxonomic ranks&#34;&#34;&#34;
+        &#34;&#34;&#34;Return all ranks (taxonomic level).
+        Return:
+            set \n
+            Set of ranks.
+        &#34;&#34;&#34;
         return self.query_type(self.namespace[&#39;Rank&#39;])
     
     @do_recursively_in_class
     def get_rank(self, t: Union[URIRef, str, list, set]):
-        &#34;&#34;&#34;Return all taxons with rank t&#34;&#34;&#34;
+        &#34;&#34;&#34;Return all taxa with rank.
+        Args:
+            t : rdflib.URIRef, str, list, or set \n
+            Rank URI \n
+        Return:
+            set \n
+            Set of taxa at rank.
+        &#34;&#34;&#34;
         return self.query_subclassof(t)</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -1802,14 +2655,30 @@ see DataAggregation</p></section>
 <span>def <span class="ident">get_division</span></span>(<span>self, t)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return all species in division t</p></section>
+<section class="desc"><p>Return all taxa in division.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>rdflib.URIRef</code>, <code>str</code>, <code>list</code>, or <code>set</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Division URI </p>
+<h2 id="return">Return</h2>
+<p>set </p>
+<p>Set of taxa in devision.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@do_recursively_in_class
 def get_division(self, t: Union[URIRef, str, list, set]):
-    &#34;&#34;&#34;Return all species in division t&#34;&#34;&#34;
+    &#34;&#34;&#34;Return all taxa in division.
+    Args:
+        t : rdflib.URIRef, str, list, or set \n
+        Division URI \n
+    Return:
+        set \n
+        Set of taxa in devision.
+    &#34;&#34;&#34;
     return self.query_subclassof(a)</code></pre>
 </details>
 </dd>
@@ -1817,14 +2686,30 @@ def get_division(self, t: Union[URIRef, str, list, set]):
 <span>def <span class="ident">get_rank</span></span>(<span>self, t)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return all taxons with rank t</p></section>
+<section class="desc"><p>Return all taxa with rank.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>rdflib.URIRef</code>, <code>str</code>, <code>list</code>, or <code>set</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Rank URI </p>
+<h2 id="return">Return</h2>
+<p>set </p>
+<p>Set of taxa at rank.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@do_recursively_in_class
 def get_rank(self, t: Union[URIRef, str, list, set]):
-    &#34;&#34;&#34;Return all taxons with rank t&#34;&#34;&#34;
+    &#34;&#34;&#34;Return all taxa with rank.
+    Args:
+        t : rdflib.URIRef, str, list, or set \n
+        Rank URI \n
+    Return:
+        set \n
+        Set of taxa at rank.
+    &#34;&#34;&#34;
     return self.query_subclassof(t)</code></pre>
 </details>
 </dd>
@@ -1832,43 +2717,66 @@ def get_rank(self, t: Union[URIRef, str, list, set]):
 <span>def <span class="ident">get_ranks</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get all taxonomic ranks</p></section>
+<section class="desc"><p>Return all ranks (taxonomic level).</p>
+<h2 id="return">Return</h2>
+<p>set </p>
+<p>Set of ranks.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_ranks(self):
-    &#34;&#34;&#34;Get all taxonomic ranks&#34;&#34;&#34;
+    &#34;&#34;&#34;Return all ranks (taxonomic level).
+    Return:
+        set \n
+        Set of ranks.
+    &#34;&#34;&#34;
     return self.query_type(self.namespace[&#39;Rank&#39;])</code></pre>
-</details>
-</dd>
-<dt id="tera.DataAccess.TaxonomyAPI.get_species"><code class="name flex">
-<span>def <span class="ident">get_species</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>All species</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_species(self):
-    &#34;&#34;&#34;All species&#34;&#34;&#34;
-    return self.query_type(self.namespace[&#39;Taxon&#39;])</code></pre>
 </details>
 </dd>
 <dt id="tera.DataAccess.TaxonomyAPI.get_ssd"><code class="name flex">
 <span>def <span class="ident">get_ssd</span></span>(<span>self, t)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return all species in ssd t</p></section>
+<section class="desc"><p>Return all taxa in SSD.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>rdflib.URIRef</code>, <code>str</code>, <code>list</code>, or <code>set</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>SSD URI </p>
+<h2 id="return">Return</h2>
+<p>set </p>
+<p>Set of taxa in SSD.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@do_recursively_in_class
 def get_ssd(self, t: Union[URIRef, str, list, set]):
-    &#34;&#34;&#34;Return all species in ssd t&#34;&#34;&#34;
+    &#34;&#34;&#34;Return all taxa in SSD.
+    Args:
+        t : rdflib.URIRef, str, list, or set \n
+        SSD URI \n
+    Return:
+        set \n
+        Set of taxa in SSD.
+    &#34;&#34;&#34;
     return self.query_subclassof(t)</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.TaxonomyAPI.get_taxa"><code class="name flex">
+<span>def <span class="ident">get_taxa</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return all taxa in taxonomy.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_taxa(self):
+    &#34;&#34;&#34;Return all taxa in taxonomy.&#34;&#34;&#34;
+    return self.query_type(self.namespace[&#39;Taxon&#39;])</code></pre>
 </details>
 </dd>
 </dl>
@@ -1876,13 +2784,13 @@ def get_ssd(self, t: Union[URIRef, str, list, set]):
 <ul class="hlist">
 <li><code><b><a title="tera.DataAccess.API" href="#tera.DataAccess.API">API</a></b></code>:
 <ul class="hlist">
+<li><code><a title="tera.DataAccess.API.avalible_convertions" href="#tera.DataAccess.API.avalible_convertions">avalible_convertions</a></code></li>
 <li><code><a title="tera.DataAccess.API.construct_subgraph" href="#tera.DataAccess.API.construct_subgraph">construct_subgraph</a></code></li>
 <li><code><a title="tera.DataAccess.API.convert_id" href="#tera.DataAccess.API.convert_id">convert_id</a></code></li>
 <li><code><a title="tera.DataAccess.API.query" href="#tera.DataAccess.API.query">query</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_alt_labels" href="#tera.DataAccess.API.query_alt_labels">query_alt_labels</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_child" href="#tera.DataAccess.API.query_child">query_child</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_label" href="#tera.DataAccess.API.query_label">query_label</a></code></li>
-<li><code><a title="tera.DataAccess.API.query_labels" href="#tera.DataAccess.API.query_labels">query_labels</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_parent" href="#tera.DataAccess.API.query_parent">query_parent</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_siblings" href="#tera.DataAccess.API.query_siblings">query_siblings</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_type" href="#tera.DataAccess.API.query_type">query_type</a></code></li>
@@ -1892,24 +2800,39 @@ def get_ssd(self, t: Union[URIRef, str, list, set]):
 </dd>
 <dt id="tera.DataAccess.TraitsAPI"><code class="flex name class">
 <span>class <span class="ident">TraitsAPI</span></span>
-<span>(</span><span>namespace='https://eol.org/schema/terms/', endpoint=None, dataobject=None, name='EOL API')</span>
+<span>(</span><span>namespace='https://eol.org/schema/terms/', endpoint=None, dataobject=None, mappings={&lt;tera.DataIntegration.NCBIToEOL object&gt;, &#x27;eol&#x27;}, name='EOL API')</span>
 </code></dt>
 <dd>
-<section class="desc"><p>endpoint :: str
-sparql endpoint url
-dataobject :: DataObject
-see DataAggregation</p></section>
+<section class="desc"><p>Class for accessing EOL traits data.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class TraitsAPI(TaxonomyAPI):
-    def __init__(self, namespace=&#39;https://eol.org/schema/terms/&#39;, endpoint = None, dataobject = None, name = &#39;EOL API&#39;):
-        super(TraitsAPI, self).__init__(namespace, endpoint, dataobject, name)
+    def __init__(self, 
+                 namespace=&#39;https://eol.org/schema/terms/&#39;, 
+                 endpoint = None, 
+                 dataobject = None,
+                 mappings = {&#39;eol&#39;,NCBIToEOL()},
+                 name = &#39;EOL API&#39;):
+        &#34;&#34;&#34;
+        Class for accessing EOL traits data.
+        &#34;&#34;&#34;
+        super(TraitsAPI, self).__init__(namespace, 
+                                        endpoint, 
+                                        dataobject, 
+                                        mappings,
+                                        name)
     
     @do_recursively_in_class
     def get_concervation_status(self,t: Union[URIRef, str, list, set]):
-        &#34;&#34;&#34;Return concervation status of t.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return concervation status of t.
+        Args: 
+            t : rdflib.URIRef, str, list, or set \n
+            URI 
+        Return:
+            concervation status
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
             SELECT ?h WHERE {
                 &lt;%s&gt; &lt;http://rs.tdwg.org/ontology/voc/SPMInfoItems#ConservationStatus&gt; ?h .
@@ -1919,7 +2842,14 @@ see DataAggregation</p></section>
 
     @do_recursively_in_class
     def get_extinct_status(self,t: Union[URIRef, str, list, set]):
-        &#34;&#34;&#34;Return extinct status (true/false) of t. &#34;&#34;&#34;
+        &#34;&#34;&#34;Return extinct status (true/false).
+        Args:
+            t : rdflib.URIRef, str, list, or set\n
+                URI
+        Return:
+            str \n
+                extinct status
+        &#34;&#34;&#34;
         q = &#34;&#34;&#34;
             SELECT ?h WHERE {
                 &lt;%s&gt; &lt;http://eol.org/schema/terms/ExtinctionStatus&gt; ?h .
@@ -1929,7 +2859,13 @@ see DataAggregation</p></section>
         
     @do_recursively_in_class
     def get_endemic_to(self,t: Union[URIRef, str, list, set]):
-        &#34;&#34;&#34;Return endemic region of t.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return endemic region.
+        Args:
+            t : rdflib.URIRef, str, list, or set\n
+                URI
+        Return:
+            str \n
+                endemic to&#34;&#34;&#34;
         q = &#34;&#34;&#34;
             SELECT ?h WHERE {
                 &lt;%s&gt; &lt;http://eol.org/terms/endemic&gt; ?h .
@@ -1939,7 +2875,13 @@ see DataAggregation</p></section>
     
     @do_recursively_in_class
     def get_ecoregion(self,t: Union[URIRef, str, list, set]):
-        &#34;&#34;&#34;Return ecoregion of t. &#34;&#34;&#34;
+        &#34;&#34;&#34;Return ecoregion.
+        Args:
+            t : rdflib.URIRef, str, list, or set\n
+                URI
+        Return:
+            str \n
+                ecoregion&#34;&#34;&#34;
         q =  &#34;&#34;&#34;
             SELECT ?h WHERE {
                 &lt;%s&gt; &lt;https://www.wikidata.org/entity/Q295469&gt; ?h .
@@ -1949,7 +2891,13 @@ see DataAggregation</p></section>
         
     @do_recursively_in_class
     def get_habitat(self,t: Union[URIRef, str, list, set]):
-        &#34;&#34;&#34;Return habiat of t.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return habiat.
+        Args:
+            t : rdflib.URIRef, str, list, or set\n
+                URI
+        Return:
+            str \n
+                habiat&#34;&#34;&#34;
         q = &#34;&#34;&#34;
             SELECT ?h WHERE {
                 &lt;%s&gt; &lt;http://rs.tdwg.org/dwc/terms/habitat&gt; ?h .
@@ -1968,14 +2916,26 @@ see DataAggregation</p></section>
 <span>def <span class="ident">get_concervation_status</span></span>(<span>self, t)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return concervation status of t.</p></section>
+<section class="desc"><p>Return concervation status of t.
+Args:
+t : rdflib.URIRef, str, list, or set </p>
+<pre><code>URI
+</code></pre>
+<h2 id="return">Return</h2>
+<p>concervation status</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@do_recursively_in_class
 def get_concervation_status(self,t: Union[URIRef, str, list, set]):
-    &#34;&#34;&#34;Return concervation status of t.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return concervation status of t.
+    Args: 
+        t : rdflib.URIRef, str, list, or set \n
+        URI 
+    Return:
+        concervation status
+    &#34;&#34;&#34;
     q = &#34;&#34;&#34;
         SELECT ?h WHERE {
             &lt;%s&gt; &lt;http://rs.tdwg.org/ontology/voc/SPMInfoItems#ConservationStatus&gt; ?h .
@@ -1988,14 +2948,29 @@ def get_concervation_status(self,t: Union[URIRef, str, list, set]):
 <span>def <span class="ident">get_ecoregion</span></span>(<span>self, t)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return ecoregion of t.</p></section>
+<section class="desc"><p>Return ecoregion.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>rdflib.URIRef</code>, <code>str</code>, <code>list</code>, or <code>set</code></dt>
+<dd>URI</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>str </p>
+<pre><code>ecoregion
+</code></pre></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@do_recursively_in_class
 def get_ecoregion(self,t: Union[URIRef, str, list, set]):
-    &#34;&#34;&#34;Return ecoregion of t. &#34;&#34;&#34;
+    &#34;&#34;&#34;Return ecoregion.
+    Args:
+        t : rdflib.URIRef, str, list, or set\n
+            URI
+    Return:
+        str \n
+            ecoregion&#34;&#34;&#34;
     q =  &#34;&#34;&#34;
         SELECT ?h WHERE {
             &lt;%s&gt; &lt;https://www.wikidata.org/entity/Q295469&gt; ?h .
@@ -2008,14 +2983,29 @@ def get_ecoregion(self,t: Union[URIRef, str, list, set]):
 <span>def <span class="ident">get_endemic_to</span></span>(<span>self, t)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return endemic region of t.</p></section>
+<section class="desc"><p>Return endemic region.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>rdflib.URIRef</code>, <code>str</code>, <code>list</code>, or <code>set</code></dt>
+<dd>URI</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>str </p>
+<pre><code>endemic to
+</code></pre></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@do_recursively_in_class
 def get_endemic_to(self,t: Union[URIRef, str, list, set]):
-    &#34;&#34;&#34;Return endemic region of t.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return endemic region.
+    Args:
+        t : rdflib.URIRef, str, list, or set\n
+            URI
+    Return:
+        str \n
+            endemic to&#34;&#34;&#34;
     q = &#34;&#34;&#34;
         SELECT ?h WHERE {
             &lt;%s&gt; &lt;http://eol.org/terms/endemic&gt; ?h .
@@ -2028,14 +3018,30 @@ def get_endemic_to(self,t: Union[URIRef, str, list, set]):
 <span>def <span class="ident">get_extinct_status</span></span>(<span>self, t)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return extinct status (true/false) of t.</p></section>
+<section class="desc"><p>Return extinct status (true/false).</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>rdflib.URIRef</code>, <code>str</code>, <code>list</code>, or <code>set</code></dt>
+<dd>URI</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>str </p>
+<pre><code>extinct status
+</code></pre></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@do_recursively_in_class
 def get_extinct_status(self,t: Union[URIRef, str, list, set]):
-    &#34;&#34;&#34;Return extinct status (true/false) of t. &#34;&#34;&#34;
+    &#34;&#34;&#34;Return extinct status (true/false).
+    Args:
+        t : rdflib.URIRef, str, list, or set\n
+            URI
+    Return:
+        str \n
+            extinct status
+    &#34;&#34;&#34;
     q = &#34;&#34;&#34;
         SELECT ?h WHERE {
             &lt;%s&gt; &lt;http://eol.org/schema/terms/ExtinctionStatus&gt; ?h .
@@ -2048,14 +3054,29 @@ def get_extinct_status(self,t: Union[URIRef, str, list, set]):
 <span>def <span class="ident">get_habitat</span></span>(<span>self, t)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return habiat of t.</p></section>
+<section class="desc"><p>Return habiat.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>rdflib.URIRef</code>, <code>str</code>, <code>list</code>, or <code>set</code></dt>
+<dd>URI</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>str </p>
+<pre><code>habiat
+</code></pre></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@do_recursively_in_class
 def get_habitat(self,t: Union[URIRef, str, list, set]):
-    &#34;&#34;&#34;Return habiat of t.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return habiat.
+    Args:
+        t : rdflib.URIRef, str, list, or set\n
+            URI
+    Return:
+        str \n
+            habiat&#34;&#34;&#34;
     q = &#34;&#34;&#34;
         SELECT ?h WHERE {
             &lt;%s&gt; &lt;http://rs.tdwg.org/dwc/terms/habitat&gt; ?h .
@@ -2069,18 +3090,18 @@ def get_habitat(self,t: Union[URIRef, str, list, set]):
 <ul class="hlist">
 <li><code><b><a title="tera.DataAccess.TaxonomyAPI" href="#tera.DataAccess.TaxonomyAPI">TaxonomyAPI</a></b></code>:
 <ul class="hlist">
+<li><code><a title="tera.DataAccess.TaxonomyAPI.avalible_convertions" href="#tera.DataAccess.API.avalible_convertions">avalible_convertions</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.construct_subgraph" href="#tera.DataAccess.API.construct_subgraph">construct_subgraph</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.convert_id" href="#tera.DataAccess.API.convert_id">convert_id</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.get_division" href="#tera.DataAccess.TaxonomyAPI.get_division">get_division</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.get_rank" href="#tera.DataAccess.TaxonomyAPI.get_rank">get_rank</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.get_ranks" href="#tera.DataAccess.TaxonomyAPI.get_ranks">get_ranks</a></code></li>
-<li><code><a title="tera.DataAccess.TaxonomyAPI.get_species" href="#tera.DataAccess.TaxonomyAPI.get_species">get_species</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.get_ssd" href="#tera.DataAccess.TaxonomyAPI.get_ssd">get_ssd</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_taxa" href="#tera.DataAccess.TaxonomyAPI.get_taxa">get_taxa</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query" href="#tera.DataAccess.API.query">query</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query_alt_labels" href="#tera.DataAccess.API.query_alt_labels">query_alt_labels</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query_child" href="#tera.DataAccess.API.query_child">query_child</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query_label" href="#tera.DataAccess.API.query_label">query_label</a></code></li>
-<li><code><a title="tera.DataAccess.TaxonomyAPI.query_labels" href="#tera.DataAccess.API.query_labels">query_labels</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query_parent" href="#tera.DataAccess.API.query_parent">query_parent</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query_siblings" href="#tera.DataAccess.API.query_siblings">query_siblings</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.query_type" href="#tera.DataAccess.API.query_type">query_type</a></code></li>
@@ -2106,14 +3127,14 @@ def get_habitat(self,t: Union[URIRef, str, list, set]):
 <ul>
 <li>
 <h4><code><a title="tera.DataAccess.API" href="#tera.DataAccess.API">API</a></code></h4>
-<ul class="two-column">
+<ul class="">
+<li><code><a title="tera.DataAccess.API.avalible_convertions" href="#tera.DataAccess.API.avalible_convertions">avalible_convertions</a></code></li>
 <li><code><a title="tera.DataAccess.API.construct_subgraph" href="#tera.DataAccess.API.construct_subgraph">construct_subgraph</a></code></li>
 <li><code><a title="tera.DataAccess.API.convert_id" href="#tera.DataAccess.API.convert_id">convert_id</a></code></li>
 <li><code><a title="tera.DataAccess.API.query" href="#tera.DataAccess.API.query">query</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_alt_labels" href="#tera.DataAccess.API.query_alt_labels">query_alt_labels</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_child" href="#tera.DataAccess.API.query_child">query_child</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_label" href="#tera.DataAccess.API.query_label">query_label</a></code></li>
-<li><code><a title="tera.DataAccess.API.query_labels" href="#tera.DataAccess.API.query_labels">query_labels</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_parent" href="#tera.DataAccess.API.query_parent">query_parent</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_siblings" href="#tera.DataAccess.API.query_siblings">query_siblings</a></code></li>
 <li><code><a title="tera.DataAccess.API.query_type" href="#tera.DataAccess.API.query_type">query_type</a></code></li>
@@ -2160,8 +3181,8 @@ def get_habitat(self,t: Union[URIRef, str, list, set]):
 <li><code><a title="tera.DataAccess.TaxonomyAPI.get_division" href="#tera.DataAccess.TaxonomyAPI.get_division">get_division</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.get_rank" href="#tera.DataAccess.TaxonomyAPI.get_rank">get_rank</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.get_ranks" href="#tera.DataAccess.TaxonomyAPI.get_ranks">get_ranks</a></code></li>
-<li><code><a title="tera.DataAccess.TaxonomyAPI.get_species" href="#tera.DataAccess.TaxonomyAPI.get_species">get_species</a></code></li>
 <li><code><a title="tera.DataAccess.TaxonomyAPI.get_ssd" href="#tera.DataAccess.TaxonomyAPI.get_ssd">get_ssd</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_taxa" href="#tera.DataAccess.TaxonomyAPI.get_taxa">get_taxa</a></code></li>
 </ul>
 </li>
 <li>
