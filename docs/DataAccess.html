@@ -50,10 +50,17 @@ class API:
                  name=&#39;API&#39;):
         &#34;&#34;&#34;API for accessing data sets. 
         
-        Keyword arguments:
-        namespace -- Base URI for API (default None)
-        endpoint -- SPARQL endpoint URL (default None)
-        dataobject -- see DataAggregation (default None)
+        Parameters
+        ----------
+        namespace : str, default None 
+            Base URI for API
+        
+        endpoint : str, default None
+            SPARQL endpoint URL
+
+        dataobject : tera.DataObject, default None
+            see DataAggregation
+            
         &#34;&#34;&#34;
         if not endpoint and not dataobject:
             raise NotImplementedError
@@ -805,10 +812,15 @@ class EffectsAPI(API):
 </code></dt>
 <dd>
 <section class="desc"><p>API for accessing data sets. </p>
-<p>Keyword arguments:
-namespace &ndash; Base URI for API (default None)
-endpoint &ndash; SPARQL endpoint URL (default None)
-dataobject &ndash; see DataAggregation (default None)</p></section>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>namespace</code></strong> :&ensp;<code>str</code>, default <code>None</code></dt>
+<dd>Base URI for API</dd>
+<dt><strong><code>endpoint</code></strong> :&ensp;<code>str</code>, default <code>None</code></dt>
+<dd>SPARQL endpoint URL</dd>
+<dt><strong><code>dataobject</code></strong> :&ensp;<code>tera.DataObject</code>, default <code>None</code></dt>
+<dd>see DataAggregation</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -821,10 +833,17 @@ dataobject &ndash; see DataAggregation (default None)</p></section>
                  name=&#39;API&#39;):
         &#34;&#34;&#34;API for accessing data sets. 
         
-        Keyword arguments:
-        namespace -- Base URI for API (default None)
-        endpoint -- SPARQL endpoint URL (default None)
-        dataobject -- see DataAggregation (default None)
+        Parameters
+        ----------
+        namespace : str, default None 
+            Base URI for API
+        
+        endpoint : str, default None
+            SPARQL endpoint URL
+
+        dataobject : tera.DataObject, default None
+            see DataAggregation
+            
         &#34;&#34;&#34;
         if not endpoint and not dataobject:
             raise NotImplementedError
@@ -2547,7 +2566,7 @@ def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
 </dd>
 <dt id="tera.DataAccess.TaxonomyAPI"><code class="flex name class">
 <span>class <span class="ident">TaxonomyAPI</span></span>
-<span>(</span><span>namespace=None, endpoint=None, dataobject=None, mappings={&lt;tera.DataIntegration.NCBIToEOL object&gt;, &#x27;eol&#x27;}, name='Taxonomy API')</span>
+<span>(</span><span>namespace=None, endpoint=None, dataobject=None, mappings={&#x27;eol&#x27;, &lt;tera.DataIntegration.NCBIToEOL object&gt;}, name='Taxonomy API')</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for accessing taxonomic data. </p>
