@@ -1,0 +1,1126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.4" />
+<title>tera.DataAggregation API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>tera.DataAggregation</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from rdflib import Graph, Namespace, Literal, URIRef, BNode
+from rdflib.namespace import RDF, OWL, RDFS
+UNIT = Namespace(&#39;http://qudt.org/vocab/unit#&#39;)
+import pandas as pd
+import validators
+import glob
+import math
+
+nan_values = [&#39;nan&#39;, float(&#39;nan&#39;),&#39;--&#39;,&#39;-X&#39;,&#39;NA&#39;,&#39;NC&#39;,-1,&#39;&#39;,&#39;sp.&#39;, -1,&#39;sp,&#39;,&#39;var.&#39;,&#39;variant&#39;,&#39;NR&#39;]
+
+class DataObject:
+    def __init__(self, namespace = &#39;http://www.example.org/&#39;, name = &#39;Data Object&#39;):
+        self.graph = Graph()
+        self.namespace = Namespace(namespace)
+        self.name = name 
+        
+    def __str__(self):
+        return self.name 
+        
+    def __dict__(self):
+        return {
+                &#39;namespace&#39;:self.namespace,
+                &#39;num_triples&#39;:len(self.graph)
+            }
+    
+    def save(self, path):
+        self.graph.serialize(path, format=path.split(&#39;.&#39;).pop(-1))
+        
+    def replace(self, f, t):
+        &#34;&#34;&#34;Replace list f of entities with t. Usefull after converting between datasets.&#34;&#34;&#34;
+        assert len(f) == len(t)
+        
+        for old, new in zip(f, t):
+            triples = self.graph.triples(subject=old)
+            tmp = set([(new,p,o) for _,p,o in triples])
+            triples = self.graph.triples(objects=old)
+            tmp |= set([(s,p,new) for s,p,_ in triples])
+            
+            self.graph.remove((old,None,None))
+            self.graph.remove((None,None,old))
+            
+
+class Taxonomy(DataObject):
+    def __init__(self, 
+                 namespace = &#39;https://www.ncbi.nlm.nih.gov/taxonomy&#39;,
+                 name = &#39;NCBI Taxonomy&#39;,
+                 directory = None):
+        super(Taxonomy, self).__init__(namespace, name)
+        
+        if directory:
+            self._load_ncbi_taxonomy(directory)
+    
+    def _load_ncbi_taxonomy(self, directory):
+        self._load_hierarchy(directory+&#39;nodes.dmp&#39;)
+        self._load_divisions(directory+&#39;division.dmp&#39;)
+        self._load_names(directory+&#39;names.dmp&#39;)
+
+    def _load_hierarchy(self, path):
+        df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2,4], names=[&#39;child&#39;,&#39;parent&#39;,&#39;rank&#39;,&#39;division&#39;], na_values = nan_values)
+        df.dropna(inplace=True)
+
+        def func(row):
+            c,p,r,d = row
+            c = self.namespace[&#39;taxon/&#39;+str(c)]
+            self.graph.add((c,RDF.type,self.namespace[&#39;Taxon&#39;]))
+            rc = r
+            r = r.replace(&#39; &#39;,&#39;_&#39;)
+            self.graph.add((c, self.namespace[&#39;rank&#39;], self.namespace[&#39;rank/&#39;+r]))
+            self.graph.add((self.namespace[&#39;rank/&#39;+r], RDFS.label, Literal(rc)))
+            self.graph.add((self.namespace[&#39;rank/&#39;+r], RDF.type, self.namespace[&#39;Rank&#39;]))
+            p = self.namespace[&#39;taxon/&#39;+str(p)]
+            self.graph.add((c, RDFS.subClassOf, p))
+            d = str(d).replace(&#39; &#39;,&#39;_&#39;)
+            d = self.namespace[&#39;division/&#39;+str(d)]
+            self.graph.add((c, RDFS.subClassOf, d))
+        
+        for row in zip(df[&#39;child&#39;],df[&#39;parent&#39;],df[&#39;rank&#39;],df[&#39;division&#39;]):
+            func(row)
+    
+    def _load_names(self, path):
+        df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2,3], names=[&#39;taxon&#39;,&#39;name&#39;,&#39;unique_name&#39;,&#39;name_type&#39;],na_values = nan_values)
+        df.dropna(inplace=True)
+
+
+        def func(row):
+            c,n,un,nt = row
+            c = self.namespace[&#39;taxon/&#39;+str(c)]
+            n = Literal(n)
+            un = Literal(un)
+            self.graph.add((c, RDFS.label, un))
+            ntl = Literal(nt)
+            nt = self.namespace[nt.replace(&#39; &#39;,&#39;_&#39;)]
+            self.graph.add((c,nt,n))
+            self.graph.add((nt,RDFS.label,ntl))
+        
+        for row in zip(df[&#39;taxon&#39;],df[&#39;name&#39;],df[&#39;unique_name&#39;],df[&#39;name_type&#39;]):
+            func(row)
+        
+    def _load_divisions(self, path):
+        df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2], names=[&#39;division&#39;,&#39;acronym&#39;,&#39;name&#39;], na_values = nan_values)
+        df.dropna(inplace=True)
+
+        def func(row):
+            d,a,n = row
+            d = self.namespace[&#39;division/&#39;+str(d)]
+            self.graph.add((d,RDF.type,self.namespace[&#39;Division&#39;]))
+            self.graph.add((d,RDFS.label,Literal(n)))
+            self.graph.add((d,RDFS.label,Literal(a)))
+        
+        for row in zip(df[&#39;division&#39;],df[&#39;acronym&#39;],df[&#39;name&#39;]):
+            func(row)
+    
+    
+class Traits(DataObject):
+    def __init__(self, 
+                 namespace = &#39;https://eol.org/schema/terms/&#39;,
+                 name = &#39;EOL Traits&#39;,
+                 directory = None):
+        super(Traits, self).__init__(namespace, name)
+        
+        if directory:
+            self._load_eol_traits(directory)
+    
+    def _load_eol_traits(self, directory):
+        self._load_traits(directory+&#39;trait_bank/traits.csv&#39;)
+        for f in glob.glob(directory+&#39;eol_rels/*.csv&#39;):
+            self._load_eol_subclasses(f)
+    
+    def _load_traits(self, path):
+        df = pd.read_csv(path, sep=&#39;,&#39;, usecols=[&#39;page_id&#39;,&#39;predicate&#39;,&#39;value_uri&#39;], low_memory=False, chunksize=10**3, na_values = nan_values)
+
+        def func(row):
+            s,p,o = row
+            s = self.namespace[s]
+            
+            try:
+                val = validators.url(o)
+                o = URIRef(o)
+            except TypeError:
+                o = Literal(o)
+                val = True
+
+            if validators.url(s) and validators.url(p) and val:
+                self.graph.add((URIRef(s),URIRef(p),o))
+
+        for chunk in df:
+            chunk.dropna(inplace=True)
+            for row in zip(chunk[&#39;page_id&#39;],chunk[&#39;predicate&#39;],chunk[&#39;value_uri&#39;]):
+                func(row)
+                
+    def _load_eol_subclasses(self, path):
+        try: 
+            try:
+                df = pd.read_csv(path,sep=&#39;,&#39;,usecols=[&#39;child&#39;,&#39;parent&#39;],low_memory=False,na_values = nan_values)
+                df.dropna(inplace=True)
+            except ValueError:
+                df = pd.read_csv(path,sep=&#39;,&#39;,header=None,low_memory=False,na_values = nan_values)
+                df.dropna(inplace=True)
+                df.columns = [&#39;parent&#39;,&#39;child&#39;]
+            
+        except FileNotFoundError as e:
+            print(e,path)
+        
+        def func(row):
+            c,p = row
+            if validators.url(c) and validators.url(p):
+                c,p = URIRef(c),URIRef(p)
+                self.graph.add((c,RDFS.subClassOf,p))
+        
+        for row in zip(df[&#39;child&#39;],df[&#39;parent&#39;]):
+            func(row)
+        
+    
+class Effects(DataObject):
+    def __init__(self, 
+                    namespace = &#39;https://cfpub.epa.gov/ecotox/&#39;,
+                    name = &#39;Ecotox Effects&#39;,
+                    directory = None):
+        super(Effects, self).__init__(namespace, name)
+        
+        self._load_effect_data(directory + &#39;tests.txt&#39;, directory + &#39;results.txt&#39;)
+        
+    def _load_effect_data(self, tests_path, results_path):
+        tests = pd.read_csv(tests_path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
+        tests.dropna(inplace=True, subset=[&#39;test_id&#39;,
+                        &#39;test_cas&#39;,
+                        &#39;species_number&#39;])
+        tests.fillna(inplace=True, value=&#39;missing&#39;)
+        results = pd.read_csv(results_path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
+        results.dropna(inplace=True, subset=[&#39;test_id&#39;,&#39;endpoint&#39;,&#39;conc1_mean&#39;,&#39;conc1_unit&#39;,&#39;effect&#39;])
+        results.fillna(inplace=True, value=&#39;missing&#39;)
+
+        def test_func(row):
+            test_id, cas_number, species_number, stdm, stdu, habitat, lifestage, age, ageunit, weight, weightunit = row
+            
+            #must be included
+            t = self.namespace[&#39;test/&#39;+str(test_id)]
+            s = self.namespace[&#39;taxon/&#39;+str(species_number)]
+            c = self.namespace[&#39;cas/&#39;+str(cas_number)]
+            self.graph.add((t, RDF.type, self.namespace[&#39;Test&#39;]))
+            self.graph.add((t, self.namespace[&#39;species&#39;], s))
+            self.graph.add((t, self.namespace[&#39;chemical&#39;], c))
+
+            for v,u,p in zip([stdm,age,weight],[stdu,ageunit,weightunit],[&#39;studyDuration&#39;,&#39;organismAge&#39;,&#39;organismWeight&#39;]):
+                if v != &#39;missing&#39;:
+                    b = BNode()
+                    self.graph.add( (b, RDF.value, Literal(v)) )
+                    self.graph.add( (b, UNIT.units, Literal(u)) )
+                    self.graph.add( (t, self.namespace[p], b) )
+            
+            if habitat != &#39;missing&#39;:
+                self.graph.add((t, self.namespace[&#39;organismHabitat&#39;],self.namespace[&#39;habitat/&#39;+habitat]))
+            if lifestage != &#39;missing&#39;:
+                self.graph.add((t, self.namespace[&#39;organismLifestage&#39;],self.namespace[&#39;lifestage/&#39;+lifestage]))
+
+        def results_func(row):
+            test_id, endpoint, conc, conc_unit, effect = row
+            t = self.namespace[&#39;test/&#39;+str(test_id)]
+            
+            r = BNode()
+            ep = self.namespace[&#39;endpoint/&#39;+str(endpoint)]
+            ef = self.namespace[&#39;effect/&#39;+str(effect)]
+            
+            self.graph.add((r,self.namespace[&#39;endpoint&#39;],ep))
+            self.graph.add((r,self.namespace[&#39;effect&#39;],ef))
+            b = BNode()
+            self.graph.add( (b, RDF.value, Literal(conc)) )
+            self.graph.add( (b, UNIT.units, Literal(conc_unit)) ) #TODO creating mapping for units not in UNIT.units
+            self.graph.add( (r, self.namespace[&#39;concentration&#39;], b) )
+            
+            self.graph.add((t,self.namespace[&#39;hasResult&#39;],r))
+            
+        for row in zip(tests[&#39;test_id&#39;],
+                        tests[&#39;test_cas&#39;],
+                        tests[&#39;species_number&#39;],
+                        tests[&#39;study_duration_mean&#39;],
+                        tests[&#39;study_duration_unit&#39;],
+                        tests[&#39;organism_habitat&#39;],
+                        tests[&#39;organism_lifestage&#39;],
+                        tests[&#39;organism_age_mean&#39;],
+                        tests[&#39;organism_age_unit&#39;],
+                        tests[&#39;organism_init_wt_mean&#39;],
+                        tests[&#39;organism_init_wt_unit&#39;]):
+            test_func(row)
+        
+        for row in zip(results[&#39;test_id&#39;], results[&#39;endpoint&#39;], results[&#39;conc1_mean&#39;], results[&#39;conc1_unit&#39;], results[&#39;effect&#39;]):
+            results_func(row)
+
+
+class EcotoxTaxonomy(DataObject):
+    def __init__(self, 
+                    namespace = &#39;https://cfpub.epa.gov/ecotox/&#39;,
+                    name = &#39;Ecotox Taxonomy&#39;,
+                    directory = None):
+        super(EcotoxTaxonomy, self).__init__(namespace, name)
+        
+        self._load_species(directory + &#39;validation/species.txt&#39; )
+        self._load_synonyms(directory + &#39;validation/species_synonyms.txt&#39;)
+        self._load_hierarchy(directory + &#39;validation/species.txt&#39;)
+        
+    def _load_species(self, path):
+        df = pd.read_csv(path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
+        df.dropna(inplace=True)
+        
+        def func(row):
+            s, cn, ln, group = row
+            
+            s = self.namespace[&#39;taxon/&#39;+s]
+            names = group.split(&#39;,&#39;)
+            group = group.replace(&#39;/&#39;,&#39;&#39;)
+            group = group.replace(&#39;.&#39;,&#39;&#39;)
+            group = group.replace(&#39; &#39;,&#39;&#39;)
+            tmp = group.split(&#39;,&#39;)
+            group_uri = [self.namespace[&#39;group/&#39;+gr] for gr in tmp]
+            
+            for gri,n in zip(group_uri,names):
+                self.graph.add((s, RDFS.subClassOf, gri))
+                self.graph.add((gri, RDFS.label, Literal(n)))
+                self.graph.add((gri, RDF.type, self.onto_namespace[&#39;SpeciesGroup&#39;]))
+                
+            self.graph.add((s, RDF.type, self.namespace[&#39;Taxon&#39;]))
+            self.graph.add((s, self.namespace[&#39;commonName&#39;], Literal(cn)))
+            self.graph.add((s, self.namespace[&#39;latinName&#39;], Literal(ln)))
+        
+        for row in zip(df[&#39;species_number&#39;], df[&#39;common_name&#39;], df[&#39;latin_name&#39;],df[&#39;ecotox_group&#39;]):
+            func(row)
+            
+    def _load_synonyms(self, path):
+        df = pd.read_csv(path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
+        df.dropna(inplace=True)
+        
+        def func(row):
+            s, ln = row
+            s = self.namespace[&#39;taxon/&#39;+s]
+            self.graph.add((s, self.namespace[&#39;latinName&#39;], Literal(ln)))
+        
+        for row in zip(df[&#39;species_number&#39;],df[&#39;latin_name&#39;]):
+            func(row)
+    
+    def _load_hierarchy(self, path):
+        df = pd.read_csv(path, sep= &#39;|&#39;, low_memory = False, dtype = str)
+        df.dropna(inplace=True)
+        
+        def func(row):
+            sn, lineage = row
+            curr = sn
+            for l in filter(lambda x: x != &#39;&#39;, lineage):
+                curr = self.namespace[&#39;taxon/&#39;+str(curr)]
+                self.graph.add((curr, RDFS.subClassOf, self.namespace[&#39;taxon/&#39;+str(l)]))
+                curr = l
+                
+        for row in zip(df[&#39;species_number&#39;],
+                        zip(df[&#39;variety&#39;],
+                            df[&#39;subspecies&#39;],
+                            df[&#39;species&#39;],
+                            df[&#39;genus&#39;],
+                            df[&#39;family&#39;],
+                            df[&#39;tax_order&#39;],
+                            df[&#39;class&#39;],
+                            df[&#39;superclass&#39;],
+                            df[&#39;subphylum_div&#39;],
+                            df[&#39;phylum_division&#39;],
+                            df[&#39;kingdom&#39;])):
+            func(row)
+                
+        
+class EcotoxChemicals(DataObject):
+    def __init__(self, 
+                    namespace = &#39;https://cfpub.epa.gov/ecotox/&#39;,
+                    name = &#39;Ecotox Chemicals&#39;,
+                    directory = None):
+        super(EcotoxChemicals, self).__init__(namespace, name)
+        
+        self._load_chemicals(directory + &#39;validation/chemicals.txt&#39;)
+        
+    def _load_chemicals(self, path):
+        df = pd.read_csv(path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
+        df.dropna(inplace=True)
+        
+        def func(row):
+            c, n, group = row
+            c = self.namespace[&#39;cas/&#39;+str(c)]
+            self.graph.add((c, RDF.type, self.namespace[&#39;Chemical&#39;]))
+            for a in n.split(&#39;, &#39;):
+                self.graph.add((c, RDFS.label, Literal(a)))
+            
+            names = group.split(&#39;,&#39;)
+            group = group.replace(&#39;/&#39;,&#39;&#39;)
+            group = group.replace(&#39;.&#39;,&#39;&#39;)
+            group = group.replace(&#39; &#39;,&#39;&#39;)
+            tmp = group.split(&#39;,&#39;)
+            group_uri = [self.namespace[&#39;group/&#39;+gr] for gr in tmp]
+        
+            for gri,n in zip(group_uri,names):
+                self.graph.add((c, RDFS.subClassOf, gri))
+                self.graph.add((gri, RDFS.label, Literal(n)))
+                self.graph.add((gri, RDF.type, self.namespace[&#39;ChemicalGroup&#39;]))
+        
+        for row in zip(df[&#39;cas_number&#39;], df[&#39;chemical_name&#39;], df[&#39;ecotox_group&#39;]):
+            func(row)
+    
+class PubChem(DataObject):
+    def __init__(self, 
+                    namespace = &#39;http://rdf.ncbi.nlm.nih.gov/pubchem/compound/&#39;,
+                    name = &#39;PubChem&#39;,
+                    directory = None):
+        super(PubChem, self).__init__(namespace, name)
+        
+        for f in glob.glob(directory+&#39;*.ttl&#39;):
+            self._load_data(f)
+        
+    def _load_data(self, path):
+        self.graph += Graph().parse(path, format = &#39;ttl&#39;)
+
+class ChEBI(DataObject):
+    def __init__(self, 
+                    namespace = &#39;http://purl.obolibrary.org/obo/&#39;,
+                    name = &#39;ChEBI&#39;,
+                    directory = None):
+        super(ChEBI, self).__init__(namespace, name)
+        
+        for f in glob.glob(directory+&#39;*.ttl&#39;):
+            self._load_data(f)
+        
+    def _load_data(self, path):
+        self.graph += Graph().parse(path, format = &#39;ttl&#39;)
+        
+class MeSH(DataObject):
+    def __init__(self, 
+                    namespace = &#39;http://id.nlm.nih.gov/mesh/&#39;,
+                    name = &#39;MeSH&#39;,
+                    directory = None):
+        super(MeSH, self).__init__(namespace, name)
+        
+        for f in glob.glob(directory+&#39;*.nt&#39;):
+            self._load_data(f)
+        
+    def _load_data(self, path):
+        self.graph += Graph().parse(path, format = &#39;nt&#39;)
+        </code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="tera.DataAggregation.ChEBI"><code class="flex name class">
+<span>class <span class="ident">ChEBI</span></span>
+<span>(</span><span>namespace='http://purl.obolibrary.org/obo/', name='ChEBI', directory=None)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ChEBI(DataObject):
+    def __init__(self, 
+                    namespace = &#39;http://purl.obolibrary.org/obo/&#39;,
+                    name = &#39;ChEBI&#39;,
+                    directory = None):
+        super(ChEBI, self).__init__(namespace, name)
+        
+        for f in glob.glob(directory+&#39;*.ttl&#39;):
+            self._load_data(f)
+        
+    def _load_data(self, path):
+        self.graph += Graph().parse(path, format = &#39;ttl&#39;)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataAggregation.DataObject.replace" href="#tera.DataAggregation.DataObject.replace">replace</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="tera.DataAggregation.DataObject"><code class="flex name class">
+<span>class <span class="ident">DataObject</span></span>
+<span>(</span><span>namespace='http://www.example.org/', name='Data Object')</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DataObject:
+    def __init__(self, namespace = &#39;http://www.example.org/&#39;, name = &#39;Data Object&#39;):
+        self.graph = Graph()
+        self.namespace = Namespace(namespace)
+        self.name = name 
+        
+    def __str__(self):
+        return self.name 
+        
+    def __dict__(self):
+        return {
+                &#39;namespace&#39;:self.namespace,
+                &#39;num_triples&#39;:len(self.graph)
+            }
+    
+    def save(self, path):
+        self.graph.serialize(path, format=path.split(&#39;.&#39;).pop(-1))
+        
+    def replace(self, f, t):
+        &#34;&#34;&#34;Replace list f of entities with t. Usefull after converting between datasets.&#34;&#34;&#34;
+        assert len(f) == len(t)
+        
+        for old, new in zip(f, t):
+            triples = self.graph.triples(subject=old)
+            tmp = set([(new,p,o) for _,p,o in triples])
+            triples = self.graph.triples(objects=old)
+            tmp |= set([(s,p,new) for s,p,_ in triples])
+            
+            self.graph.remove((old,None,None))
+            self.graph.remove((None,None,old))</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="tera.DataAggregation.ChEBI" href="#tera.DataAggregation.ChEBI">ChEBI</a></li>
+<li><a title="tera.DataAggregation.EcotoxChemicals" href="#tera.DataAggregation.EcotoxChemicals">EcotoxChemicals</a></li>
+<li><a title="tera.DataAggregation.EcotoxTaxonomy" href="#tera.DataAggregation.EcotoxTaxonomy">EcotoxTaxonomy</a></li>
+<li><a title="tera.DataAggregation.Effects" href="#tera.DataAggregation.Effects">Effects</a></li>
+<li><a title="tera.DataAggregation.MeSH" href="#tera.DataAggregation.MeSH">MeSH</a></li>
+<li><a title="tera.DataAggregation.PubChem" href="#tera.DataAggregation.PubChem">PubChem</a></li>
+<li><a title="tera.DataAggregation.Taxonomy" href="#tera.DataAggregation.Taxonomy">Taxonomy</a></li>
+<li><a title="tera.DataAggregation.Traits" href="#tera.DataAggregation.Traits">Traits</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="tera.DataAggregation.DataObject.replace"><code class="name flex">
+<span>def <span class="ident">replace</span></span>(<span>self, f, t)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Replace list f of entities with t. Usefull after converting between datasets.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def replace(self, f, t):
+    &#34;&#34;&#34;Replace list f of entities with t. Usefull after converting between datasets.&#34;&#34;&#34;
+    assert len(f) == len(t)
+    
+    for old, new in zip(f, t):
+        triples = self.graph.triples(subject=old)
+        tmp = set([(new,p,o) for _,p,o in triples])
+        triples = self.graph.triples(objects=old)
+        tmp |= set([(s,p,new) for s,p,_ in triples])
+        
+        self.graph.remove((old,None,None))
+        self.graph.remove((None,None,old))</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAggregation.DataObject.save"><code class="name flex">
+<span>def <span class="ident">save</span></span>(<span>self, path)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save(self, path):
+    self.graph.serialize(path, format=path.split(&#39;.&#39;).pop(-1))</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="tera.DataAggregation.EcotoxChemicals"><code class="flex name class">
+<span>class <span class="ident">EcotoxChemicals</span></span>
+<span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', name='Ecotox Chemicals', directory=None)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class EcotoxChemicals(DataObject):
+    def __init__(self, 
+                    namespace = &#39;https://cfpub.epa.gov/ecotox/&#39;,
+                    name = &#39;Ecotox Chemicals&#39;,
+                    directory = None):
+        super(EcotoxChemicals, self).__init__(namespace, name)
+        
+        self._load_chemicals(directory + &#39;validation/chemicals.txt&#39;)
+        
+    def _load_chemicals(self, path):
+        df = pd.read_csv(path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
+        df.dropna(inplace=True)
+        
+        def func(row):
+            c, n, group = row
+            c = self.namespace[&#39;cas/&#39;+str(c)]
+            self.graph.add((c, RDF.type, self.namespace[&#39;Chemical&#39;]))
+            for a in n.split(&#39;, &#39;):
+                self.graph.add((c, RDFS.label, Literal(a)))
+            
+            names = group.split(&#39;,&#39;)
+            group = group.replace(&#39;/&#39;,&#39;&#39;)
+            group = group.replace(&#39;.&#39;,&#39;&#39;)
+            group = group.replace(&#39; &#39;,&#39;&#39;)
+            tmp = group.split(&#39;,&#39;)
+            group_uri = [self.namespace[&#39;group/&#39;+gr] for gr in tmp]
+        
+            for gri,n in zip(group_uri,names):
+                self.graph.add((c, RDFS.subClassOf, gri))
+                self.graph.add((gri, RDFS.label, Literal(n)))
+                self.graph.add((gri, RDF.type, self.namespace[&#39;ChemicalGroup&#39;]))
+        
+        for row in zip(df[&#39;cas_number&#39;], df[&#39;chemical_name&#39;], df[&#39;ecotox_group&#39;]):
+            func(row)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataAggregation.DataObject.replace" href="#tera.DataAggregation.DataObject.replace">replace</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="tera.DataAggregation.EcotoxTaxonomy"><code class="flex name class">
+<span>class <span class="ident">EcotoxTaxonomy</span></span>
+<span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', name='Ecotox Taxonomy', directory=None)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class EcotoxTaxonomy(DataObject):
+    def __init__(self, 
+                    namespace = &#39;https://cfpub.epa.gov/ecotox/&#39;,
+                    name = &#39;Ecotox Taxonomy&#39;,
+                    directory = None):
+        super(EcotoxTaxonomy, self).__init__(namespace, name)
+        
+        self._load_species(directory + &#39;validation/species.txt&#39; )
+        self._load_synonyms(directory + &#39;validation/species_synonyms.txt&#39;)
+        self._load_hierarchy(directory + &#39;validation/species.txt&#39;)
+        
+    def _load_species(self, path):
+        df = pd.read_csv(path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
+        df.dropna(inplace=True)
+        
+        def func(row):
+            s, cn, ln, group = row
+            
+            s = self.namespace[&#39;taxon/&#39;+s]
+            names = group.split(&#39;,&#39;)
+            group = group.replace(&#39;/&#39;,&#39;&#39;)
+            group = group.replace(&#39;.&#39;,&#39;&#39;)
+            group = group.replace(&#39; &#39;,&#39;&#39;)
+            tmp = group.split(&#39;,&#39;)
+            group_uri = [self.namespace[&#39;group/&#39;+gr] for gr in tmp]
+            
+            for gri,n in zip(group_uri,names):
+                self.graph.add((s, RDFS.subClassOf, gri))
+                self.graph.add((gri, RDFS.label, Literal(n)))
+                self.graph.add((gri, RDF.type, self.onto_namespace[&#39;SpeciesGroup&#39;]))
+                
+            self.graph.add((s, RDF.type, self.namespace[&#39;Taxon&#39;]))
+            self.graph.add((s, self.namespace[&#39;commonName&#39;], Literal(cn)))
+            self.graph.add((s, self.namespace[&#39;latinName&#39;], Literal(ln)))
+        
+        for row in zip(df[&#39;species_number&#39;], df[&#39;common_name&#39;], df[&#39;latin_name&#39;],df[&#39;ecotox_group&#39;]):
+            func(row)
+            
+    def _load_synonyms(self, path):
+        df = pd.read_csv(path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
+        df.dropna(inplace=True)
+        
+        def func(row):
+            s, ln = row
+            s = self.namespace[&#39;taxon/&#39;+s]
+            self.graph.add((s, self.namespace[&#39;latinName&#39;], Literal(ln)))
+        
+        for row in zip(df[&#39;species_number&#39;],df[&#39;latin_name&#39;]):
+            func(row)
+    
+    def _load_hierarchy(self, path):
+        df = pd.read_csv(path, sep= &#39;|&#39;, low_memory = False, dtype = str)
+        df.dropna(inplace=True)
+        
+        def func(row):
+            sn, lineage = row
+            curr = sn
+            for l in filter(lambda x: x != &#39;&#39;, lineage):
+                curr = self.namespace[&#39;taxon/&#39;+str(curr)]
+                self.graph.add((curr, RDFS.subClassOf, self.namespace[&#39;taxon/&#39;+str(l)]))
+                curr = l
+                
+        for row in zip(df[&#39;species_number&#39;],
+                        zip(df[&#39;variety&#39;],
+                            df[&#39;subspecies&#39;],
+                            df[&#39;species&#39;],
+                            df[&#39;genus&#39;],
+                            df[&#39;family&#39;],
+                            df[&#39;tax_order&#39;],
+                            df[&#39;class&#39;],
+                            df[&#39;superclass&#39;],
+                            df[&#39;subphylum_div&#39;],
+                            df[&#39;phylum_division&#39;],
+                            df[&#39;kingdom&#39;])):
+            func(row)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataAggregation.DataObject.replace" href="#tera.DataAggregation.DataObject.replace">replace</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="tera.DataAggregation.Effects"><code class="flex name class">
+<span>class <span class="ident">Effects</span></span>
+<span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', name='Ecotox Effects', directory=None)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Effects(DataObject):
+    def __init__(self, 
+                    namespace = &#39;https://cfpub.epa.gov/ecotox/&#39;,
+                    name = &#39;Ecotox Effects&#39;,
+                    directory = None):
+        super(Effects, self).__init__(namespace, name)
+        
+        self._load_effect_data(directory + &#39;tests.txt&#39;, directory + &#39;results.txt&#39;)
+        
+    def _load_effect_data(self, tests_path, results_path):
+        tests = pd.read_csv(tests_path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
+        tests.dropna(inplace=True, subset=[&#39;test_id&#39;,
+                        &#39;test_cas&#39;,
+                        &#39;species_number&#39;])
+        tests.fillna(inplace=True, value=&#39;missing&#39;)
+        results = pd.read_csv(results_path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
+        results.dropna(inplace=True, subset=[&#39;test_id&#39;,&#39;endpoint&#39;,&#39;conc1_mean&#39;,&#39;conc1_unit&#39;,&#39;effect&#39;])
+        results.fillna(inplace=True, value=&#39;missing&#39;)
+
+        def test_func(row):
+            test_id, cas_number, species_number, stdm, stdu, habitat, lifestage, age, ageunit, weight, weightunit = row
+            
+            #must be included
+            t = self.namespace[&#39;test/&#39;+str(test_id)]
+            s = self.namespace[&#39;taxon/&#39;+str(species_number)]
+            c = self.namespace[&#39;cas/&#39;+str(cas_number)]
+            self.graph.add((t, RDF.type, self.namespace[&#39;Test&#39;]))
+            self.graph.add((t, self.namespace[&#39;species&#39;], s))
+            self.graph.add((t, self.namespace[&#39;chemical&#39;], c))
+
+            for v,u,p in zip([stdm,age,weight],[stdu,ageunit,weightunit],[&#39;studyDuration&#39;,&#39;organismAge&#39;,&#39;organismWeight&#39;]):
+                if v != &#39;missing&#39;:
+                    b = BNode()
+                    self.graph.add( (b, RDF.value, Literal(v)) )
+                    self.graph.add( (b, UNIT.units, Literal(u)) )
+                    self.graph.add( (t, self.namespace[p], b) )
+            
+            if habitat != &#39;missing&#39;:
+                self.graph.add((t, self.namespace[&#39;organismHabitat&#39;],self.namespace[&#39;habitat/&#39;+habitat]))
+            if lifestage != &#39;missing&#39;:
+                self.graph.add((t, self.namespace[&#39;organismLifestage&#39;],self.namespace[&#39;lifestage/&#39;+lifestage]))
+
+        def results_func(row):
+            test_id, endpoint, conc, conc_unit, effect = row
+            t = self.namespace[&#39;test/&#39;+str(test_id)]
+            
+            r = BNode()
+            ep = self.namespace[&#39;endpoint/&#39;+str(endpoint)]
+            ef = self.namespace[&#39;effect/&#39;+str(effect)]
+            
+            self.graph.add((r,self.namespace[&#39;endpoint&#39;],ep))
+            self.graph.add((r,self.namespace[&#39;effect&#39;],ef))
+            b = BNode()
+            self.graph.add( (b, RDF.value, Literal(conc)) )
+            self.graph.add( (b, UNIT.units, Literal(conc_unit)) ) #TODO creating mapping for units not in UNIT.units
+            self.graph.add( (r, self.namespace[&#39;concentration&#39;], b) )
+            
+            self.graph.add((t,self.namespace[&#39;hasResult&#39;],r))
+            
+        for row in zip(tests[&#39;test_id&#39;],
+                        tests[&#39;test_cas&#39;],
+                        tests[&#39;species_number&#39;],
+                        tests[&#39;study_duration_mean&#39;],
+                        tests[&#39;study_duration_unit&#39;],
+                        tests[&#39;organism_habitat&#39;],
+                        tests[&#39;organism_lifestage&#39;],
+                        tests[&#39;organism_age_mean&#39;],
+                        tests[&#39;organism_age_unit&#39;],
+                        tests[&#39;organism_init_wt_mean&#39;],
+                        tests[&#39;organism_init_wt_unit&#39;]):
+            test_func(row)
+        
+        for row in zip(results[&#39;test_id&#39;], results[&#39;endpoint&#39;], results[&#39;conc1_mean&#39;], results[&#39;conc1_unit&#39;], results[&#39;effect&#39;]):
+            results_func(row)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataAggregation.DataObject.replace" href="#tera.DataAggregation.DataObject.replace">replace</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="tera.DataAggregation.MeSH"><code class="flex name class">
+<span>class <span class="ident">MeSH</span></span>
+<span>(</span><span>namespace='http://id.nlm.nih.gov/mesh/', name='MeSH', directory=None)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MeSH(DataObject):
+    def __init__(self, 
+                    namespace = &#39;http://id.nlm.nih.gov/mesh/&#39;,
+                    name = &#39;MeSH&#39;,
+                    directory = None):
+        super(MeSH, self).__init__(namespace, name)
+        
+        for f in glob.glob(directory+&#39;*.nt&#39;):
+            self._load_data(f)
+        
+    def _load_data(self, path):
+        self.graph += Graph().parse(path, format = &#39;nt&#39;)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataAggregation.DataObject.replace" href="#tera.DataAggregation.DataObject.replace">replace</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="tera.DataAggregation.PubChem"><code class="flex name class">
+<span>class <span class="ident">PubChem</span></span>
+<span>(</span><span>namespace='http://rdf.ncbi.nlm.nih.gov/pubchem/compound/', name='PubChem', directory=None)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PubChem(DataObject):
+    def __init__(self, 
+                    namespace = &#39;http://rdf.ncbi.nlm.nih.gov/pubchem/compound/&#39;,
+                    name = &#39;PubChem&#39;,
+                    directory = None):
+        super(PubChem, self).__init__(namespace, name)
+        
+        for f in glob.glob(directory+&#39;*.ttl&#39;):
+            self._load_data(f)
+        
+    def _load_data(self, path):
+        self.graph += Graph().parse(path, format = &#39;ttl&#39;)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataAggregation.DataObject.replace" href="#tera.DataAggregation.DataObject.replace">replace</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="tera.DataAggregation.Taxonomy"><code class="flex name class">
+<span>class <span class="ident">Taxonomy</span></span>
+<span>(</span><span>namespace='https://www.ncbi.nlm.nih.gov/taxonomy', name='NCBI Taxonomy', directory=None)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Taxonomy(DataObject):
+    def __init__(self, 
+                 namespace = &#39;https://www.ncbi.nlm.nih.gov/taxonomy&#39;,
+                 name = &#39;NCBI Taxonomy&#39;,
+                 directory = None):
+        super(Taxonomy, self).__init__(namespace, name)
+        
+        if directory:
+            self._load_ncbi_taxonomy(directory)
+    
+    def _load_ncbi_taxonomy(self, directory):
+        self._load_hierarchy(directory+&#39;nodes.dmp&#39;)
+        self._load_divisions(directory+&#39;division.dmp&#39;)
+        self._load_names(directory+&#39;names.dmp&#39;)
+
+    def _load_hierarchy(self, path):
+        df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2,4], names=[&#39;child&#39;,&#39;parent&#39;,&#39;rank&#39;,&#39;division&#39;], na_values = nan_values)
+        df.dropna(inplace=True)
+
+        def func(row):
+            c,p,r,d = row
+            c = self.namespace[&#39;taxon/&#39;+str(c)]
+            self.graph.add((c,RDF.type,self.namespace[&#39;Taxon&#39;]))
+            rc = r
+            r = r.replace(&#39; &#39;,&#39;_&#39;)
+            self.graph.add((c, self.namespace[&#39;rank&#39;], self.namespace[&#39;rank/&#39;+r]))
+            self.graph.add((self.namespace[&#39;rank/&#39;+r], RDFS.label, Literal(rc)))
+            self.graph.add((self.namespace[&#39;rank/&#39;+r], RDF.type, self.namespace[&#39;Rank&#39;]))
+            p = self.namespace[&#39;taxon/&#39;+str(p)]
+            self.graph.add((c, RDFS.subClassOf, p))
+            d = str(d).replace(&#39; &#39;,&#39;_&#39;)
+            d = self.namespace[&#39;division/&#39;+str(d)]
+            self.graph.add((c, RDFS.subClassOf, d))
+        
+        for row in zip(df[&#39;child&#39;],df[&#39;parent&#39;],df[&#39;rank&#39;],df[&#39;division&#39;]):
+            func(row)
+    
+    def _load_names(self, path):
+        df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2,3], names=[&#39;taxon&#39;,&#39;name&#39;,&#39;unique_name&#39;,&#39;name_type&#39;],na_values = nan_values)
+        df.dropna(inplace=True)
+
+
+        def func(row):
+            c,n,un,nt = row
+            c = self.namespace[&#39;taxon/&#39;+str(c)]
+            n = Literal(n)
+            un = Literal(un)
+            self.graph.add((c, RDFS.label, un))
+            ntl = Literal(nt)
+            nt = self.namespace[nt.replace(&#39; &#39;,&#39;_&#39;)]
+            self.graph.add((c,nt,n))
+            self.graph.add((nt,RDFS.label,ntl))
+        
+        for row in zip(df[&#39;taxon&#39;],df[&#39;name&#39;],df[&#39;unique_name&#39;],df[&#39;name_type&#39;]):
+            func(row)
+        
+    def _load_divisions(self, path):
+        df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2], names=[&#39;division&#39;,&#39;acronym&#39;,&#39;name&#39;], na_values = nan_values)
+        df.dropna(inplace=True)
+
+        def func(row):
+            d,a,n = row
+            d = self.namespace[&#39;division/&#39;+str(d)]
+            self.graph.add((d,RDF.type,self.namespace[&#39;Division&#39;]))
+            self.graph.add((d,RDFS.label,Literal(n)))
+            self.graph.add((d,RDFS.label,Literal(a)))
+        
+        for row in zip(df[&#39;division&#39;],df[&#39;acronym&#39;],df[&#39;name&#39;]):
+            func(row)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataAggregation.DataObject.replace" href="#tera.DataAggregation.DataObject.replace">replace</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="tera.DataAggregation.Traits"><code class="flex name class">
+<span>class <span class="ident">Traits</span></span>
+<span>(</span><span>namespace='https://eol.org/schema/terms/', name='EOL Traits', directory=None)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Traits(DataObject):
+    def __init__(self, 
+                 namespace = &#39;https://eol.org/schema/terms/&#39;,
+                 name = &#39;EOL Traits&#39;,
+                 directory = None):
+        super(Traits, self).__init__(namespace, name)
+        
+        if directory:
+            self._load_eol_traits(directory)
+    
+    def _load_eol_traits(self, directory):
+        self._load_traits(directory+&#39;trait_bank/traits.csv&#39;)
+        for f in glob.glob(directory+&#39;eol_rels/*.csv&#39;):
+            self._load_eol_subclasses(f)
+    
+    def _load_traits(self, path):
+        df = pd.read_csv(path, sep=&#39;,&#39;, usecols=[&#39;page_id&#39;,&#39;predicate&#39;,&#39;value_uri&#39;], low_memory=False, chunksize=10**3, na_values = nan_values)
+
+        def func(row):
+            s,p,o = row
+            s = self.namespace[s]
+            
+            try:
+                val = validators.url(o)
+                o = URIRef(o)
+            except TypeError:
+                o = Literal(o)
+                val = True
+
+            if validators.url(s) and validators.url(p) and val:
+                self.graph.add((URIRef(s),URIRef(p),o))
+
+        for chunk in df:
+            chunk.dropna(inplace=True)
+            for row in zip(chunk[&#39;page_id&#39;],chunk[&#39;predicate&#39;],chunk[&#39;value_uri&#39;]):
+                func(row)
+                
+    def _load_eol_subclasses(self, path):
+        try: 
+            try:
+                df = pd.read_csv(path,sep=&#39;,&#39;,usecols=[&#39;child&#39;,&#39;parent&#39;],low_memory=False,na_values = nan_values)
+                df.dropna(inplace=True)
+            except ValueError:
+                df = pd.read_csv(path,sep=&#39;,&#39;,header=None,low_memory=False,na_values = nan_values)
+                df.dropna(inplace=True)
+                df.columns = [&#39;parent&#39;,&#39;child&#39;]
+            
+        except FileNotFoundError as e:
+            print(e,path)
+        
+        def func(row):
+            c,p = row
+            if validators.url(c) and validators.url(p):
+                c,p = URIRef(c),URIRef(p)
+                self.graph.add((c,RDFS.subClassOf,p))
+        
+        for row in zip(df[&#39;child&#39;],df[&#39;parent&#39;]):
+            func(row)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataAggregation.DataObject.replace" href="#tera.DataAggregation.DataObject.replace">replace</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="tera" href="index.html">tera</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="tera.DataAggregation.ChEBI" href="#tera.DataAggregation.ChEBI">ChEBI</a></code></h4>
+</li>
+<li>
+<h4><code><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></code></h4>
+<ul class="">
+<li><code><a title="tera.DataAggregation.DataObject.replace" href="#tera.DataAggregation.DataObject.replace">replace</a></code></li>
+<li><code><a title="tera.DataAggregation.DataObject.save" href="#tera.DataAggregation.DataObject.save">save</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="tera.DataAggregation.EcotoxChemicals" href="#tera.DataAggregation.EcotoxChemicals">EcotoxChemicals</a></code></h4>
+</li>
+<li>
+<h4><code><a title="tera.DataAggregation.EcotoxTaxonomy" href="#tera.DataAggregation.EcotoxTaxonomy">EcotoxTaxonomy</a></code></h4>
+</li>
+<li>
+<h4><code><a title="tera.DataAggregation.Effects" href="#tera.DataAggregation.Effects">Effects</a></code></h4>
+</li>
+<li>
+<h4><code><a title="tera.DataAggregation.MeSH" href="#tera.DataAggregation.MeSH">MeSH</a></code></h4>
+</li>
+<li>
+<h4><code><a title="tera.DataAggregation.PubChem" href="#tera.DataAggregation.PubChem">PubChem</a></code></h4>
+</li>
+<li>
+<h4><code><a title="tera.DataAggregation.Taxonomy" href="#tera.DataAggregation.Taxonomy">Taxonomy</a></code></h4>
+</li>
+<li>
+<h4><code><a title="tera.DataAggregation.Traits" href="#tera.DataAggregation.Traits">Traits</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.4</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

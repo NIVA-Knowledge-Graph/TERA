@@ -1,0 +1,2188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.4" />
+<title>tera.DataAccess API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>tera.DataAccess</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from rdflib import Graph, Namespace, URIRef
+from rdflib.namespace import RDF, RDFS, OWL
+UNIT = Namespace(&#39;http://qudt.org/vocab/unit#&#39;)
+from .utils import query_endpoint, test_endpoint, query_graph, prefixes, do_recursively_in_class, strip_namespace, tanimoto
+from typing import Union
+
+import pubchempy
+
+from .DataIntegration import InchikeyToCas, InchikeyToChEBI, InchikeyToChEMBL, InchikeyToMeSH, InchikeyToPubChem, NCBIToEcotox, NCBIToEOL
+
+class API:
+    def __init__(self, 
+                 namespace=None, 
+                 endpoint=None, 
+                 dataobject=None, 
+                 name=&#39;API&#39;):
+        &#34;&#34;&#34;
+        endpoint :: str
+            sparql endpoint url
+        dataobject :: DataObject 
+            see DataAggregation
+        &#34;&#34;&#34;
+        if not endpoint and not dataobject:
+            raise NotImplementedError
+        
+        if endpoint:
+            if test_endpoint(endpoint):
+                self.endpoint = endpoint
+                self.use_endpoint = True
+                self.namespace = Namespace(namespace)
+            else:
+                print(&#39;Did not reach endpoint at: &#39;, endpoint)
+                
+        if dataobject:
+            self.dataobject = dataobject
+            self.use_endpoint = False
+            self.namespace = dataobject.namespace
+        
+        self.name = name
+            
+        self.initNs = {&#39;rdf&#39;:RDF, 
+                       &#39;ns&#39;:self.namespace, 
+                       &#39;owl&#39;:OWL, 
+                       &#39;rdfs&#39;:RDFS, 
+                       &#39;unit&#39;:UNIT,
+                       &#39;mesh&#39;:Namespace(&#39;http://id.nlm.nih.gov/mesh/&#39;),
+                       &#39;obo&#39;:Namespace(&#39;http://purl.obolibrary.org/obo/&#39;),
+                       &#39;pubchem&#39;:Namespace(&#39;http://rdf.ncbi.nlm.nih.gov/pubchem/vocabulary#&#39;),
+                       &#39;compound&#39;:Namespace(&#39;http://rdf.ncbi.nlm.nih.gov/pubchem/compound/&#39;)}
+        self.base_query = prefixes(self.initNs)
+            
+    def query(self, q, var):
+        &#34;&#34;&#34;Pass SPARQL to graph or endpoint&#34;&#34;&#34;
+        q = self.base_query + q
+        if self.use_endpoint:
+            return query_endpoint(self.endpoint, q, var)
+        else:
+            return query_graph(self.dataobject.graph, q)
+        
+    def query_type(self, t):
+        &#34;&#34;&#34;Return entities of type t.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            select ?s where {
+                ?s rdf:type &lt;%s&gt;
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q, &#39;s&#39;)
+    
+    def query_child(self, t):
+        &#34;&#34;&#34;Return children of t.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            select ?s where {
+                ?s rdfs:subClassOf &lt;%s&gt; .
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q, &#39;s&#39;)
+    
+    def query_label(self, t):
+        &#34;&#34;&#34;Return entities with label t.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            select ?s where {
+                ?s rdfs:label &#34;%s&#34; . 
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q, &#39;s&#39;)
+    
+    def query_parent(self, t):
+        &#34;&#34;&#34;Return parent of t.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            select ?s where {
+                &lt;%s&gt; rdfs:subClassOf ?s .
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q, &#39;s&#39;)
+    
+    def query_siblings(self, t, depth=1):
+        &#34;&#34;&#34;Return (depth-1)-cusins of t.&#34;&#34;&#34;
+        if depth == -1: depth = &#39;1,&#39;
+        q = &#34;&#34;&#34;
+            select ?s where {
+                &lt;%s&gt; rdfs:subClassOf{%s} ?s .
+            }
+        &#34;&#34;&#34; % (str(t),str(depth))
+        parents = self.query(q,&#39;s&#39;)
+        out = set()
+        while parents:
+            p = parents.pop(0)
+            q = &#34;&#34;&#34;
+            select ?s where {
+                ?s rdfs:subClassOf{%s} &lt;%s&gt; .
+            }
+            &#34;&#34;&#34; % (str(depth),str(t))
+            out |= self.query(q,&#39;s&#39;)
+        return s
+    
+    def query_labels(self, t):
+        &#34;&#34;&#34;Get rdfs:labels of t&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            select ?s where {
+                &lt;%s&gt; rdfs:label ?s .
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q, &#39;s&#39;)
+    
+    def query_alt_labels(self, t):
+        &#34;&#34;&#34;Get literals of t where p =&lt; rdfs:label.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            select ?p ?s where {
+                &lt;%s&gt; ?p ?s .
+                ?p rdfs:subPropertyOf rdfs:label .
+            } filter (isLiteral(?s))
+        &#34;&#34;&#34; % str(t)
+        return self.query(q, [&#39;p&#39;,&#39;s&#39;])
+    
+    def construct_subgraph(self, t):
+        &#34;&#34;&#34;
+        Return all triples *-connected to t.
+        &#34;&#34;&#34;
+        out = set()
+        tmp = set([t])
+        visited = set()
+        while tmp:
+            curr = tmp.pop()
+            visited.add(curr)
+            q = &#34;&#34;&#34;
+                select ?s ?p ?o {
+                    values ?s { &lt;%s&gt; }
+                    ?s ?p ?o
+                }
+            &#34;&#34;&#34; % str(curr)
+            res = self.query(q, [&#39;s&#39;,&#39;p&#39;,&#39;o&#39;])
+            out |= res
+            tmp |= set([o for _,_,o in res])
+            tmp -= visited
+        
+        return out
+    
+    @do_recursively_in_class
+    def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
+        &#34;&#34;&#34;
+        Convert between types of ids used in data.
+        
+        Args:
+            from_ :: str 
+                input id type, inchikey, cas, chemical_id or cid.
+            to_ :: str 
+                output id type, inchikey, cas, chemical_id or cid.
+            id_ :: list or element
+                list of ids, &#39;no mapping&#39; if no mapping between from_ and to_ exists.
+            strip :: bool
+                remove namespace from inputs
+        Return:
+            converted ids.
+        Raises:
+            NotImplementedError: if from_ or to_ not in (inchikey, cas, cid, mesh, chebi, chemble)
+        &#34;&#34;&#34;
+
+        if f == t: return id_
+    
+        if not hasattr(self, &#39;mappings&#39;):
+            raise AttributeError(self.name + &#39; has not attribute mappings.&#39;)
+    
+        if isinstance(id_, (list, set)):
+            return {i:self.convert_id(i) for i in id_}
+        if isinstance(id_, URIRef):
+            id_ = str(id_)
+        if strip:
+            id_ = strip_namespace(id_, [&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
+        
+        if f == self.base_identifier and t in self.mappings:
+            return self.mappings[t].convert(id_)
+        
+        if f in self.mappings:
+            return self.convert_id(self.mappings[f].convert(id_,reverse=True),
+                                   f=self.base_identifier,t=t)
+        
+        raise NotImplementedError(&#39;From %s to %s is not supported. \n Supported from/to values are %s&#39;, (f,t,&#39;,&#39;.join(self.mappings.keys())))
+    
+class TaxonomyAPI(API):
+    def __init__(self, 
+                 namespace=None, 
+                 endpoint = None,
+                 dataobject = None,
+                 mapping_dataobject = None,
+                 name = &#39;Taxonomy API&#39;):
+        super(TaxonomyAPI, self).__init__(namespace, endpoint, dataobject, name)
+        
+        self.mappings = {&#39;eol&#39;:NCBIToEOL()}
+        if mapping_dataobject:
+            self.mappings[&#39;ecotox&#39;] = NCBIToEcotox(dataobject, mapping_dataobject)
+        elif endpoint and test_endpoint(endpoint):
+            self.mappings[&#39;ecotox&#39;] = EndpointMapping(endpoint)
+        
+        self.base_identifier = &#39;ncbi&#39;
+        
+    def get_species(self):
+        &#34;&#34;&#34;All species&#34;&#34;&#34;
+        return self.query_type(self.namespace[&#39;Taxon&#39;])
+    
+    @do_recursively_in_class
+    def get_division(self, t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;Return all species in division t&#34;&#34;&#34;
+        return self.query_subclassof(a)
+    
+    @do_recursively_in_class
+    def get_ssd(self, t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;Return all species in ssd t&#34;&#34;&#34;
+        return self.query_subclassof(t)
+    
+    def get_ranks(self):
+        &#34;&#34;&#34;Get all taxonomic ranks&#34;&#34;&#34;
+        return self.query_type(self.namespace[&#39;Rank&#39;])
+    
+    @do_recursively_in_class
+    def get_rank(self, t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;Return all taxons with rank t&#34;&#34;&#34;
+        return self.query_subclassof(t)
+
+class ChemicalAPI(API):
+    def __init__(self, namespace=&#39;&#39;, endpoint = None, dataobject = None, name = &#39;Chemical API&#39;):
+        super(ChemicalAPI, self).__init__(namespace, endpoint, dataobject, name)
+        
+        self.mappings = {&#39;cas&#39;:InchikeyToCas(),
+                         &#39;cid&#39;:InchikeyToPubChem(),
+                         &#39;chebi&#39;:InchikeyToChEBI(),
+                         &#39;chemble&#39;:InchikeyToChEMBL(),
+                         &#39;mesh&#39;:InchikeyToMeSH()}
+        self.base_identifier = &#39;inchikey&#39;
+   
+    @do_recursively_in_class
+    def get_fingerprint(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip = False):
+        &#34;&#34;&#34;Get bin fingerprints for id_.&#34;&#34;&#34;
+        c = self.convert_id(id_, f, &#39;cid&#39;, strip)
+        
+        fp = None
+        try:
+            fp = Compound.from_cid(c).fingerprint
+            fp = bin(int(fp, 16))
+        except pubchempy.BadRequestError as e:
+            print(c,e)
+        except pubchempy.NotFoundError as e:
+            print(c,e)
+
+        return fp
+    
+    @do_recursively_in_class
+    def get_names(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip = False):
+        &#34;&#34;&#34;Get synonyms for id_.&#34;&#34;&#34;
+        c = self.convert_id(id_, f, &#39;cid&#39;, strip)
+        out = []
+        try:
+            out = Compound.from_cid(c).synonyms
+        except pubchempy.BadRequestError as e:
+            print(c,e)
+        except pubchempy.NotFoundError as e:
+            print(c,e)
+
+        return out
+    
+    @do_recursively_in_class
+    def class_hierarchy(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip=False):
+        &#34;&#34;&#34;Return all triples connceted to id_.&#34;&#34;&#34;
+        a = self.convert_id(id_, f, &#39;cid&#39;, strip = strip)
+        b = self.convert_id(id_, f, &#39;mesh&#39;, strip = strip)
+        a = self.initNs[&#39;compound&#39;][a]
+        b = self.initNs[&#39;mesh&#39;][b]
+        return self.construct_subgraph(a) | self.construct_subgraph(b)
+        
+    @do_recursively_in_class
+    def get_features(self, id_: Union[URIRef, str, list, set], params=None, f=&#39;inchikey&#39;, strip=False):
+        &#34;&#34;&#34;Return chemical features.
+            params :: list 
+                properties to return
+                ex: params = [&#39;charge&#39;,&#39;molecular_weight&#39;,&#39;xlogp&#39;]
+                To see all avalible features use which_features() . 
+        &#34;&#34;&#34;
+        id_ = self.convert_id(id_, f, &#39;cid&#39;, strip=strip)
+        id_ = self.initNs[&#39;compound&#39;][id_]
+        
+        out = dict()
+        try:
+            if params:
+                out = Compound.from_cid(c).to_dict(properties = params)
+            else:
+                out = Compound.from_cid(c).to_dict()
+        except pubchempy.NotFoundError as e:
+            print(c,e)
+        except pubchempy.BadRequestError as e:
+            print(c,e)
+
+        return out
+    
+    @do_recursively_in_class
+    def which_features(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip=False):
+        &#34;&#34;&#34;Chemical features avalible.&#34;&#34;&#34;
+        return self.get_features(id_, f, strip).keys()
+    
+    @do_recursively_in_class
+    def simiarity(self, id_: Union[URIRef, str, list, set], ids, f=&#39;inchikey&#39;,strip=False):
+        &#34;&#34;&#34;Returns chemical simiarity between id and ids&#34;&#34;&#34;
+        fp = self.get_fingerprint(id_, f, strip)
+        fps = self.get_fingerprint(ids, f, strip)
+        return {i:tanimoto(fp,f) for i,f in zip(ids,fps) if f and fp}
+        
+    def compounds(self):
+        &#34;&#34;&#34;Return all compounds.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            SELECT ?s {
+            ?s  ?o  ?z
+            FILTER (isURI(?s) &amp;&amp; STRSTARTS(str(?s), str(compound:) ) )
+            }
+            &#34;&#34;&#34;
+        return self.query(q, var = &#39;s&#39;)
+    
+class TraitsAPI(TaxonomyAPI):
+    def __init__(self, namespace=&#39;https://eol.org/schema/terms/&#39;, endpoint = None, dataobject = None, name = &#39;EOL API&#39;):
+        super(TraitsAPI, self).__init__(namespace, endpoint, dataobject, name)
+    
+    @do_recursively_in_class
+    def get_concervation_status(self,t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;Return concervation status of t.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            SELECT ?h WHERE {
+                &lt;%s&gt; &lt;http://rs.tdwg.org/ontology/voc/SPMInfoItems#ConservationStatus&gt; ?h .
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q,&#39;h&#39;)
+
+    @do_recursively_in_class
+    def get_extinct_status(self,t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;Return extinct status (true/false) of t. &#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            SELECT ?h WHERE {
+                &lt;%s&gt; &lt;http://eol.org/schema/terms/ExtinctionStatus&gt; ?h .
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q,&#39;h&#39;)
+        
+    @do_recursively_in_class
+    def get_endemic_to(self,t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;Return endemic region of t.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            SELECT ?h WHERE {
+                &lt;%s&gt; &lt;http://eol.org/terms/endemic&gt; ?h .
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q,&#39;h&#39;)
+    
+    @do_recursively_in_class
+    def get_ecoregion(self,t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;Return ecoregion of t. &#34;&#34;&#34;
+        q =  &#34;&#34;&#34;
+            SELECT ?h WHERE {
+                &lt;%s&gt; &lt;https://www.wikidata.org/entity/Q295469&gt; ?h .
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q,&#39;h&#39;)
+        
+    @do_recursively_in_class
+    def get_habitat(self,t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;Return habiat of t.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            SELECT ?h WHERE {
+                &lt;%s&gt; &lt;http://rs.tdwg.org/dwc/terms/habitat&gt; ?h .
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q,&#39;h&#39;)
+    
+class EcotoxChemicalAPI(ChemicalAPI):
+    def __init__(self, namespace=&#39;https://cfpub.epa.gov/ecotox/&#39;, endpoint = None, dataobject = None, name = &#39;ECOTOX Chemical API&#39;):
+        super(EcotoxChemicalAPI, self).__init__(namespace, endpoint, dataobject, name)
+        
+    @do_recursively_in_class
+    def query_chemical_names(self,t: Union[URIRef, str, list, set]):
+        return self.query_labels(t)
+    
+    def query_chemicals(self):
+        return self.query_type(self.namespace[&#39;Chemical&#39;])
+    
+class EcotoxTaxonomyAPI(TaxonomyAPI):
+    def __init__(self, 
+                 namespace=&#39;https://cfpub.epa.gov/ecotox/&#39;, 
+                 endpoint = None, 
+                 dataobject = None, 
+                 name = &#39;ECOTOX Taxonomy API&#39;):
+        super(EcotoxTaxonomyAPI, self).__init__(namespace, endpoint, dataobject, name)
+        
+class NCBITaxonomyAPI(TaxonomyAPI):
+    def __init__(self, 
+                 namespace=&#39;https://www.ncbi.nlm.nih.gov/taxonomy&#39;, 
+                 endpoint = None, 
+                 dataobject = None, 
+                 name = &#39;NCBI API&#39;):
+        super(TaxonomyAPI, self).__init__(namespace, endpoint, dataobject, name)
+    
+class EffectsAPI(API):
+    def __init__(self, namespace=&#39;https://cfpub.epa.gov/ecotox/&#39;, endpoint = None, dataobject = None, name = &#39;ECOTOX Effects API&#39;):
+        super(EffectsAPI, self).__init__(namespace, endpoint, dataobject, name)
+    
+    @do_recursively_in_class
+    def get_chemicals_from_species(self,t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;Return chemical involved in experiment with species t.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+        select ?c where {
+            ?t rdf:type ns:Test .
+            ?t ns:species &lt;%s&gt; .
+            ?t ns:chemical ?c .
+            } 
+        &#34;&#34;&#34; % str(t)
+        return self.query(q,&#39;c&#39;)
+    
+    @do_recursively_in_class
+    def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;Return species involved in experiment with chemical t.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+        select ?c where {
+            ?t rdf:type ns:Test .
+            ?t ns:species ?c .
+            ?t ns:chemical &lt;%s&gt; .
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q,&#39;c&#39;)
+    
+    def get_chemicals(self):
+        &#34;&#34;&#34;Return chemicals used in at least one experiment.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+        select ?c where {
+            ?t rdf:type ns:Test .
+            ?t ns:chemical ?c .
+            }
+        &#34;&#34;&#34;
+        return self.query(q,&#39;c&#39;)
+    
+    def get_species(self):
+        &#34;&#34;&#34;Return species used in at least one experiment.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+        select ?c where {
+            ?t rdf:type ns:Test .
+            ?t ns:species ?c .
+            }
+        &#34;&#34;&#34;
+        return self.query(q,&#39;c&#39;)
+    
+    def get_endpoint(self, 
+                       c: Union[URIRef, str, list, set], 
+                       s: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;
+        Return endpoints that use chemical c and species s.
+        If list is none: c = query_chemicals and s = query_species
+        &#34;&#34;&#34;
+        if not c:
+            c = self.query_chemicals()
+        if not s:
+            s = self.query_species()
+        if isinstance(c,(list,set)):
+            return {a:self.get_endpoint(a,s) for a in c}
+        if isinstance(s,(list,set)):
+            return {a:self.get_endpoint(c,a) for a in s}
+        q = &#34;&#34;&#34;
+            SELECT ?cc ?cu ?ep ?ef ?sd ?sdu {
+                ?test rdf:type ns:Test ;
+                  ns:chemical &lt;%s&gt; ;
+                   ns:species &lt;%s&gt; ;
+                   ns:hasResult [ 
+                   ns:endpoint ?ep ;
+                   ns:effect ?ef ;
+                   ns:concentration [rdf:value ?cc ; 
+                                        unit:units ?cu] ] .
+               
+                OPTIONAL {
+                    ?test ns:studyDuration [rdf:value ?sd ;
+                                            unit:units ?sdu] .
+                }
+            }&#34;&#34;&#34; % (str(c), str(s))
+        
+        return self.query(q, [&#39;cc&#39;,&#39;cu&#39;,&#39;ep&#39;,&#39;ef&#39;,&#39;sd&#39;,&#39;sdu&#39;])</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="tera.DataAccess.API"><code class="flex name class">
+<span>class <span class="ident">API</span></span>
+<span>(</span><span>namespace=None, endpoint=None, dataobject=None, name='API')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>endpoint :: str
+sparql endpoint url
+dataobject :: DataObject
+see DataAggregation</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class API:
+    def __init__(self, 
+                 namespace=None, 
+                 endpoint=None, 
+                 dataobject=None, 
+                 name=&#39;API&#39;):
+        &#34;&#34;&#34;
+        endpoint :: str
+            sparql endpoint url
+        dataobject :: DataObject 
+            see DataAggregation
+        &#34;&#34;&#34;
+        if not endpoint and not dataobject:
+            raise NotImplementedError
+        
+        if endpoint:
+            if test_endpoint(endpoint):
+                self.endpoint = endpoint
+                self.use_endpoint = True
+                self.namespace = Namespace(namespace)
+            else:
+                print(&#39;Did not reach endpoint at: &#39;, endpoint)
+                
+        if dataobject:
+            self.dataobject = dataobject
+            self.use_endpoint = False
+            self.namespace = dataobject.namespace
+        
+        self.name = name
+            
+        self.initNs = {&#39;rdf&#39;:RDF, 
+                       &#39;ns&#39;:self.namespace, 
+                       &#39;owl&#39;:OWL, 
+                       &#39;rdfs&#39;:RDFS, 
+                       &#39;unit&#39;:UNIT,
+                       &#39;mesh&#39;:Namespace(&#39;http://id.nlm.nih.gov/mesh/&#39;),
+                       &#39;obo&#39;:Namespace(&#39;http://purl.obolibrary.org/obo/&#39;),
+                       &#39;pubchem&#39;:Namespace(&#39;http://rdf.ncbi.nlm.nih.gov/pubchem/vocabulary#&#39;),
+                       &#39;compound&#39;:Namespace(&#39;http://rdf.ncbi.nlm.nih.gov/pubchem/compound/&#39;)}
+        self.base_query = prefixes(self.initNs)
+            
+    def query(self, q, var):
+        &#34;&#34;&#34;Pass SPARQL to graph or endpoint&#34;&#34;&#34;
+        q = self.base_query + q
+        if self.use_endpoint:
+            return query_endpoint(self.endpoint, q, var)
+        else:
+            return query_graph(self.dataobject.graph, q)
+        
+    def query_type(self, t):
+        &#34;&#34;&#34;Return entities of type t.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            select ?s where {
+                ?s rdf:type &lt;%s&gt;
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q, &#39;s&#39;)
+    
+    def query_child(self, t):
+        &#34;&#34;&#34;Return children of t.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            select ?s where {
+                ?s rdfs:subClassOf &lt;%s&gt; .
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q, &#39;s&#39;)
+    
+    def query_label(self, t):
+        &#34;&#34;&#34;Return entities with label t.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            select ?s where {
+                ?s rdfs:label &#34;%s&#34; . 
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q, &#39;s&#39;)
+    
+    def query_parent(self, t):
+        &#34;&#34;&#34;Return parent of t.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            select ?s where {
+                &lt;%s&gt; rdfs:subClassOf ?s .
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q, &#39;s&#39;)
+    
+    def query_siblings(self, t, depth=1):
+        &#34;&#34;&#34;Return (depth-1)-cusins of t.&#34;&#34;&#34;
+        if depth == -1: depth = &#39;1,&#39;
+        q = &#34;&#34;&#34;
+            select ?s where {
+                &lt;%s&gt; rdfs:subClassOf{%s} ?s .
+            }
+        &#34;&#34;&#34; % (str(t),str(depth))
+        parents = self.query(q,&#39;s&#39;)
+        out = set()
+        while parents:
+            p = parents.pop(0)
+            q = &#34;&#34;&#34;
+            select ?s where {
+                ?s rdfs:subClassOf{%s} &lt;%s&gt; .
+            }
+            &#34;&#34;&#34; % (str(depth),str(t))
+            out |= self.query(q,&#39;s&#39;)
+        return s
+    
+    def query_labels(self, t):
+        &#34;&#34;&#34;Get rdfs:labels of t&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            select ?s where {
+                &lt;%s&gt; rdfs:label ?s .
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q, &#39;s&#39;)
+    
+    def query_alt_labels(self, t):
+        &#34;&#34;&#34;Get literals of t where p =&lt; rdfs:label.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            select ?p ?s where {
+                &lt;%s&gt; ?p ?s .
+                ?p rdfs:subPropertyOf rdfs:label .
+            } filter (isLiteral(?s))
+        &#34;&#34;&#34; % str(t)
+        return self.query(q, [&#39;p&#39;,&#39;s&#39;])
+    
+    def construct_subgraph(self, t):
+        &#34;&#34;&#34;
+        Return all triples *-connected to t.
+        &#34;&#34;&#34;
+        out = set()
+        tmp = set([t])
+        visited = set()
+        while tmp:
+            curr = tmp.pop()
+            visited.add(curr)
+            q = &#34;&#34;&#34;
+                select ?s ?p ?o {
+                    values ?s { &lt;%s&gt; }
+                    ?s ?p ?o
+                }
+            &#34;&#34;&#34; % str(curr)
+            res = self.query(q, [&#39;s&#39;,&#39;p&#39;,&#39;o&#39;])
+            out |= res
+            tmp |= set([o for _,_,o in res])
+            tmp -= visited
+        
+        return out
+    
+    @do_recursively_in_class
+    def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
+        &#34;&#34;&#34;
+        Convert between types of ids used in data.
+        
+        Args:
+            from_ :: str 
+                input id type, inchikey, cas, chemical_id or cid.
+            to_ :: str 
+                output id type, inchikey, cas, chemical_id or cid.
+            id_ :: list or element
+                list of ids, &#39;no mapping&#39; if no mapping between from_ and to_ exists.
+            strip :: bool
+                remove namespace from inputs
+        Return:
+            converted ids.
+        Raises:
+            NotImplementedError: if from_ or to_ not in (inchikey, cas, cid, mesh, chebi, chemble)
+        &#34;&#34;&#34;
+
+        if f == t: return id_
+    
+        if not hasattr(self, &#39;mappings&#39;):
+            raise AttributeError(self.name + &#39; has not attribute mappings.&#39;)
+    
+        if isinstance(id_, (list, set)):
+            return {i:self.convert_id(i) for i in id_}
+        if isinstance(id_, URIRef):
+            id_ = str(id_)
+        if strip:
+            id_ = strip_namespace(id_, [&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
+        
+        if f == self.base_identifier and t in self.mappings:
+            return self.mappings[t].convert(id_)
+        
+        if f in self.mappings:
+            return self.convert_id(self.mappings[f].convert(id_,reverse=True),
+                                   f=self.base_identifier,t=t)
+        
+        raise NotImplementedError(&#39;From %s to %s is not supported. \n Supported from/to values are %s&#39;, (f,t,&#39;,&#39;.join(self.mappings.keys())))</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="tera.DataAccess.ChemicalAPI" href="#tera.DataAccess.ChemicalAPI">ChemicalAPI</a></li>
+<li><a title="tera.DataAccess.EffectsAPI" href="#tera.DataAccess.EffectsAPI">EffectsAPI</a></li>
+<li><a title="tera.DataAccess.TaxonomyAPI" href="#tera.DataAccess.TaxonomyAPI">TaxonomyAPI</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="tera.DataAccess.API.construct_subgraph"><code class="name flex">
+<span>def <span class="ident">construct_subgraph</span></span>(<span>self, t)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return all triples *-connected to t.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def construct_subgraph(self, t):
+    &#34;&#34;&#34;
+    Return all triples *-connected to t.
+    &#34;&#34;&#34;
+    out = set()
+    tmp = set([t])
+    visited = set()
+    while tmp:
+        curr = tmp.pop()
+        visited.add(curr)
+        q = &#34;&#34;&#34;
+            select ?s ?p ?o {
+                values ?s { &lt;%s&gt; }
+                ?s ?p ?o
+            }
+        &#34;&#34;&#34; % str(curr)
+        res = self.query(q, [&#39;s&#39;,&#39;p&#39;,&#39;o&#39;])
+        out |= res
+        tmp |= set([o for _,_,o in res])
+        tmp -= visited
+    
+    return out</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.API.convert_id"><code class="name flex">
+<span>def <span class="ident">convert_id</span></span>(<span>self, id_, f, t, strip=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Convert between types of ids used in data.</p>
+<h2 id="args">Args</h2>
+<p>from_ :: str
+input id type, inchikey, cas, chemical_id or cid.
+to_ :: str
+output id type, inchikey, cas, chemical_id or cid.
+id_ :: list or element
+list of ids, 'no mapping' if no mapping between from_ and to_ exists.
+strip :: bool
+remove namespace from inputs</p>
+<h2 id="return">Return</h2>
+<p>converted ids.</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><strong><code>NotImplementedError</code></strong></dt>
+<dd>if from_ or to_ not in (inchikey, cas, cid, mesh, chebi, chemble)</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@do_recursively_in_class
+def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
+    &#34;&#34;&#34;
+    Convert between types of ids used in data.
+    
+    Args:
+        from_ :: str 
+            input id type, inchikey, cas, chemical_id or cid.
+        to_ :: str 
+            output id type, inchikey, cas, chemical_id or cid.
+        id_ :: list or element
+            list of ids, &#39;no mapping&#39; if no mapping between from_ and to_ exists.
+        strip :: bool
+            remove namespace from inputs
+    Return:
+        converted ids.
+    Raises:
+        NotImplementedError: if from_ or to_ not in (inchikey, cas, cid, mesh, chebi, chemble)
+    &#34;&#34;&#34;
+
+    if f == t: return id_
+
+    if not hasattr(self, &#39;mappings&#39;):
+        raise AttributeError(self.name + &#39; has not attribute mappings.&#39;)
+
+    if isinstance(id_, (list, set)):
+        return {i:self.convert_id(i) for i in id_}
+    if isinstance(id_, URIRef):
+        id_ = str(id_)
+    if strip:
+        id_ = strip_namespace(id_, [&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
+    
+    if f == self.base_identifier and t in self.mappings:
+        return self.mappings[t].convert(id_)
+    
+    if f in self.mappings:
+        return self.convert_id(self.mappings[f].convert(id_,reverse=True),
+                               f=self.base_identifier,t=t)
+    
+    raise NotImplementedError(&#39;From %s to %s is not supported. \n Supported from/to values are %s&#39;, (f,t,&#39;,&#39;.join(self.mappings.keys())))</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.API.query"><code class="name flex">
+<span>def <span class="ident">query</span></span>(<span>self, q, var)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Pass SPARQL to graph or endpoint</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def query(self, q, var):
+    &#34;&#34;&#34;Pass SPARQL to graph or endpoint&#34;&#34;&#34;
+    q = self.base_query + q
+    if self.use_endpoint:
+        return query_endpoint(self.endpoint, q, var)
+    else:
+        return query_graph(self.dataobject.graph, q)</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.API.query_alt_labels"><code class="name flex">
+<span>def <span class="ident">query_alt_labels</span></span>(<span>self, t)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get literals of t where p =&lt; rdfs:label.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def query_alt_labels(self, t):
+    &#34;&#34;&#34;Get literals of t where p =&lt; rdfs:label.&#34;&#34;&#34;
+    q = &#34;&#34;&#34;
+        select ?p ?s where {
+            &lt;%s&gt; ?p ?s .
+            ?p rdfs:subPropertyOf rdfs:label .
+        } filter (isLiteral(?s))
+    &#34;&#34;&#34; % str(t)
+    return self.query(q, [&#39;p&#39;,&#39;s&#39;])</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.API.query_child"><code class="name flex">
+<span>def <span class="ident">query_child</span></span>(<span>self, t)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return children of t.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def query_child(self, t):
+    &#34;&#34;&#34;Return children of t.&#34;&#34;&#34;
+    q = &#34;&#34;&#34;
+        select ?s where {
+            ?s rdfs:subClassOf &lt;%s&gt; .
+        }
+    &#34;&#34;&#34; % str(t)
+    return self.query(q, &#39;s&#39;)</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.API.query_label"><code class="name flex">
+<span>def <span class="ident">query_label</span></span>(<span>self, t)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return entities with label t.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def query_label(self, t):
+    &#34;&#34;&#34;Return entities with label t.&#34;&#34;&#34;
+    q = &#34;&#34;&#34;
+        select ?s where {
+            ?s rdfs:label &#34;%s&#34; . 
+        }
+    &#34;&#34;&#34; % str(t)
+    return self.query(q, &#39;s&#39;)</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.API.query_labels"><code class="name flex">
+<span>def <span class="ident">query_labels</span></span>(<span>self, t)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get rdfs:labels of t</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def query_labels(self, t):
+    &#34;&#34;&#34;Get rdfs:labels of t&#34;&#34;&#34;
+    q = &#34;&#34;&#34;
+        select ?s where {
+            &lt;%s&gt; rdfs:label ?s .
+        }
+    &#34;&#34;&#34; % str(t)
+    return self.query(q, &#39;s&#39;)</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.API.query_parent"><code class="name flex">
+<span>def <span class="ident">query_parent</span></span>(<span>self, t)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return parent of t.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def query_parent(self, t):
+    &#34;&#34;&#34;Return parent of t.&#34;&#34;&#34;
+    q = &#34;&#34;&#34;
+        select ?s where {
+            &lt;%s&gt; rdfs:subClassOf ?s .
+        }
+    &#34;&#34;&#34; % str(t)
+    return self.query(q, &#39;s&#39;)</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.API.query_siblings"><code class="name flex">
+<span>def <span class="ident">query_siblings</span></span>(<span>self, t, depth=1)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return (depth-1)-cusins of t.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def query_siblings(self, t, depth=1):
+    &#34;&#34;&#34;Return (depth-1)-cusins of t.&#34;&#34;&#34;
+    if depth == -1: depth = &#39;1,&#39;
+    q = &#34;&#34;&#34;
+        select ?s where {
+            &lt;%s&gt; rdfs:subClassOf{%s} ?s .
+        }
+    &#34;&#34;&#34; % (str(t),str(depth))
+    parents = self.query(q,&#39;s&#39;)
+    out = set()
+    while parents:
+        p = parents.pop(0)
+        q = &#34;&#34;&#34;
+        select ?s where {
+            ?s rdfs:subClassOf{%s} &lt;%s&gt; .
+        }
+        &#34;&#34;&#34; % (str(depth),str(t))
+        out |= self.query(q,&#39;s&#39;)
+    return s</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.API.query_type"><code class="name flex">
+<span>def <span class="ident">query_type</span></span>(<span>self, t)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return entities of type t.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def query_type(self, t):
+    &#34;&#34;&#34;Return entities of type t.&#34;&#34;&#34;
+    q = &#34;&#34;&#34;
+        select ?s where {
+            ?s rdf:type &lt;%s&gt;
+        }
+    &#34;&#34;&#34; % str(t)
+    return self.query(q, &#39;s&#39;)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="tera.DataAccess.ChemicalAPI"><code class="flex name class">
+<span>class <span class="ident">ChemicalAPI</span></span>
+<span>(</span><span>namespace='', endpoint=None, dataobject=None, name='Chemical API')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>endpoint :: str
+sparql endpoint url
+dataobject :: DataObject
+see DataAggregation</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ChemicalAPI(API):
+    def __init__(self, namespace=&#39;&#39;, endpoint = None, dataobject = None, name = &#39;Chemical API&#39;):
+        super(ChemicalAPI, self).__init__(namespace, endpoint, dataobject, name)
+        
+        self.mappings = {&#39;cas&#39;:InchikeyToCas(),
+                         &#39;cid&#39;:InchikeyToPubChem(),
+                         &#39;chebi&#39;:InchikeyToChEBI(),
+                         &#39;chemble&#39;:InchikeyToChEMBL(),
+                         &#39;mesh&#39;:InchikeyToMeSH()}
+        self.base_identifier = &#39;inchikey&#39;
+   
+    @do_recursively_in_class
+    def get_fingerprint(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip = False):
+        &#34;&#34;&#34;Get bin fingerprints for id_.&#34;&#34;&#34;
+        c = self.convert_id(id_, f, &#39;cid&#39;, strip)
+        
+        fp = None
+        try:
+            fp = Compound.from_cid(c).fingerprint
+            fp = bin(int(fp, 16))
+        except pubchempy.BadRequestError as e:
+            print(c,e)
+        except pubchempy.NotFoundError as e:
+            print(c,e)
+
+        return fp
+    
+    @do_recursively_in_class
+    def get_names(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip = False):
+        &#34;&#34;&#34;Get synonyms for id_.&#34;&#34;&#34;
+        c = self.convert_id(id_, f, &#39;cid&#39;, strip)
+        out = []
+        try:
+            out = Compound.from_cid(c).synonyms
+        except pubchempy.BadRequestError as e:
+            print(c,e)
+        except pubchempy.NotFoundError as e:
+            print(c,e)
+
+        return out
+    
+    @do_recursively_in_class
+    def class_hierarchy(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip=False):
+        &#34;&#34;&#34;Return all triples connceted to id_.&#34;&#34;&#34;
+        a = self.convert_id(id_, f, &#39;cid&#39;, strip = strip)
+        b = self.convert_id(id_, f, &#39;mesh&#39;, strip = strip)
+        a = self.initNs[&#39;compound&#39;][a]
+        b = self.initNs[&#39;mesh&#39;][b]
+        return self.construct_subgraph(a) | self.construct_subgraph(b)
+        
+    @do_recursively_in_class
+    def get_features(self, id_: Union[URIRef, str, list, set], params=None, f=&#39;inchikey&#39;, strip=False):
+        &#34;&#34;&#34;Return chemical features.
+            params :: list 
+                properties to return
+                ex: params = [&#39;charge&#39;,&#39;molecular_weight&#39;,&#39;xlogp&#39;]
+                To see all avalible features use which_features() . 
+        &#34;&#34;&#34;
+        id_ = self.convert_id(id_, f, &#39;cid&#39;, strip=strip)
+        id_ = self.initNs[&#39;compound&#39;][id_]
+        
+        out = dict()
+        try:
+            if params:
+                out = Compound.from_cid(c).to_dict(properties = params)
+            else:
+                out = Compound.from_cid(c).to_dict()
+        except pubchempy.NotFoundError as e:
+            print(c,e)
+        except pubchempy.BadRequestError as e:
+            print(c,e)
+
+        return out
+    
+    @do_recursively_in_class
+    def which_features(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip=False):
+        &#34;&#34;&#34;Chemical features avalible.&#34;&#34;&#34;
+        return self.get_features(id_, f, strip).keys()
+    
+    @do_recursively_in_class
+    def simiarity(self, id_: Union[URIRef, str, list, set], ids, f=&#39;inchikey&#39;,strip=False):
+        &#34;&#34;&#34;Returns chemical simiarity between id and ids&#34;&#34;&#34;
+        fp = self.get_fingerprint(id_, f, strip)
+        fps = self.get_fingerprint(ids, f, strip)
+        return {i:tanimoto(fp,f) for i,f in zip(ids,fps) if f and fp}
+        
+    def compounds(self):
+        &#34;&#34;&#34;Return all compounds.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            SELECT ?s {
+            ?s  ?o  ?z
+            FILTER (isURI(?s) &amp;&amp; STRSTARTS(str(?s), str(compound:) ) )
+            }
+            &#34;&#34;&#34;
+        return self.query(q, var = &#39;s&#39;)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="tera.DataAccess.API" href="#tera.DataAccess.API">API</a></li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="tera.DataAccess.EcotoxChemicalAPI" href="#tera.DataAccess.EcotoxChemicalAPI">EcotoxChemicalAPI</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="tera.DataAccess.ChemicalAPI.class_hierarchy"><code class="name flex">
+<span>def <span class="ident">class_hierarchy</span></span>(<span>self, id_, f='inchikey', strip=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return all triples connceted to id_.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@do_recursively_in_class
+def class_hierarchy(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip=False):
+    &#34;&#34;&#34;Return all triples connceted to id_.&#34;&#34;&#34;
+    a = self.convert_id(id_, f, &#39;cid&#39;, strip = strip)
+    b = self.convert_id(id_, f, &#39;mesh&#39;, strip = strip)
+    a = self.initNs[&#39;compound&#39;][a]
+    b = self.initNs[&#39;mesh&#39;][b]
+    return self.construct_subgraph(a) | self.construct_subgraph(b)</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.ChemicalAPI.compounds"><code class="name flex">
+<span>def <span class="ident">compounds</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return all compounds.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def compounds(self):
+    &#34;&#34;&#34;Return all compounds.&#34;&#34;&#34;
+    q = &#34;&#34;&#34;
+        SELECT ?s {
+        ?s  ?o  ?z
+        FILTER (isURI(?s) &amp;&amp; STRSTARTS(str(?s), str(compound:) ) )
+        }
+        &#34;&#34;&#34;
+    return self.query(q, var = &#39;s&#39;)</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.ChemicalAPI.get_features"><code class="name flex">
+<span>def <span class="ident">get_features</span></span>(<span>self, id_, params=None, f='inchikey', strip=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return chemical features.
+params :: list
+properties to return
+ex: params = ['charge','molecular_weight','xlogp']
+To see all avalible features use which_features() .</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@do_recursively_in_class
+def get_features(self, id_: Union[URIRef, str, list, set], params=None, f=&#39;inchikey&#39;, strip=False):
+    &#34;&#34;&#34;Return chemical features.
+        params :: list 
+            properties to return
+            ex: params = [&#39;charge&#39;,&#39;molecular_weight&#39;,&#39;xlogp&#39;]
+            To see all avalible features use which_features() . 
+    &#34;&#34;&#34;
+    id_ = self.convert_id(id_, f, &#39;cid&#39;, strip=strip)
+    id_ = self.initNs[&#39;compound&#39;][id_]
+    
+    out = dict()
+    try:
+        if params:
+            out = Compound.from_cid(c).to_dict(properties = params)
+        else:
+            out = Compound.from_cid(c).to_dict()
+    except pubchempy.NotFoundError as e:
+        print(c,e)
+    except pubchempy.BadRequestError as e:
+        print(c,e)
+
+    return out</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.ChemicalAPI.get_fingerprint"><code class="name flex">
+<span>def <span class="ident">get_fingerprint</span></span>(<span>self, id_, f='inchikey', strip=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get bin fingerprints for id_.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@do_recursively_in_class
+def get_fingerprint(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip = False):
+    &#34;&#34;&#34;Get bin fingerprints for id_.&#34;&#34;&#34;
+    c = self.convert_id(id_, f, &#39;cid&#39;, strip)
+    
+    fp = None
+    try:
+        fp = Compound.from_cid(c).fingerprint
+        fp = bin(int(fp, 16))
+    except pubchempy.BadRequestError as e:
+        print(c,e)
+    except pubchempy.NotFoundError as e:
+        print(c,e)
+
+    return fp</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.ChemicalAPI.get_names"><code class="name flex">
+<span>def <span class="ident">get_names</span></span>(<span>self, id_, f='inchikey', strip=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get synonyms for id_.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@do_recursively_in_class
+def get_names(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip = False):
+    &#34;&#34;&#34;Get synonyms for id_.&#34;&#34;&#34;
+    c = self.convert_id(id_, f, &#39;cid&#39;, strip)
+    out = []
+    try:
+        out = Compound.from_cid(c).synonyms
+    except pubchempy.BadRequestError as e:
+        print(c,e)
+    except pubchempy.NotFoundError as e:
+        print(c,e)
+
+    return out</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.ChemicalAPI.simiarity"><code class="name flex">
+<span>def <span class="ident">simiarity</span></span>(<span>self, id_, ids, f='inchikey', strip=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns chemical simiarity between id and ids</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@do_recursively_in_class
+def simiarity(self, id_: Union[URIRef, str, list, set], ids, f=&#39;inchikey&#39;,strip=False):
+    &#34;&#34;&#34;Returns chemical simiarity between id and ids&#34;&#34;&#34;
+    fp = self.get_fingerprint(id_, f, strip)
+    fps = self.get_fingerprint(ids, f, strip)
+    return {i:tanimoto(fp,f) for i,f in zip(ids,fps) if f and fp}</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.ChemicalAPI.which_features"><code class="name flex">
+<span>def <span class="ident">which_features</span></span>(<span>self, id_, f='inchikey', strip=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Chemical features avalible.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@do_recursively_in_class
+def which_features(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip=False):
+    &#34;&#34;&#34;Chemical features avalible.&#34;&#34;&#34;
+    return self.get_features(id_, f, strip).keys()</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataAccess.API" href="#tera.DataAccess.API">API</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataAccess.API.construct_subgraph" href="#tera.DataAccess.API.construct_subgraph">construct_subgraph</a></code></li>
+<li><code><a title="tera.DataAccess.API.convert_id" href="#tera.DataAccess.API.convert_id">convert_id</a></code></li>
+<li><code><a title="tera.DataAccess.API.query" href="#tera.DataAccess.API.query">query</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_alt_labels" href="#tera.DataAccess.API.query_alt_labels">query_alt_labels</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_child" href="#tera.DataAccess.API.query_child">query_child</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_label" href="#tera.DataAccess.API.query_label">query_label</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_labels" href="#tera.DataAccess.API.query_labels">query_labels</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_parent" href="#tera.DataAccess.API.query_parent">query_parent</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_siblings" href="#tera.DataAccess.API.query_siblings">query_siblings</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_type" href="#tera.DataAccess.API.query_type">query_type</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="tera.DataAccess.EcotoxChemicalAPI"><code class="flex name class">
+<span>class <span class="ident">EcotoxChemicalAPI</span></span>
+<span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', endpoint=None, dataobject=None, name='ECOTOX Chemical API')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>endpoint :: str
+sparql endpoint url
+dataobject :: DataObject
+see DataAggregation</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class EcotoxChemicalAPI(ChemicalAPI):
+    def __init__(self, namespace=&#39;https://cfpub.epa.gov/ecotox/&#39;, endpoint = None, dataobject = None, name = &#39;ECOTOX Chemical API&#39;):
+        super(EcotoxChemicalAPI, self).__init__(namespace, endpoint, dataobject, name)
+        
+    @do_recursively_in_class
+    def query_chemical_names(self,t: Union[URIRef, str, list, set]):
+        return self.query_labels(t)
+    
+    def query_chemicals(self):
+        return self.query_type(self.namespace[&#39;Chemical&#39;])</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="tera.DataAccess.ChemicalAPI" href="#tera.DataAccess.ChemicalAPI">ChemicalAPI</a></li>
+<li><a title="tera.DataAccess.API" href="#tera.DataAccess.API">API</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="tera.DataAccess.EcotoxChemicalAPI.query_chemical_names"><code class="name flex">
+<span>def <span class="ident">query_chemical_names</span></span>(<span>self, t)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@do_recursively_in_class
+def query_chemical_names(self,t: Union[URIRef, str, list, set]):
+    return self.query_labels(t)</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.EcotoxChemicalAPI.query_chemicals"><code class="name flex">
+<span>def <span class="ident">query_chemicals</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def query_chemicals(self):
+    return self.query_type(self.namespace[&#39;Chemical&#39;])</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataAccess.ChemicalAPI" href="#tera.DataAccess.ChemicalAPI">ChemicalAPI</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataAccess.ChemicalAPI.class_hierarchy" href="#tera.DataAccess.ChemicalAPI.class_hierarchy">class_hierarchy</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.compounds" href="#tera.DataAccess.ChemicalAPI.compounds">compounds</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.construct_subgraph" href="#tera.DataAccess.API.construct_subgraph">construct_subgraph</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.convert_id" href="#tera.DataAccess.API.convert_id">convert_id</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.get_features" href="#tera.DataAccess.ChemicalAPI.get_features">get_features</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.get_fingerprint" href="#tera.DataAccess.ChemicalAPI.get_fingerprint">get_fingerprint</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.get_names" href="#tera.DataAccess.ChemicalAPI.get_names">get_names</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.query" href="#tera.DataAccess.API.query">query</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.query_alt_labels" href="#tera.DataAccess.API.query_alt_labels">query_alt_labels</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.query_child" href="#tera.DataAccess.API.query_child">query_child</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.query_label" href="#tera.DataAccess.API.query_label">query_label</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.query_labels" href="#tera.DataAccess.API.query_labels">query_labels</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.query_parent" href="#tera.DataAccess.API.query_parent">query_parent</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.query_siblings" href="#tera.DataAccess.API.query_siblings">query_siblings</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.query_type" href="#tera.DataAccess.API.query_type">query_type</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.simiarity" href="#tera.DataAccess.ChemicalAPI.simiarity">simiarity</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.which_features" href="#tera.DataAccess.ChemicalAPI.which_features">which_features</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="tera.DataAccess.EcotoxTaxonomyAPI"><code class="flex name class">
+<span>class <span class="ident">EcotoxTaxonomyAPI</span></span>
+<span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', endpoint=None, dataobject=None, name='ECOTOX Taxonomy API')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>endpoint :: str
+sparql endpoint url
+dataobject :: DataObject
+see DataAggregation</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class EcotoxTaxonomyAPI(TaxonomyAPI):
+    def __init__(self, 
+                 namespace=&#39;https://cfpub.epa.gov/ecotox/&#39;, 
+                 endpoint = None, 
+                 dataobject = None, 
+                 name = &#39;ECOTOX Taxonomy API&#39;):
+        super(EcotoxTaxonomyAPI, self).__init__(namespace, endpoint, dataobject, name)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="tera.DataAccess.TaxonomyAPI" href="#tera.DataAccess.TaxonomyAPI">TaxonomyAPI</a></li>
+<li><a title="tera.DataAccess.API" href="#tera.DataAccess.API">API</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataAccess.TaxonomyAPI" href="#tera.DataAccess.TaxonomyAPI">TaxonomyAPI</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataAccess.TaxonomyAPI.construct_subgraph" href="#tera.DataAccess.API.construct_subgraph">construct_subgraph</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.convert_id" href="#tera.DataAccess.API.convert_id">convert_id</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_division" href="#tera.DataAccess.TaxonomyAPI.get_division">get_division</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_rank" href="#tera.DataAccess.TaxonomyAPI.get_rank">get_rank</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_ranks" href="#tera.DataAccess.TaxonomyAPI.get_ranks">get_ranks</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_species" href="#tera.DataAccess.TaxonomyAPI.get_species">get_species</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_ssd" href="#tera.DataAccess.TaxonomyAPI.get_ssd">get_ssd</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query" href="#tera.DataAccess.API.query">query</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_alt_labels" href="#tera.DataAccess.API.query_alt_labels">query_alt_labels</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_child" href="#tera.DataAccess.API.query_child">query_child</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_label" href="#tera.DataAccess.API.query_label">query_label</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_labels" href="#tera.DataAccess.API.query_labels">query_labels</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_parent" href="#tera.DataAccess.API.query_parent">query_parent</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_siblings" href="#tera.DataAccess.API.query_siblings">query_siblings</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_type" href="#tera.DataAccess.API.query_type">query_type</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="tera.DataAccess.EffectsAPI"><code class="flex name class">
+<span>class <span class="ident">EffectsAPI</span></span>
+<span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', endpoint=None, dataobject=None, name='ECOTOX Effects API')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>endpoint :: str
+sparql endpoint url
+dataobject :: DataObject
+see DataAggregation</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class EffectsAPI(API):
+    def __init__(self, namespace=&#39;https://cfpub.epa.gov/ecotox/&#39;, endpoint = None, dataobject = None, name = &#39;ECOTOX Effects API&#39;):
+        super(EffectsAPI, self).__init__(namespace, endpoint, dataobject, name)
+    
+    @do_recursively_in_class
+    def get_chemicals_from_species(self,t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;Return chemical involved in experiment with species t.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+        select ?c where {
+            ?t rdf:type ns:Test .
+            ?t ns:species &lt;%s&gt; .
+            ?t ns:chemical ?c .
+            } 
+        &#34;&#34;&#34; % str(t)
+        return self.query(q,&#39;c&#39;)
+    
+    @do_recursively_in_class
+    def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;Return species involved in experiment with chemical t.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+        select ?c where {
+            ?t rdf:type ns:Test .
+            ?t ns:species ?c .
+            ?t ns:chemical &lt;%s&gt; .
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q,&#39;c&#39;)
+    
+    def get_chemicals(self):
+        &#34;&#34;&#34;Return chemicals used in at least one experiment.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+        select ?c where {
+            ?t rdf:type ns:Test .
+            ?t ns:chemical ?c .
+            }
+        &#34;&#34;&#34;
+        return self.query(q,&#39;c&#39;)
+    
+    def get_species(self):
+        &#34;&#34;&#34;Return species used in at least one experiment.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+        select ?c where {
+            ?t rdf:type ns:Test .
+            ?t ns:species ?c .
+            }
+        &#34;&#34;&#34;
+        return self.query(q,&#39;c&#39;)
+    
+    def get_endpoint(self, 
+                       c: Union[URIRef, str, list, set], 
+                       s: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;
+        Return endpoints that use chemical c and species s.
+        If list is none: c = query_chemicals and s = query_species
+        &#34;&#34;&#34;
+        if not c:
+            c = self.query_chemicals()
+        if not s:
+            s = self.query_species()
+        if isinstance(c,(list,set)):
+            return {a:self.get_endpoint(a,s) for a in c}
+        if isinstance(s,(list,set)):
+            return {a:self.get_endpoint(c,a) for a in s}
+        q = &#34;&#34;&#34;
+            SELECT ?cc ?cu ?ep ?ef ?sd ?sdu {
+                ?test rdf:type ns:Test ;
+                  ns:chemical &lt;%s&gt; ;
+                   ns:species &lt;%s&gt; ;
+                   ns:hasResult [ 
+                   ns:endpoint ?ep ;
+                   ns:effect ?ef ;
+                   ns:concentration [rdf:value ?cc ; 
+                                        unit:units ?cu] ] .
+               
+                OPTIONAL {
+                    ?test ns:studyDuration [rdf:value ?sd ;
+                                            unit:units ?sdu] .
+                }
+            }&#34;&#34;&#34; % (str(c), str(s))
+        
+        return self.query(q, [&#39;cc&#39;,&#39;cu&#39;,&#39;ep&#39;,&#39;ef&#39;,&#39;sd&#39;,&#39;sdu&#39;])</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="tera.DataAccess.API" href="#tera.DataAccess.API">API</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="tera.DataAccess.EffectsAPI.get_chemicals"><code class="name flex">
+<span>def <span class="ident">get_chemicals</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return chemicals used in at least one experiment.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_chemicals(self):
+    &#34;&#34;&#34;Return chemicals used in at least one experiment.&#34;&#34;&#34;
+    q = &#34;&#34;&#34;
+    select ?c where {
+        ?t rdf:type ns:Test .
+        ?t ns:chemical ?c .
+        }
+    &#34;&#34;&#34;
+    return self.query(q,&#39;c&#39;)</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.EffectsAPI.get_chemicals_from_species"><code class="name flex">
+<span>def <span class="ident">get_chemicals_from_species</span></span>(<span>self, t)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return chemical involved in experiment with species t.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@do_recursively_in_class
+def get_chemicals_from_species(self,t: Union[URIRef, str, list, set]):
+    &#34;&#34;&#34;Return chemical involved in experiment with species t.&#34;&#34;&#34;
+    q = &#34;&#34;&#34;
+    select ?c where {
+        ?t rdf:type ns:Test .
+        ?t ns:species &lt;%s&gt; .
+        ?t ns:chemical ?c .
+        } 
+    &#34;&#34;&#34; % str(t)
+    return self.query(q,&#39;c&#39;)</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.EffectsAPI.get_endpoint"><code class="name flex">
+<span>def <span class="ident">get_endpoint</span></span>(<span>self, c, s)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return endpoints that use chemical c and species s.
+If list is none: c = query_chemicals and s = query_species</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_endpoint(self, 
+                   c: Union[URIRef, str, list, set], 
+                   s: Union[URIRef, str, list, set]):
+    &#34;&#34;&#34;
+    Return endpoints that use chemical c and species s.
+    If list is none: c = query_chemicals and s = query_species
+    &#34;&#34;&#34;
+    if not c:
+        c = self.query_chemicals()
+    if not s:
+        s = self.query_species()
+    if isinstance(c,(list,set)):
+        return {a:self.get_endpoint(a,s) for a in c}
+    if isinstance(s,(list,set)):
+        return {a:self.get_endpoint(c,a) for a in s}
+    q = &#34;&#34;&#34;
+        SELECT ?cc ?cu ?ep ?ef ?sd ?sdu {
+            ?test rdf:type ns:Test ;
+              ns:chemical &lt;%s&gt; ;
+               ns:species &lt;%s&gt; ;
+               ns:hasResult [ 
+               ns:endpoint ?ep ;
+               ns:effect ?ef ;
+               ns:concentration [rdf:value ?cc ; 
+                                    unit:units ?cu] ] .
+           
+            OPTIONAL {
+                ?test ns:studyDuration [rdf:value ?sd ;
+                                        unit:units ?sdu] .
+            }
+        }&#34;&#34;&#34; % (str(c), str(s))
+    
+    return self.query(q, [&#39;cc&#39;,&#39;cu&#39;,&#39;ep&#39;,&#39;ef&#39;,&#39;sd&#39;,&#39;sdu&#39;])</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.EffectsAPI.get_species"><code class="name flex">
+<span>def <span class="ident">get_species</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return species used in at least one experiment.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_species(self):
+    &#34;&#34;&#34;Return species used in at least one experiment.&#34;&#34;&#34;
+    q = &#34;&#34;&#34;
+    select ?c where {
+        ?t rdf:type ns:Test .
+        ?t ns:species ?c .
+        }
+    &#34;&#34;&#34;
+    return self.query(q,&#39;c&#39;)</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.EffectsAPI.get_species_from_chemicals"><code class="name flex">
+<span>def <span class="ident">get_species_from_chemicals</span></span>(<span>self, t)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return species involved in experiment with chemical t.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@do_recursively_in_class
+def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
+    &#34;&#34;&#34;Return species involved in experiment with chemical t.&#34;&#34;&#34;
+    q = &#34;&#34;&#34;
+    select ?c where {
+        ?t rdf:type ns:Test .
+        ?t ns:species ?c .
+        ?t ns:chemical &lt;%s&gt; .
+        }
+    &#34;&#34;&#34; % str(t)
+    return self.query(q,&#39;c&#39;)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataAccess.API" href="#tera.DataAccess.API">API</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataAccess.API.construct_subgraph" href="#tera.DataAccess.API.construct_subgraph">construct_subgraph</a></code></li>
+<li><code><a title="tera.DataAccess.API.convert_id" href="#tera.DataAccess.API.convert_id">convert_id</a></code></li>
+<li><code><a title="tera.DataAccess.API.query" href="#tera.DataAccess.API.query">query</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_alt_labels" href="#tera.DataAccess.API.query_alt_labels">query_alt_labels</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_child" href="#tera.DataAccess.API.query_child">query_child</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_label" href="#tera.DataAccess.API.query_label">query_label</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_labels" href="#tera.DataAccess.API.query_labels">query_labels</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_parent" href="#tera.DataAccess.API.query_parent">query_parent</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_siblings" href="#tera.DataAccess.API.query_siblings">query_siblings</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_type" href="#tera.DataAccess.API.query_type">query_type</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="tera.DataAccess.NCBITaxonomyAPI"><code class="flex name class">
+<span>class <span class="ident">NCBITaxonomyAPI</span></span>
+<span>(</span><span>namespace='https://www.ncbi.nlm.nih.gov/taxonomy', endpoint=None, dataobject=None, name='NCBI API')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>endpoint :: str
+sparql endpoint url
+dataobject :: DataObject
+see DataAggregation</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NCBITaxonomyAPI(TaxonomyAPI):
+    def __init__(self, 
+                 namespace=&#39;https://www.ncbi.nlm.nih.gov/taxonomy&#39;, 
+                 endpoint = None, 
+                 dataobject = None, 
+                 name = &#39;NCBI API&#39;):
+        super(TaxonomyAPI, self).__init__(namespace, endpoint, dataobject, name)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="tera.DataAccess.TaxonomyAPI" href="#tera.DataAccess.TaxonomyAPI">TaxonomyAPI</a></li>
+<li><a title="tera.DataAccess.API" href="#tera.DataAccess.API">API</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataAccess.TaxonomyAPI" href="#tera.DataAccess.TaxonomyAPI">TaxonomyAPI</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataAccess.TaxonomyAPI.construct_subgraph" href="#tera.DataAccess.API.construct_subgraph">construct_subgraph</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.convert_id" href="#tera.DataAccess.API.convert_id">convert_id</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_division" href="#tera.DataAccess.TaxonomyAPI.get_division">get_division</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_rank" href="#tera.DataAccess.TaxonomyAPI.get_rank">get_rank</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_ranks" href="#tera.DataAccess.TaxonomyAPI.get_ranks">get_ranks</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_species" href="#tera.DataAccess.TaxonomyAPI.get_species">get_species</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_ssd" href="#tera.DataAccess.TaxonomyAPI.get_ssd">get_ssd</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query" href="#tera.DataAccess.API.query">query</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_alt_labels" href="#tera.DataAccess.API.query_alt_labels">query_alt_labels</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_child" href="#tera.DataAccess.API.query_child">query_child</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_label" href="#tera.DataAccess.API.query_label">query_label</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_labels" href="#tera.DataAccess.API.query_labels">query_labels</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_parent" href="#tera.DataAccess.API.query_parent">query_parent</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_siblings" href="#tera.DataAccess.API.query_siblings">query_siblings</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_type" href="#tera.DataAccess.API.query_type">query_type</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="tera.DataAccess.TaxonomyAPI"><code class="flex name class">
+<span>class <span class="ident">TaxonomyAPI</span></span>
+<span>(</span><span>namespace=None, endpoint=None, dataobject=None, mapping_dataobject=None, name='Taxonomy API')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>endpoint :: str
+sparql endpoint url
+dataobject :: DataObject
+see DataAggregation</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TaxonomyAPI(API):
+    def __init__(self, 
+                 namespace=None, 
+                 endpoint = None,
+                 dataobject = None,
+                 mapping_dataobject = None,
+                 name = &#39;Taxonomy API&#39;):
+        super(TaxonomyAPI, self).__init__(namespace, endpoint, dataobject, name)
+        
+        self.mappings = {&#39;eol&#39;:NCBIToEOL()}
+        if mapping_dataobject:
+            self.mappings[&#39;ecotox&#39;] = NCBIToEcotox(dataobject, mapping_dataobject)
+        elif endpoint and test_endpoint(endpoint):
+            self.mappings[&#39;ecotox&#39;] = EndpointMapping(endpoint)
+        
+        self.base_identifier = &#39;ncbi&#39;
+        
+    def get_species(self):
+        &#34;&#34;&#34;All species&#34;&#34;&#34;
+        return self.query_type(self.namespace[&#39;Taxon&#39;])
+    
+    @do_recursively_in_class
+    def get_division(self, t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;Return all species in division t&#34;&#34;&#34;
+        return self.query_subclassof(a)
+    
+    @do_recursively_in_class
+    def get_ssd(self, t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;Return all species in ssd t&#34;&#34;&#34;
+        return self.query_subclassof(t)
+    
+    def get_ranks(self):
+        &#34;&#34;&#34;Get all taxonomic ranks&#34;&#34;&#34;
+        return self.query_type(self.namespace[&#39;Rank&#39;])
+    
+    @do_recursively_in_class
+    def get_rank(self, t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;Return all taxons with rank t&#34;&#34;&#34;
+        return self.query_subclassof(t)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="tera.DataAccess.API" href="#tera.DataAccess.API">API</a></li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="tera.DataAccess.EcotoxTaxonomyAPI" href="#tera.DataAccess.EcotoxTaxonomyAPI">EcotoxTaxonomyAPI</a></li>
+<li><a title="tera.DataAccess.NCBITaxonomyAPI" href="#tera.DataAccess.NCBITaxonomyAPI">NCBITaxonomyAPI</a></li>
+<li><a title="tera.DataAccess.TraitsAPI" href="#tera.DataAccess.TraitsAPI">TraitsAPI</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="tera.DataAccess.TaxonomyAPI.get_division"><code class="name flex">
+<span>def <span class="ident">get_division</span></span>(<span>self, t)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return all species in division t</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@do_recursively_in_class
+def get_division(self, t: Union[URIRef, str, list, set]):
+    &#34;&#34;&#34;Return all species in division t&#34;&#34;&#34;
+    return self.query_subclassof(a)</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.TaxonomyAPI.get_rank"><code class="name flex">
+<span>def <span class="ident">get_rank</span></span>(<span>self, t)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return all taxons with rank t</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@do_recursively_in_class
+def get_rank(self, t: Union[URIRef, str, list, set]):
+    &#34;&#34;&#34;Return all taxons with rank t&#34;&#34;&#34;
+    return self.query_subclassof(t)</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.TaxonomyAPI.get_ranks"><code class="name flex">
+<span>def <span class="ident">get_ranks</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get all taxonomic ranks</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_ranks(self):
+    &#34;&#34;&#34;Get all taxonomic ranks&#34;&#34;&#34;
+    return self.query_type(self.namespace[&#39;Rank&#39;])</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.TaxonomyAPI.get_species"><code class="name flex">
+<span>def <span class="ident">get_species</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>All species</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_species(self):
+    &#34;&#34;&#34;All species&#34;&#34;&#34;
+    return self.query_type(self.namespace[&#39;Taxon&#39;])</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.TaxonomyAPI.get_ssd"><code class="name flex">
+<span>def <span class="ident">get_ssd</span></span>(<span>self, t)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return all species in ssd t</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@do_recursively_in_class
+def get_ssd(self, t: Union[URIRef, str, list, set]):
+    &#34;&#34;&#34;Return all species in ssd t&#34;&#34;&#34;
+    return self.query_subclassof(t)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataAccess.API" href="#tera.DataAccess.API">API</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataAccess.API.construct_subgraph" href="#tera.DataAccess.API.construct_subgraph">construct_subgraph</a></code></li>
+<li><code><a title="tera.DataAccess.API.convert_id" href="#tera.DataAccess.API.convert_id">convert_id</a></code></li>
+<li><code><a title="tera.DataAccess.API.query" href="#tera.DataAccess.API.query">query</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_alt_labels" href="#tera.DataAccess.API.query_alt_labels">query_alt_labels</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_child" href="#tera.DataAccess.API.query_child">query_child</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_label" href="#tera.DataAccess.API.query_label">query_label</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_labels" href="#tera.DataAccess.API.query_labels">query_labels</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_parent" href="#tera.DataAccess.API.query_parent">query_parent</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_siblings" href="#tera.DataAccess.API.query_siblings">query_siblings</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_type" href="#tera.DataAccess.API.query_type">query_type</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="tera.DataAccess.TraitsAPI"><code class="flex name class">
+<span>class <span class="ident">TraitsAPI</span></span>
+<span>(</span><span>namespace='https://eol.org/schema/terms/', endpoint=None, dataobject=None, name='EOL API')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>endpoint :: str
+sparql endpoint url
+dataobject :: DataObject
+see DataAggregation</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TraitsAPI(TaxonomyAPI):
+    def __init__(self, namespace=&#39;https://eol.org/schema/terms/&#39;, endpoint = None, dataobject = None, name = &#39;EOL API&#39;):
+        super(TraitsAPI, self).__init__(namespace, endpoint, dataobject, name)
+    
+    @do_recursively_in_class
+    def get_concervation_status(self,t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;Return concervation status of t.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            SELECT ?h WHERE {
+                &lt;%s&gt; &lt;http://rs.tdwg.org/ontology/voc/SPMInfoItems#ConservationStatus&gt; ?h .
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q,&#39;h&#39;)
+
+    @do_recursively_in_class
+    def get_extinct_status(self,t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;Return extinct status (true/false) of t. &#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            SELECT ?h WHERE {
+                &lt;%s&gt; &lt;http://eol.org/schema/terms/ExtinctionStatus&gt; ?h .
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q,&#39;h&#39;)
+        
+    @do_recursively_in_class
+    def get_endemic_to(self,t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;Return endemic region of t.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            SELECT ?h WHERE {
+                &lt;%s&gt; &lt;http://eol.org/terms/endemic&gt; ?h .
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q,&#39;h&#39;)
+    
+    @do_recursively_in_class
+    def get_ecoregion(self,t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;Return ecoregion of t. &#34;&#34;&#34;
+        q =  &#34;&#34;&#34;
+            SELECT ?h WHERE {
+                &lt;%s&gt; &lt;https://www.wikidata.org/entity/Q295469&gt; ?h .
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q,&#39;h&#39;)
+        
+    @do_recursively_in_class
+    def get_habitat(self,t: Union[URIRef, str, list, set]):
+        &#34;&#34;&#34;Return habiat of t.&#34;&#34;&#34;
+        q = &#34;&#34;&#34;
+            SELECT ?h WHERE {
+                &lt;%s&gt; &lt;http://rs.tdwg.org/dwc/terms/habitat&gt; ?h .
+            }
+        &#34;&#34;&#34; % str(t)
+        return self.query(q,&#39;h&#39;)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="tera.DataAccess.TaxonomyAPI" href="#tera.DataAccess.TaxonomyAPI">TaxonomyAPI</a></li>
+<li><a title="tera.DataAccess.API" href="#tera.DataAccess.API">API</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="tera.DataAccess.TraitsAPI.get_concervation_status"><code class="name flex">
+<span>def <span class="ident">get_concervation_status</span></span>(<span>self, t)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return concervation status of t.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@do_recursively_in_class
+def get_concervation_status(self,t: Union[URIRef, str, list, set]):
+    &#34;&#34;&#34;Return concervation status of t.&#34;&#34;&#34;
+    q = &#34;&#34;&#34;
+        SELECT ?h WHERE {
+            &lt;%s&gt; &lt;http://rs.tdwg.org/ontology/voc/SPMInfoItems#ConservationStatus&gt; ?h .
+        }
+    &#34;&#34;&#34; % str(t)
+    return self.query(q,&#39;h&#39;)</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.TraitsAPI.get_ecoregion"><code class="name flex">
+<span>def <span class="ident">get_ecoregion</span></span>(<span>self, t)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return ecoregion of t.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@do_recursively_in_class
+def get_ecoregion(self,t: Union[URIRef, str, list, set]):
+    &#34;&#34;&#34;Return ecoregion of t. &#34;&#34;&#34;
+    q =  &#34;&#34;&#34;
+        SELECT ?h WHERE {
+            &lt;%s&gt; &lt;https://www.wikidata.org/entity/Q295469&gt; ?h .
+        }
+    &#34;&#34;&#34; % str(t)
+    return self.query(q,&#39;h&#39;)</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.TraitsAPI.get_endemic_to"><code class="name flex">
+<span>def <span class="ident">get_endemic_to</span></span>(<span>self, t)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return endemic region of t.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@do_recursively_in_class
+def get_endemic_to(self,t: Union[URIRef, str, list, set]):
+    &#34;&#34;&#34;Return endemic region of t.&#34;&#34;&#34;
+    q = &#34;&#34;&#34;
+        SELECT ?h WHERE {
+            &lt;%s&gt; &lt;http://eol.org/terms/endemic&gt; ?h .
+        }
+    &#34;&#34;&#34; % str(t)
+    return self.query(q,&#39;h&#39;)</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.TraitsAPI.get_extinct_status"><code class="name flex">
+<span>def <span class="ident">get_extinct_status</span></span>(<span>self, t)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return extinct status (true/false) of t.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@do_recursively_in_class
+def get_extinct_status(self,t: Union[URIRef, str, list, set]):
+    &#34;&#34;&#34;Return extinct status (true/false) of t. &#34;&#34;&#34;
+    q = &#34;&#34;&#34;
+        SELECT ?h WHERE {
+            &lt;%s&gt; &lt;http://eol.org/schema/terms/ExtinctionStatus&gt; ?h .
+        }
+    &#34;&#34;&#34; % str(t)
+    return self.query(q,&#39;h&#39;)</code></pre>
+</details>
+</dd>
+<dt id="tera.DataAccess.TraitsAPI.get_habitat"><code class="name flex">
+<span>def <span class="ident">get_habitat</span></span>(<span>self, t)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return habiat of t.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@do_recursively_in_class
+def get_habitat(self,t: Union[URIRef, str, list, set]):
+    &#34;&#34;&#34;Return habiat of t.&#34;&#34;&#34;
+    q = &#34;&#34;&#34;
+        SELECT ?h WHERE {
+            &lt;%s&gt; &lt;http://rs.tdwg.org/dwc/terms/habitat&gt; ?h .
+        }
+    &#34;&#34;&#34; % str(t)
+    return self.query(q,&#39;h&#39;)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tera.DataAccess.TaxonomyAPI" href="#tera.DataAccess.TaxonomyAPI">TaxonomyAPI</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tera.DataAccess.TaxonomyAPI.construct_subgraph" href="#tera.DataAccess.API.construct_subgraph">construct_subgraph</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.convert_id" href="#tera.DataAccess.API.convert_id">convert_id</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_division" href="#tera.DataAccess.TaxonomyAPI.get_division">get_division</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_rank" href="#tera.DataAccess.TaxonomyAPI.get_rank">get_rank</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_ranks" href="#tera.DataAccess.TaxonomyAPI.get_ranks">get_ranks</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_species" href="#tera.DataAccess.TaxonomyAPI.get_species">get_species</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_ssd" href="#tera.DataAccess.TaxonomyAPI.get_ssd">get_ssd</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query" href="#tera.DataAccess.API.query">query</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_alt_labels" href="#tera.DataAccess.API.query_alt_labels">query_alt_labels</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_child" href="#tera.DataAccess.API.query_child">query_child</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_label" href="#tera.DataAccess.API.query_label">query_label</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_labels" href="#tera.DataAccess.API.query_labels">query_labels</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_parent" href="#tera.DataAccess.API.query_parent">query_parent</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_siblings" href="#tera.DataAccess.API.query_siblings">query_siblings</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.query_type" href="#tera.DataAccess.API.query_type">query_type</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="tera" href="index.html">tera</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="tera.DataAccess.API" href="#tera.DataAccess.API">API</a></code></h4>
+<ul class="two-column">
+<li><code><a title="tera.DataAccess.API.construct_subgraph" href="#tera.DataAccess.API.construct_subgraph">construct_subgraph</a></code></li>
+<li><code><a title="tera.DataAccess.API.convert_id" href="#tera.DataAccess.API.convert_id">convert_id</a></code></li>
+<li><code><a title="tera.DataAccess.API.query" href="#tera.DataAccess.API.query">query</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_alt_labels" href="#tera.DataAccess.API.query_alt_labels">query_alt_labels</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_child" href="#tera.DataAccess.API.query_child">query_child</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_label" href="#tera.DataAccess.API.query_label">query_label</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_labels" href="#tera.DataAccess.API.query_labels">query_labels</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_parent" href="#tera.DataAccess.API.query_parent">query_parent</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_siblings" href="#tera.DataAccess.API.query_siblings">query_siblings</a></code></li>
+<li><code><a title="tera.DataAccess.API.query_type" href="#tera.DataAccess.API.query_type">query_type</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="tera.DataAccess.ChemicalAPI" href="#tera.DataAccess.ChemicalAPI">ChemicalAPI</a></code></h4>
+<ul class="two-column">
+<li><code><a title="tera.DataAccess.ChemicalAPI.class_hierarchy" href="#tera.DataAccess.ChemicalAPI.class_hierarchy">class_hierarchy</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.compounds" href="#tera.DataAccess.ChemicalAPI.compounds">compounds</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.get_features" href="#tera.DataAccess.ChemicalAPI.get_features">get_features</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.get_fingerprint" href="#tera.DataAccess.ChemicalAPI.get_fingerprint">get_fingerprint</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.get_names" href="#tera.DataAccess.ChemicalAPI.get_names">get_names</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.simiarity" href="#tera.DataAccess.ChemicalAPI.simiarity">simiarity</a></code></li>
+<li><code><a title="tera.DataAccess.ChemicalAPI.which_features" href="#tera.DataAccess.ChemicalAPI.which_features">which_features</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="tera.DataAccess.EcotoxChemicalAPI" href="#tera.DataAccess.EcotoxChemicalAPI">EcotoxChemicalAPI</a></code></h4>
+<ul class="">
+<li><code><a title="tera.DataAccess.EcotoxChemicalAPI.query_chemical_names" href="#tera.DataAccess.EcotoxChemicalAPI.query_chemical_names">query_chemical_names</a></code></li>
+<li><code><a title="tera.DataAccess.EcotoxChemicalAPI.query_chemicals" href="#tera.DataAccess.EcotoxChemicalAPI.query_chemicals">query_chemicals</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="tera.DataAccess.EcotoxTaxonomyAPI" href="#tera.DataAccess.EcotoxTaxonomyAPI">EcotoxTaxonomyAPI</a></code></h4>
+</li>
+<li>
+<h4><code><a title="tera.DataAccess.EffectsAPI" href="#tera.DataAccess.EffectsAPI">EffectsAPI</a></code></h4>
+<ul class="">
+<li><code><a title="tera.DataAccess.EffectsAPI.get_chemicals" href="#tera.DataAccess.EffectsAPI.get_chemicals">get_chemicals</a></code></li>
+<li><code><a title="tera.DataAccess.EffectsAPI.get_chemicals_from_species" href="#tera.DataAccess.EffectsAPI.get_chemicals_from_species">get_chemicals_from_species</a></code></li>
+<li><code><a title="tera.DataAccess.EffectsAPI.get_endpoint" href="#tera.DataAccess.EffectsAPI.get_endpoint">get_endpoint</a></code></li>
+<li><code><a title="tera.DataAccess.EffectsAPI.get_species" href="#tera.DataAccess.EffectsAPI.get_species">get_species</a></code></li>
+<li><code><a title="tera.DataAccess.EffectsAPI.get_species_from_chemicals" href="#tera.DataAccess.EffectsAPI.get_species_from_chemicals">get_species_from_chemicals</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="tera.DataAccess.NCBITaxonomyAPI" href="#tera.DataAccess.NCBITaxonomyAPI">NCBITaxonomyAPI</a></code></h4>
+</li>
+<li>
+<h4><code><a title="tera.DataAccess.TaxonomyAPI" href="#tera.DataAccess.TaxonomyAPI">TaxonomyAPI</a></code></h4>
+<ul class="">
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_division" href="#tera.DataAccess.TaxonomyAPI.get_division">get_division</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_rank" href="#tera.DataAccess.TaxonomyAPI.get_rank">get_rank</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_ranks" href="#tera.DataAccess.TaxonomyAPI.get_ranks">get_ranks</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_species" href="#tera.DataAccess.TaxonomyAPI.get_species">get_species</a></code></li>
+<li><code><a title="tera.DataAccess.TaxonomyAPI.get_ssd" href="#tera.DataAccess.TaxonomyAPI.get_ssd">get_ssd</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="tera.DataAccess.TraitsAPI" href="#tera.DataAccess.TraitsAPI">TraitsAPI</a></code></h4>
+<ul class="">
+<li><code><a title="tera.DataAccess.TraitsAPI.get_concervation_status" href="#tera.DataAccess.TraitsAPI.get_concervation_status">get_concervation_status</a></code></li>
+<li><code><a title="tera.DataAccess.TraitsAPI.get_ecoregion" href="#tera.DataAccess.TraitsAPI.get_ecoregion">get_ecoregion</a></code></li>
+<li><code><a title="tera.DataAccess.TraitsAPI.get_endemic_to" href="#tera.DataAccess.TraitsAPI.get_endemic_to">get_endemic_to</a></code></li>
+<li><code><a title="tera.DataAccess.TraitsAPI.get_extinct_status" href="#tera.DataAccess.TraitsAPI.get_extinct_status">get_extinct_status</a></code></li>
+<li><code><a title="tera.DataAccess.TraitsAPI.get_habitat" href="#tera.DataAccess.TraitsAPI.get_habitat">get_habitat</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.4</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>
