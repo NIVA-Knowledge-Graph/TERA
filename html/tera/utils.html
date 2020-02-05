@@ -40,7 +40,6 @@ def tanimoto(fp1, fp2):
             Chemical fingerprint on binary form.\n
         fp2 : str \n
             Chemical fingerprint on binary form.\n
-    
     Return:
         simiarity : float
     &#34;&#34;&#34;
@@ -50,12 +49,16 @@ def tanimoto(fp1, fp2):
     return float(both_count) / (fp1_count + fp2_count - both_count)
 
 
-def remove_missing(item):
-    if item in nan_values:
-        item = &#39;NaN&#39;
-    return item
-
 def test_endpoint(endpoint):
+    &#34;&#34;&#34;
+    Test SPARQL endpoint.
+    Args:
+        endpoint : str \n
+            SPARQL endpoint URL. ex: https://query.wikidata.org/sparql \
+    Return:
+        bool \n
+            If endpoint returns data.
+    &#34;&#34;&#34;
     sparql = SPARQLWrapper(endpoint)
     q = &#34;&#34;&#34;
         SELECT ?s ?p ?o
@@ -73,6 +76,19 @@ def test_endpoint(endpoint):
     
     
 def query_endpoint(endpoint, q, var = &#39;p&#39;):
+    &#34;&#34;&#34;
+    Wrapper for quering SPARQL endpoint with SPARQLWrapper.
+    Args:
+        endpoint : str\n
+            SPARQL endpoint URL. \n
+        q : str \n
+            SPARQL query. \n
+        var : str or list \n
+            Query variables to return.
+    Return:
+        set \n
+            Set of tuple query results. Tuple in order specified in input var. 
+    &#34;&#34;&#34;
     if not isinstance(var, list):
         var = [var]
         
@@ -94,37 +110,53 @@ def query_endpoint(endpoint, q, var = &#39;p&#39;):
         return set()
 
 
-def test_endpoint(endpoint):
-    sparql = SPARQLWrapper(endpoint)
-    q = &#34;&#34;&#34;
-        SELECT ?s ?p ?o
-        WHERE {?s ?p ?o}
-        LIMIT 100
-    &#34;&#34;&#34; 
-
-    sparql.setQuery(q)
-    sparql.setReturnFormat(JSON)
-    try:
-        results = sparql.query().convert()
-        return True
-    except:
-        return False
-    
 def query_graph(graph, q):
+    &#34;&#34;&#34;
+    Query rdflib.Graph. 
+    Args:
+        graph : rdflib.Graph \n
+        q : str \n
+            SPARQL query
+    Return:
+        set \n
+            Query results.
+    &#34;&#34;&#34;
     try:
-        return list(graph.query(q))
+        return set(graph.query(q))
     except Exception as e:
         print(e.message)
-        return []
+        return set()
     
 
 def prefixes(initNs):
+    &#34;&#34;&#34;
+    Format prefixes for SPARQL. 
+    Args:
+        initNs : dict \n
+        ex : {&#39;ex&#39;:&#39;http://example.org&#39;} 
+    Return:
+        str \n
+        SPARQL formatted prefixes.
+    &#34;&#34;&#34;
     q = &#39;&#39;
     for k,i in initNs.items():
         q += &#34;PREFIX\t&#34;+k+&#39;:\t&#39; + &#39;&lt;&#39;+str(i)+&#39;&gt;\n&#39;
     return q
 
 def strip_namespace(string, var = [&#39;/&#39;]):
+    &#34;&#34;&#34;
+    Remove namespace from URI.
+    Args:
+        string : str \n
+            URI \n
+        var : str or list \n
+            Symbols to split string. ex. / or #.
+    Return:
+        str \n
+            Shortest remaining string after var.
+    &#34;&#34;&#34;
+    if not isinstance(var,list):
+        var = [var]
     tmp1 = str(string)
     for v in var:
         tmp2 = str(string).split(v)[-1]
@@ -134,6 +166,7 @@ def strip_namespace(string, var = [&#39;/&#39;]):
 
 
 def do_recursively_in_class(func):
+    &#34;&#34;&#34;Enables function to take either element or iterable as input.&#34;&#34;&#34;
     @wraps(func)
     def call_recursively(my_class_instance, x, **kwargs):
         if isinstance(x, (list,set,tuple)):
@@ -145,6 +178,14 @@ def do_recursively_in_class(func):
 
 
 def graph_to_dict(graph):
+    &#34;&#34;&#34;
+    Map entities in graph to a dict.
+    Args:
+        graph : rdflib.Graph
+    Return:
+        dict \n
+        On the form {entity : list of literals connected to entity}
+    &#34;&#34;&#34;
     entities = graph.subjects()
     d = defaultdict(list)
     
@@ -164,12 +205,13 @@ def graph_to_dict(graph):
 <span>def <span class="ident">do_recursively_in_class</span></span>(<span>func)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Enables function to take either element or iterable as input.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def do_recursively_in_class(func):
+    &#34;&#34;&#34;Enables function to take either element or iterable as input.&#34;&#34;&#34;
     @wraps(func)
     def call_recursively(my_class_instance, x, **kwargs):
         if isinstance(x, (list,set,tuple)):
@@ -184,12 +226,28 @@ def graph_to_dict(graph):
 <span>def <span class="ident">graph_to_dict</span></span>(<span>graph)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Map entities in graph to a dict.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>graph</code></strong> :&ensp;<code>rdflib.Graph</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>dict </p>
+<p>On the form {entity : list of literals connected to entity}</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def graph_to_dict(graph):
+    &#34;&#34;&#34;
+    Map entities in graph to a dict.
+    Args:
+        graph : rdflib.Graph
+    Return:
+        dict \n
+        On the form {entity : list of literals connected to entity}
+    &#34;&#34;&#34;
     entities = graph.subjects()
     d = defaultdict(list)
     
@@ -202,12 +260,31 @@ def graph_to_dict(graph):
 <span>def <span class="ident">prefixes</span></span>(<span>initNs)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Format prefixes for SPARQL. </p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>initNs</code></strong> :&ensp;<code>dict</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>ex</code></strong> :&ensp;{<code>'ex'</code>:<code>'http</code>://<code>example.org'</code>}</dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>str </p>
+<p>SPARQL formatted prefixes.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def prefixes(initNs):
+    &#34;&#34;&#34;
+    Format prefixes for SPARQL. 
+    Args:
+        initNs : dict \n
+        ex : {&#39;ex&#39;:&#39;http://example.org&#39;} 
+    Return:
+        str \n
+        SPARQL formatted prefixes.
+    &#34;&#34;&#34;
     q = &#39;&#39;
     for k,i in initNs.items():
         q += &#34;PREFIX\t&#34;+k+&#39;:\t&#39; + &#39;&lt;&#39;+str(i)+&#39;&gt;\n&#39;
@@ -218,12 +295,38 @@ def graph_to_dict(graph):
 <span>def <span class="ident">query_endpoint</span></span>(<span>endpoint, q, var='p')</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Wrapper for quering SPARQL endpoint with SPARQLWrapper.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>endpoint</code></strong> :&ensp;<code>str</code></dt>
+<dd>SPARQL endpoint URL.</dd>
+<dt><strong><code>q</code></strong> :&ensp;<code>str</code></dt>
+<dd>SPARQL query.</dd>
+<dt><strong><code>var</code></strong> :&ensp;<code>str</code> or <code>list</code></dt>
+<dd>Query variables to return.</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>set </p>
+<pre><code>Set of tuple query results. Tuple in order specified in input var.
+</code></pre></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def query_endpoint(endpoint, q, var = &#39;p&#39;):
+    &#34;&#34;&#34;
+    Wrapper for quering SPARQL endpoint with SPARQLWrapper.
+    Args:
+        endpoint : str\n
+            SPARQL endpoint URL. \n
+        q : str \n
+            SPARQL query. \n
+        var : str or list \n
+            Query variables to return.
+    Return:
+        set \n
+            Set of tuple query results. Tuple in order specified in input var. 
+    &#34;&#34;&#34;
     if not isinstance(var, list):
         var = [var]
         
@@ -249,44 +352,74 @@ def graph_to_dict(graph):
 <span>def <span class="ident">query_graph</span></span>(<span>graph, q)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Query rdflib.Graph. </p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>graph</code></strong> :&ensp;<code>rdflib.Graph</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>q</code></strong> :&ensp;<code>str</code></dt>
+<dd>SPARQL query</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>set </p>
+<pre><code>Query results.
+</code></pre></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def query_graph(graph, q):
+    &#34;&#34;&#34;
+    Query rdflib.Graph. 
+    Args:
+        graph : rdflib.Graph \n
+        q : str \n
+            SPARQL query
+    Return:
+        set \n
+            Query results.
+    &#34;&#34;&#34;
     try:
-        return list(graph.query(q))
+        return set(graph.query(q))
     except Exception as e:
         print(e.message)
-        return []</code></pre>
-</details>
-</dd>
-<dt id="tera.utils.remove_missing"><code class="name flex">
-<span>def <span class="ident">remove_missing</span></span>(<span>item)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def remove_missing(item):
-    if item in nan_values:
-        item = &#39;NaN&#39;
-    return item</code></pre>
+        return set()</code></pre>
 </details>
 </dd>
 <dt id="tera.utils.strip_namespace"><code class="name flex">
 <span>def <span class="ident">strip_namespace</span></span>(<span>string, var=['/'])</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Remove namespace from URI.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>string</code></strong> :&ensp;<code>str</code></dt>
+<dd>URI</dd>
+<dt><strong><code>var</code></strong> :&ensp;<code>str</code> or <code>list</code></dt>
+<dd>Symbols to split string. ex. / or #.</dd>
+</dl>
+<h2 id="return">Return</h2>
+<p>str </p>
+<pre><code>Shortest remaining string after var.
+</code></pre></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def strip_namespace(string, var = [&#39;/&#39;]):
+    &#34;&#34;&#34;
+    Remove namespace from URI.
+    Args:
+        string : str \n
+            URI \n
+        var : str or list \n
+            Symbols to split string. ex. / or #.
+    Return:
+        str \n
+            Shortest remaining string after var.
+    &#34;&#34;&#34;
+    if not isinstance(var,list):
+        var = [var]
     tmp1 = str(string)
     for v in var:
         tmp2 = str(string).split(v)[-1]
@@ -324,7 +457,6 @@ def graph_to_dict(graph):
             Chemical fingerprint on binary form.\n
         fp2 : str \n
             Chemical fingerprint on binary form.\n
-    
     Return:
         simiarity : float
     &#34;&#34;&#34;
@@ -338,12 +470,30 @@ def graph_to_dict(graph):
 <span>def <span class="ident">test_endpoint</span></span>(<span>endpoint)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Test SPARQL endpoint.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>endpoint</code></strong> :&ensp;<code>str</code></dt>
+<dd>SPARQL endpoint URL. ex: <a href="https://query.wikidata.org/sparql">https://query.wikidata.org/sparql</a>
+Return:</dd>
+</dl>
+<p>bool </p>
+<pre><code>If endpoint returns data.
+</code></pre></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_endpoint(endpoint):
+    &#34;&#34;&#34;
+    Test SPARQL endpoint.
+    Args:
+        endpoint : str \n
+            SPARQL endpoint URL. ex: https://query.wikidata.org/sparql \
+    Return:
+        bool \n
+            If endpoint returns data.
+    &#34;&#34;&#34;
     sparql = SPARQLWrapper(endpoint)
     q = &#34;&#34;&#34;
         SELECT ?s ?p ?o
@@ -383,7 +533,6 @@ def graph_to_dict(graph):
 <li><code><a title="tera.utils.prefixes" href="#tera.utils.prefixes">prefixes</a></code></li>
 <li><code><a title="tera.utils.query_endpoint" href="#tera.utils.query_endpoint">query_endpoint</a></code></li>
 <li><code><a title="tera.utils.query_graph" href="#tera.utils.query_graph">query_graph</a></code></li>
-<li><code><a title="tera.utils.remove_missing" href="#tera.utils.remove_missing">remove_missing</a></code></li>
 <li><code><a title="tera.utils.strip_namespace" href="#tera.utils.strip_namespace">strip_namespace</a></code></li>
 <li><code><a title="tera.utils.tanimoto" href="#tera.utils.tanimoto">tanimoto</a></code></li>
 <li><code><a title="tera.utils.test_endpoint" href="#tera.utils.test_endpoint">test_endpoint</a></code></li>
