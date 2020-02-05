@@ -1,6 +1,4 @@
 """
-DataAccess
-
 A set of APIs to access data created with DataAggregation and DataIntegration moduels.
 """
 
@@ -20,16 +18,26 @@ class API:
                  endpoint=None, 
                  dataobject=None, 
                  name='API'):
-        """
-        API for accessing data sets. 
+        """API for accessing data sets. 
         
-        Keyword arguments:
-        namespace -- Base URI for API (default None)
-        endpoint -- SPARQL endpoint URL (default None)
-        dataobject -- see DataAggregation (default None)
+        Parameters
+        ----------
+        namespace : str, default None 
+            Base URI for API
+        
+        endpoint : str, default None
+            SPARQL endpoint URL
+
+        dataobject : tera.DataObject, default None
+            see DataAggregation
+        
+        Raises
+        ------
+        AssertionError 
+            * If both endpoint and dataobject is None.
+        
         """
-        if not endpoint and not dataobject:
-            raise NotImplementedError
+        assert endpoint or dataobject
         
         if endpoint:
             if test_endpoint(endpoint):
@@ -58,15 +66,19 @@ class API:
         self.base_query = prefixes(self.initNs)
             
     def query(self, q, var):
-        """Pass SPARQL to graph or endpoint.,
+        """Pass SPARQL to graph or endpoint.
         
-        Args:
-            q : str \n
-                sparql query \n
-            var : str or list \n
-                Bindings to return from query.
-        Return:
-            Query result.
+        Parameters
+        ----------
+        q : str
+            sparql query
+                
+        var : str or list
+            Bindings to return from query.
+        
+        Returns
+        -------
+        set
         """
         q = self.base_query + q
         if self.use_endpoint:
@@ -76,12 +88,15 @@ class API:
         
     def query_type(self, t):
         """Return entities of type.
-        Args:
-            t : str or rdflib.URIRef \n
+            
+        Parameters
+        ----------
+        t : str or rdflib.URIRef
             Type URI.
-        Return:
-            set \n
-            Entities of type t. 
+    
+        Returns 
+        -------
+        set 
         """
         q = """
             select ?s where {
@@ -92,12 +107,15 @@ class API:
     
     def query_child(self, t):
         """Return children.
-        Args:
-            t : str or rdflib.URIRef \n
+        
+        Parameters
+        ----------
+        t : str or rdflib.URIRef 
             Parent URI.
-        Return:
-            set \n
-            Entities in t. 
+        
+        Returns 
+        -------
+        set
         """
         q = """
             select ?s where {
@@ -108,12 +126,14 @@ class API:
     
     def query_label(self, t):
         """Return entities with label t.
-        Args:
-            t : str or rdflib.URIRef \n
-            URI.
-        Return:
-            set \n
-            Labels of t. 
+        
+        Parameters
+        ----------
+        t : str or rdflib.URIRef
+        
+        Returns 
+        -------
+        set 
         """
         q = """
             select ?s where {
@@ -124,12 +144,14 @@ class API:
     
     def query_parent(self, t):
         """Return parent of t.
-        Args:
-            t : str or rdflib.URIRef \n
-            Child URI.
-        Return:
-            set \n
-            Parents of t.
+        
+        Parameters
+        ----------
+            t : str or rdflib.URIRef
+            
+        Returns 
+        -------
+        set
         """
         q = """
             select ?s where {
@@ -140,14 +162,17 @@ class API:
     
     def query_siblings(self, t, depth=1):
         """Return (depth-1)-cousins.
-        Args:
-            t : str or rdflib.URIRef \n
-                URI. \n 
-            depth : int \n 
-                Number of generation to search. 1 -> siblings, 1 -> 1st cousins, etc. 
-        Return:
-            set \n
-            Cousins of t.
+        
+        Parameters
+        ----------
+        t : str or rdflib.URIRef
+        
+        depth : int, default 1 
+            Number of generation to search. 1 -> siblings, 1 -> 1st cousins, etc. 
+        
+        Returns 
+        -------
+        set
         """
         if depth == -1: depth = '1,'
         q = """
@@ -169,12 +194,14 @@ class API:
     
     def query_alt_labels(self, t):
         """Get literals where prop =< rdfs:label.
-        Args:
-            t : str or rdflib.URIRef \n
-                URI. \n 
-        Return:
-            set \n
-            Alt labels of t.
+        
+        Parameters
+        ----------
+        t : str or rdflib.URIRef
+        
+        Returns 
+        -------
+        set
         """
         q = """
             select ?p ?s where {
@@ -185,14 +212,15 @@ class API:
         return self.query(q, ['p','s'])
     
     def construct_subgraph(self, t):
-        """
-        Return all triples connected to input.
-        Args:
-            t : str or rdflib.URIRef \n
-                URI
-        Return:
-            set \n
-            Set of triples connected by arbitrary links to input. 
+        """Return all triples connected to input.
+        
+        Parameters
+        ----------
+        t : str or rdflib.URIRef
+        
+        Returns 
+        -------
+        set
         """
         out = set()
         tmp = set([t])
@@ -217,20 +245,29 @@ class API:
     def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
         """
         Convert between types of ids used in data.
-        Args:
-            f : str \n 
-                input id type. \n
-            f : str  \n
-                output id type.\n
-            id_ : element or list \n 
-                list of ids, 'no mapping' if no mapping between f and t exists. \n
-            strip : bool \n  
-                remove namespace from inputs
-        Return:
-            str or dict \n
-            If single input, returns string. Else, dict on the form {from:to}. 
-        Raises:
-            NotImplementedError: if cannot convert between f and t.
+        
+        Parameters
+        ----------
+        f : str 
+            input id type.
+            
+        t : str
+            output id type.
+            
+        id_ : element or list 
+            list of ids, 'no mapping' if no mapping between f and t exists.
+            
+        strip : bool  
+            remove namespace from inputs
+        
+        Returns 
+        -------
+        str
+            
+        Raises
+        ------
+        NotImplementedError
+            * If cannot convert between f and t.
         """
 
         if f == t: return id_
@@ -250,10 +287,15 @@ class API:
             return self.convert_id(self.mappings[f].convert(id_,reverse=True),
                                    f=self.base_identifier,t=t)
         
-        raise NotImplementedError('From %s to %s is not supported. \n Supported from/to values are %s', (f,t,','.join(self.mappings.keys())))
+        raise NotImplementedError('From %s to %s is not supported.  Supported from/to values are %s', (f,t,','.join(self.mappings.keys())))
     
     def avalible_convertions(self):
-        """Returns id types that can be converted between."""
+        """Returns id types that can be converted between.
+        
+        Returns
+        -------
+        set
+        """
         return set([self.base_identifier]) | set(self.mappings.keys())
     
 class TaxonomyAPI(API):
@@ -263,13 +305,15 @@ class TaxonomyAPI(API):
                  dataobject = None,
                  mappings = {'eol',NCBIToEOL()},
                  name = 'Taxonomy API'):
-        """
-        Base class for accessing taxonomic data. 
-        Args:
-            dataobject : tera.Taxonomy \n
-                Data set to access using API. \n
-            mappings : dict \n
-                Mappings from base_identifier (eg. ncbi) to other datasets. 
+        """Base class for accessing taxonomic data. 
+        
+        Parameters
+        ----------
+        dataobject : tera.Taxonomy 
+            Data set to access using API. 
+            
+        mappings : dict 
+            Mappings (tera.Alignment) from base_identifier (eg. ncbi) to other datasets. 
         """
         super(TaxonomyAPI, self).__init__(namespace, endpoint, dataobject, name)
         
@@ -277,50 +321,65 @@ class TaxonomyAPI(API):
         self.base_identifier = 'ncbi'
         
     def get_taxa(self):
-        """Return all taxa in taxonomy."""
+        """Return all taxa in taxonomy.
+        
+        Returns
+        -------
+        set
+        """
         return self.query_type(self.namespace['Taxon'])
     
     @do_recursively_in_class
     def get_division(self, t: Union[URIRef, str, list, set]):
         """Return all taxa in division.
-        Args:
-            t : rdflib.URIRef, str, list, or set \n
-            Division URI \n
-        Return:
-            set \n
-            Set of taxa in devision.
+        
+        Parameters
+        ----------
+        t : rdflib.URIRef, str, list, or set
+            Division URI 
+        
+        Returns 
+        -------
+        set
         """
         return self.query_subclassof(a)
     
     @do_recursively_in_class
     def get_ssd(self, t: Union[URIRef, str, list, set]):
         """Return all taxa in SSD.
-        Args:
-            t : rdflib.URIRef, str, list, or set \n
-            SSD URI \n
-        Return:
-            set \n
-            Set of taxa in SSD.
+        
+        Parameters
+        ----------
+        t : rdflib.URIRef, str, list, or set 
+            SSD URI 
+        
+        Returns 
+        -------
+        set 
         """
         return self.query_subclassof(t)
     
     def get_ranks(self):
         """Return all ranks (taxonomic level).
-        Return:
-            set \n
-            Set of ranks.
+        
+        Returns 
+        -------
+        set
         """
         return self.query_type(self.namespace['Rank'])
     
     @do_recursively_in_class
     def get_rank(self, t: Union[URIRef, str, list, set]):
         """Return all taxa with rank.
-        Args:
-            t : rdflib.URIRef, str, list, or set \n
-            Rank URI \n
-        Return:
-            set \n
-            Set of taxa at rank.
+        
+        Parameters
+        ----------
+        t : rdflib.URIRef, str, list, or set
+            Rank URI
+        
+        Returns 
+        -------
+        set 
         """
         return self.query_subclassof(t)
 
@@ -337,11 +396,14 @@ class ChemicalAPI(API):
                  name = 'Chemical API'):
         """
         Base class for accessing chemical data. 
-        Args:
-            dataobject : tera.DataObject \n
-                Data set to access using API. \n
-            mappings : dict \n
-                Mappings from base_identifier (eg. ncbi) to other datasets. 
+        
+        Parameters
+        ----------
+        dataobject : tera.DataObject 
+            Data set to access using API. 
+        
+        mappings : dict 
+            Mappings from base_identifier (eg. ncbi) to other datasets. 
         """
         super(ChemicalAPI, self).__init__(namespace, endpoint, dataobject, name)
         self.mappings = mappings
@@ -350,16 +412,21 @@ class ChemicalAPI(API):
     @do_recursively_in_class
     def get_fingerprint(self, id_: Union[URIRef, str, list, set], f='inchikey', strip = False):
         """Get binary fingerprints.
-        Args:
-            id_ : rdflib.URIRef, str, list, or set \n
-                URI or identifier. \n
-            f : str \n
-                Input identifier type. \n
-            strip : bool \n
-                Remove namespace. Should be true if URI is passed.
-        Return:
-            fp : str \n
-            Binary fingerprint.
+        
+        Parameters
+        ----------
+        id_ : rdflib.URIRef, str, list, or set 
+            URI or identifier. 
+        
+        f : str 
+            Input identifier type. 
+        
+        strip : bool 
+            Remove namespace. Should be true if URI is passed.
+        
+        Returns 
+        -------
+        str
         """
         c = self.convert_id(id_, f, 'cid', strip)
         
@@ -376,17 +443,22 @@ class ChemicalAPI(API):
     
     @do_recursively_in_class
     def get_names(self, id_: Union[URIRef, str, list, set], f='inchikey', strip = False):
-        """Get synonyms for id_.
-        Args:
-            id_ : rdflib.URIRef, str, list, or set \n
-                URI or identifier. \n
-            f : str \n
-                Input identifier type. \n
-            strip : bool \n
-                Remove namespace. Should be true if URI is passed.
-        Return:
-            list \n
-            Synonyms.
+        """Get synonyms.
+        
+        Parameters
+        ----------
+        id_ : rdflib.URIRef, str, list, or set 
+            URI or identifier. 
+        
+        f : str 
+            Input identifier type. 
+            
+        strip : bool 
+            Remove namespace. Should be true if URI is passed.
+        
+        Returns 
+        -------
+        list
         """
         c = self.convert_id(id_, f, 'cid', strip)
         out = []
@@ -402,16 +474,21 @@ class ChemicalAPI(API):
     @do_recursively_in_class
     def class_hierarchy(self, id_: Union[URIRef, str, list, set], f='inchikey', strip=False):
         """Return all triples connceted to input.
-        Args:
-            id_ : rdflib.URIRef, str, list, or set \n
-                URI or identifier. \n
-            f : str \n
-                Input identifier type. \n
-            strip : bool \n
-                Remove namespace. Should be true if URI is passed.
-        Return:
-            set \n
-            Triples.
+        
+        Parameters
+        ----------
+        id_ : rdflib.URIRef, str, list, or set 
+            URI or identifier. 
+        
+        f : str 
+            Input identifier type. 
+            
+        strip : bool 
+            Remove namespace. Should be true if URI is passed.
+        
+        Returns 
+        -------
+        set 
         """
         a = self.convert_id(id_, f, 'cid', strip = strip)
         b = self.convert_id(id_, f, 'mesh', strip = strip)
@@ -422,20 +499,26 @@ class ChemicalAPI(API):
     @do_recursively_in_class
     def get_features(self, id_: Union[URIRef, str, list, set], params=None, f='inchikey', strip=False):
         """Return chemical features.
-        Args:
-            id_ : rdflib.URIRef, str, list, or set \n
-                URI or identifier. \n
-            params : list \n
-                Properties to return \n 
-                eg. params = ['charge','molecular_weight','xlogp'] \n
-                To see all avalible features use which_features(). \n
-            f : str \n
-                Input identifier type. \n
-            strip : bool \n
-                Remove namespace. Should be true if URI is passed.
-        Return:
-            dict \n
-            Chemical features.
+        
+        Parameters
+        ----------
+        id_ : rdflib.URIRef, str, list, or set 
+            URI or identifier. 
+        
+        params : list 
+            Properties to return.
+            eg. params = ['charge','molecular_weight','xlogp'] 
+            To see all avalible features use which_features(). 
+        
+        f : str 
+            Input identifier type. 
+            
+        strip : bool 
+            Remove namespace. Should be true if URI is passed.
+        
+        Returns 
+        -------
+        dict 
         """
         id_ = self.convert_id(id_, f, 'cid', strip=strip)
         id_ = self.initNs['compound'][id_]
@@ -456,34 +539,45 @@ class ChemicalAPI(API):
     @do_recursively_in_class
     def which_features(self, id_: Union[URIRef, str, list, set], f='inchikey', strip=False):
         """Chemical features avalible.
-        Args:
-            id_ : rdflib.URIRef, str, list, or set \n
-                URI or identifier. \n
-            f : str \n
-                Input identifier type. \n
-            strip : bool \n
-                Remove namespace. Should be true if URI is passed.
-        Return:
-            list \n
-            Chemical features.
+        
+        Parameters
+        ----------
+        id_ : rdflib.URIRef, str, list, or set 
+            URI or identifier. 
+        
+        f : str 
+            Input identifier type. 
+            
+        strip : bool 
+            Remove namespace. Should be true if URI is passed.
+        
+        Returns 
+        -------
+        list 
         """
         return [p for p in dir(Compound) if isinstance(getattr(Compound, p), property)]
     
     @do_recursively_in_class
     def simiarity(self, id_: Union[URIRef, str, list, set], ids, f='inchikey',strip=False):
         """Returns chemical simiarity between id and ids
-        Args:
-            id_ : rdflib.URIRef, str, list, or set \n
-                URI or identifier. \n
-            ids : list or set \n
-                URI or identifiers to compare against. 
-            f : str \n
-                Input identifier type. \n
-            strip : bool \n
-                Remove namespace. Should be true if URI is passed.
-        Return:
-            dict \n
-            Chemical simiarity.
+        
+        Parameters
+        ----------
+        id_ : rdflib.URIRef, str, list, or set 
+            URI or identifier. 
+        
+        ids : list or set 
+            URI or identifiers to compare against. 
+        
+        f : str 
+            Input identifier type. 
+            
+        strip : bool 
+            Remove namespace. Should be true if URI is passed.
+        
+        Returns 
+        -------
+        dict 
         """
         fp = self.get_fingerprint(id_, f, strip)
         fps = self.get_fingerprint(ids, f, strip)
@@ -491,9 +585,10 @@ class ChemicalAPI(API):
         
     def compounds(self):
         """Return all compounds.
-        Return:
-            set \n
-            All compounds.
+        
+        Returns 
+        -------
+        set 
         """
         q = """
             SELECT ?s {
@@ -512,6 +607,16 @@ class TraitsAPI(TaxonomyAPI):
                  name = 'EOL API'):
         """
         Class for accessing EOL traits data.
+        
+        Parameters
+        ----------
+        namespace : str 
+        
+        endpoint : str 
+        
+        dataobject : tera.DataObject
+        
+        mapping : dict 
         """
         super(TraitsAPI, self).__init__(namespace, 
                                         endpoint, 
@@ -522,11 +627,15 @@ class TraitsAPI(TaxonomyAPI):
     @do_recursively_in_class
     def get_concervation_status(self,t: Union[URIRef, str, list, set]):
         """Return concervation status of t.
-        Args: 
-            t : rdflib.URIRef, str, list, or set \n
+        
+        Parameters
+        ---------- 
+        t : rdflib.URIRef, str, list, or set 
             URI 
-        Return:
-            concervation status
+        
+        Returns 
+        -------
+        str 
         """
         q = """
             SELECT ?h WHERE {
@@ -538,12 +647,15 @@ class TraitsAPI(TaxonomyAPI):
     @do_recursively_in_class
     def get_extinct_status(self,t: Union[URIRef, str, list, set]):
         """Return extinct status (true/false).
-        Args:
-            t : rdflib.URIRef, str, list, or set\n
-                URI
-        Return:
-            str \n
-                extinct status
+        
+        Parameters
+        ----------
+        t : rdflib.URIRef, str, list, or set
+            URI
+        
+        Returns 
+        -------
+        str 
         """
         q = """
             SELECT ?h WHERE {
@@ -555,12 +667,16 @@ class TraitsAPI(TaxonomyAPI):
     @do_recursively_in_class
     def get_endemic_to(self,t: Union[URIRef, str, list, set]):
         """Return endemic region.
-        Args:
-            t : rdflib.URIRef, str, list, or set\n
-                URI
-        Return:
-            str \n
-                endemic to"""
+        
+        Parameters
+        ----------
+        t : rdflib.URIRef, str, list, or set
+            URI
+        
+        Returns 
+        -------
+        str 
+        """
         q = """
             SELECT ?h WHERE {
                 <%s> <http://eol.org/terms/endemic> ?h .
@@ -571,12 +687,16 @@ class TraitsAPI(TaxonomyAPI):
     @do_recursively_in_class
     def get_ecoregion(self,t: Union[URIRef, str, list, set]):
         """Return ecoregion.
-        Args:
-            t : rdflib.URIRef, str, list, or set\n
-                URI
-        Return:
-            str \n
-                ecoregion"""
+        
+        Parameters
+        ----------
+        t : rdflib.URIRef, str, list, or set
+            URI
+        
+        Returns 
+        -------
+        str 
+        """
         q =  """
             SELECT ?h WHERE {
                 <%s> <https://www.wikidata.org/entity/Q295469> ?h .
@@ -587,12 +707,16 @@ class TraitsAPI(TaxonomyAPI):
     @do_recursively_in_class
     def get_habitat(self,t: Union[URIRef, str, list, set]):
         """Return habiat.
-        Args:
-            t : rdflib.URIRef, str, list, or set\n
-                URI
-        Return:
-            str \n
-                habiat"""
+        
+        Parameters
+        ----------
+        t : rdflib.URIRef, str, list, or set
+            URI
+        
+        Returns 
+        -------
+        str 
+        """
         q = """
             SELECT ?h WHERE {
                 <%s> <http://rs.tdwg.org/dwc/terms/habitat> ?h .
@@ -608,6 +732,14 @@ class EcotoxChemicalAPI(ChemicalAPI):
                  name = 'ECOTOX Chemical API'):
         """
         Class for accessing chemical data in Ecotox. 
+        
+        Parameters
+        ----------
+        namespace : str 
+        
+        endpoint : str 
+        
+        dataobject : tera.DataObject
         """
         super(EcotoxChemicalAPI, self).__init__(namespace, endpoint, dataobject, name)
         
@@ -615,17 +747,25 @@ class EcotoxChemicalAPI(ChemicalAPI):
     def query_chemical_names(self,t: Union[URIRef, str, list, set]):
         """
         Return chemical names.
-        Args: 
-            t : rdflib.URIRef, str, list, set \n
+        
+        Parameters
+        ---------- 
+        t : rdflib.URIRef, str, list, set 
             URI 
-        Return:
-            str\n
-            Chemical label.
+        
+        Returns 
+        -------
+        str
         """
         return self.query_labels(t)
     
     def query_chemicals(self):
-        """Return set of all chemicals."""
+        """Return set of all chemicals.
+        
+        Returns
+        -------
+        set
+        """
         return self.query_type(self.namespace['Chemical'])
     
 class EcotoxTaxonomyAPI(TaxonomyAPI):
@@ -634,7 +774,16 @@ class EcotoxTaxonomyAPI(TaxonomyAPI):
                  endpoint = None, 
                  dataobject = None, 
                  name = 'ECOTOX Taxonomy API'):
-        """Class for accessing Ecotox taxonomic data."""
+        """Class for accessing Ecotox taxonomic data.
+        
+        Parameters
+        ----------
+        namespace : str 
+        
+        endpoint : str 
+        
+        dataobject : tera.DataObject
+        """
         super(EcotoxTaxonomyAPI, self).__init__(namespace, endpoint, dataobject, name)
         
 class NCBITaxonomyAPI(TaxonomyAPI):
@@ -643,7 +792,16 @@ class NCBITaxonomyAPI(TaxonomyAPI):
                  endpoint = None, 
                  dataobject = None, 
                  name = 'NCBI API'):
-        """Class for accessing NCBI taxonomic data."""
+        """Class for accessing NCBI taxonomic data.
+        
+        Parameters
+        ----------
+        namespace : str 
+        
+        endpoint : str 
+        
+        dataobject : tera.DataObject
+        """
         super(TaxonomyAPI, self).__init__(namespace, endpoint, dataobject, name)
     
 class EffectsAPI(API):
@@ -652,18 +810,30 @@ class EffectsAPI(API):
                  endpoint = None, 
                  dataobject = None, 
                  name = 'ECOTOX Effects API'):
-        """Class for accessing Ecotox effect data."""
+        """Class for accessing Ecotox effect data.
+        
+        Parameters
+        ----------
+        namespace : str 
+        
+        endpoint : str 
+        
+        dataobject : tera.DataObject
+        """
         super(EffectsAPI, self).__init__(namespace, endpoint, dataobject, name)
     
     @do_recursively_in_class
     def get_chemicals_from_species(self,t: Union[URIRef, str, list, set]):
         """Return chemical involved in experiment with certain species.
-        Args:
-            t : rdflib.URIRef, str, list, set \n
-                Species URI 
-        Return:
-            set \n
-                Chemical URIs
+  
+        Parameters
+        ----------
+        t : rdflib.URIRef, str, list, set 
+            Species URI 
+        
+        Returns 
+        -------
+        set 
         """
         q = """
         select ?c where {
@@ -677,12 +847,15 @@ class EffectsAPI(API):
     @do_recursively_in_class
     def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
         """Return species involved in experiment using chemical.
-        Args:
-            t : rdflib.URIRef, str, list, set \n
-                Chemical URI 
-        Return:
-            set \n
-                Species URIs
+        
+        Parameters
+        ----------
+        t : rdflib.URIRef, str, list, set 
+            Chemical URI 
+        
+        Returns 
+        -------
+        set 
         """
         q = """
         select ?c where {
@@ -695,9 +868,10 @@ class EffectsAPI(API):
     
     def get_chemicals(self):
         """Return chemicals used in at least one experiment.
-        Return:
-            set \n
-            Chemical URIs
+        
+        Returns 
+        -------
+        set 
         """
         q = """
         select ?c where {
@@ -709,9 +883,11 @@ class EffectsAPI(API):
     
     def get_species(self):
         """Return species used in at least one experiment.
-        Return:
-            set \n
-            Species URIs"""
+        
+        Returns 
+        -------
+        set 
+        """
         q = """
         select ?c where {
             ?t rdf:type ns:Test .
@@ -725,13 +901,17 @@ class EffectsAPI(API):
                        s: Union[URIRef, str, list, set]):
         """
         Return endpoints that use chemical c and species s.
-        Args: 
-            c : rdflib.URIRef, str, list, set \n
-                Chemical URIs. If None, c <- query_chemicals\n
-            s : rdflib.URIRef, str, list, set \n
-                Species URIs. If None, s <- query_species\n
-        Return:
-            dict \n
+        
+        Parameters
+        ---------- 
+        c : rdflib.URIRef, str, list, set 
+            Chemical URIs. If None, c <- query_chemicals
+        s : rdflib.URIRef, str, list, set 
+            Species URIs. If None, s <- query_species
+        
+        Returns 
+        -------
+        dict 
             On the form {chemical:{species:endpoint values}}
         """
         if not c:
