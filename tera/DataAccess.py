@@ -21,13 +21,12 @@ class API:
                  dataobject=None, 
                  name='API'):
         """
-        Args:
-        namespace : str \n
-            Base URI for API. \n
-        endpoint : str \n 
-            SPARQL endpoint url \n 
-        dataobject : tera.DataObject \n  
-            see DataAggregation \n 
+        API for accessing data sets. 
+        
+        Keyword arguments:
+        namespace -- Base URI for API (default None)
+        endpoint -- SPARQL endpoint URL (default None)
+        dataobject -- see DataAggregation (default None)
         """
         if not endpoint and not dataobject:
             raise NotImplementedError
