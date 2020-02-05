@@ -11,6 +11,12 @@ nan_values = ['nan', float('nan'),'--','-X','NA','NC',-1,'','sp.', -1,'sp,','var
 
 class DataObject:
     def __init__(self, namespace = 'http://www.example.org/', name = 'Data Object'):
+        """
+        Base class for aggregation of data.
+        Args:
+            namespace : str \n
+            Base URI for the data set.
+        """
         self.graph = Graph()
         self.namespace = Namespace(namespace)
         self.name = name 
@@ -25,10 +31,21 @@ class DataObject:
             }
     
     def save(self, path):
+        """Save graph to file.
+        Args:
+            path : str \n
+            ex: file.nt
+        """
         self.graph.serialize(path, format=path.split('.').pop(-1))
         
     def replace(self, f, t):
-        """Replace list f of entities with t. Usefull after converting between datasets."""
+        """Replace list f of entities with t. Usefull after converting between datasets.
+        Args:
+            f : list \n
+                Old entities to replace.\n
+            t : list \n
+                New entities. 
+        """
         assert len(f) == len(t)
         
         for old, new in zip(f, t):
@@ -46,6 +63,12 @@ class Taxonomy(DataObject):
                  namespace = 'https://www.ncbi.nlm.nih.gov/taxonomy',
                  name = 'NCBI Taxonomy',
                  directory = None):
+        """
+        Aggregation of the NCBI Taxonomy. 
+        Args: 
+            directory : str \n
+            Path to data set. Downloaded from ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.zip
+        """
         super(Taxonomy, self).__init__(namespace, name)
         
         if directory:
@@ -117,6 +140,12 @@ class Traits(DataObject):
                  namespace = 'https://eol.org/schema/terms/',
                  name = 'EOL Traits',
                  directory = None):
+        """
+        Encyclopedia of Life Traits. 
+        Args:
+            directory : str \n 
+            Path to data set. See https://opendata.eol.org/dataset/all-trait-data-large
+        """
         super(Traits, self).__init__(namespace, name)
         
         if directory:
@@ -177,6 +206,12 @@ class Effects(DataObject):
                     namespace = 'https://cfpub.epa.gov/ecotox/',
                     name = 'Ecotox Effects',
                     directory = None):
+        """
+        Ecotox effects data aggregation.
+        Args: 
+            directory : str \n
+            Path to data set. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
+        """
         super(Effects, self).__init__(namespace, name)
         
         self._load_effect_data(directory + 'tests.txt', directory + 'results.txt')
@@ -253,6 +288,12 @@ class EcotoxTaxonomy(DataObject):
                     namespace = 'https://cfpub.epa.gov/ecotox/',
                     name = 'Ecotox Taxonomy',
                     directory = None):
+        """
+        Ecotox taxonomy aggregation. 
+        Args:
+            directory : str \n
+            Path to dataset. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
+        """
         super(EcotoxTaxonomy, self).__init__(namespace, name)
         
         self._load_species(directory + 'validation/species.txt' )
@@ -330,6 +371,12 @@ class EcotoxChemicals(DataObject):
                     namespace = 'https://cfpub.epa.gov/ecotox/',
                     name = 'Ecotox Chemicals',
                     directory = None):
+        """
+        Ecotox chemicals aggregation. 
+        Args:
+            directory : str \n
+            Path to dataset. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
+        """
         super(EcotoxChemicals, self).__init__(namespace, name)
         
         self._load_chemicals(directory + 'validation/chemicals.txt')
@@ -365,6 +412,12 @@ class PubChem(DataObject):
                     namespace = 'http://rdf.ncbi.nlm.nih.gov/pubchem/compound/',
                     name = 'PubChem',
                     directory = None):
+        """
+        PubChem data loading.
+        Args:
+            directory : str \n
+            Path to turtle RDF files. Downloaded from ftp://ftp.ncbi.nlm.nih.gov/pubchem/RDF/ . Used files: compound/pc_compound_type.ttl and compound/pc_compound2parent.ttl .
+        """
         super(PubChem, self).__init__(namespace, name)
         
         for f in glob.glob(directory+'*.ttl'):
@@ -378,6 +431,12 @@ class ChEBI(DataObject):
                     namespace = 'http://purl.obolibrary.org/obo/',
                     name = 'ChEBI',
                     directory = None):
+        """
+        ChEBI data loading. 
+        Args: 
+            directory : str \n
+            Path to turtle RDF files. See https://www.ebi.ac.uk/rdf/datasets/
+        """
         super(ChEBI, self).__init__(namespace, name)
         
         for f in glob.glob(directory+'*.ttl'):
@@ -391,6 +450,12 @@ class MeSH(DataObject):
                     namespace = 'http://id.nlm.nih.gov/mesh/',
                     name = 'MeSH',
                     directory = None):
+        """
+        MeSH data loading. 
+        Args:
+            directory : str \n 
+            Path to nt RDF files. See https://id.nlm.nih.gov/mesh/
+        """
         super(MeSH, self).__init__(namespace, name)
         
         for f in glob.glob(directory+'*.nt'):

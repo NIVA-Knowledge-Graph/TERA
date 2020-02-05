@@ -10,9 +10,21 @@ from collections import defaultdict
 
 class Alignment:
     def __init__(self, name = 'Alignment'):
+        """Base class for alignment of two data sets. """
         self.name = name
     
-    def mapping(self, x, reverse = False):
+    def _mapping(self, x, reverse = False):
+        """
+        Maps from one id type to another. 
+        Args:
+            x : rdflib.URIRef or str \n
+                URI/identifier to map from. \n
+            reverse : bool \n
+                Reverse the direction of mapping. 
+        Return:
+            mapping \n
+            If no mapping exists, returns 'no mapping'
+        """
         tmp = self.mappings
         if reverse:
             tmp = {tmp[k]:k for k in tmp}
@@ -24,16 +36,43 @@ class Alignment:
     
     @do_recursively_in_class
     def convert(self, id_, reverse=True, strip = False):
+        """
+        Convert a set of ids into new identifiers.
+        Args:
+            id_ : rdflib.URIRef, str, list, set \n
+                URI(s)/identifier(s) \n 
+            reverse : bool \n
+                Reverse the direction of mapping. \n
+            strip : bool \n
+                Remove namespace.
+        Return:
+            str or dict
+            Mapped values.
+        """
         if strip:
-            id_ = strip_namespace(id_,['/','#','CID'])
-        return self.mapping(id_,reverse)
+            id_ = strip_namespace(str(id_),['/','#','CID'])
+        return self._mapping(id_,reverse)
 
 class EndpointMapping(Alignment):
     def __init__(self, endpoint):
         super(EndpointMapping, self).__init__()
-        self.mappings = self.load_mapping(endpoint)
+        """Class for loading mappings based on owl:sameAs property.
+        Args:
+            endpoint : str \n
+            SPARQL endpoint URL.
+        """
+        self.mappings = self._load_mapping(endpoint)
     
-    def load_mapping(self, endpoint):
+    def _load_mapping(self, endpoint):
+        """
+        Load mappings from endpoint.
+        Args:
+            endpoint : str \n
+            SPARQL endpoint URL
+        Return:
+            dict\n
+            On the form {from:to}
+        """
         query = """
         SELECT ?s ?o WHERE {
             ?s <http://www.w3.org/2002/07/owl#sameAs> ?o .
@@ -45,19 +84,28 @@ class EndpointMapping(Alignment):
 class WikidataMapping(Alignment):
     def __init__(self, query):
         """
-        query :: str
-            Wikidata query with two variables. 
-            ex: from inchikey to cas
-            SELECT ?from ?to
-            { 
-            ?compound wdt:P235 ?from .
-            ?compound wdt:P231 ?to .
-            } 
+        Class for loading mappings from wikidata.
+        Args:
+            query : str \n
+            Wikidata query with two variables. \n
+            eg. from inchikey to cas \n
+            SELECT ?from ?to {\n  
+            ?compound wdt:P235 ?from . \n
+            ?compound wdt:P231 ?to .} \n
         """
         super(WikidataMapping, self).__init__()
-        self.mappings = self.load_mapping(query)
+        self.mappings = self._load_mapping(query)
         
-    def load_mapping(self, query):
+    def _load_mapping(self, query):
+        """
+        Load mappings from wikidata.
+        Args:
+            query : str \n
+            wikidata query. 
+        Return:
+            dict\n
+            On the form {from:to}
+        """
         res = query_endpoint('https://query.wikidata.org/sparql', 
                              query, 
                              var = ['from', 'to'])
@@ -66,15 +114,28 @@ class WikidataMapping(Alignment):
 class LogMapMapping(Alignment):
     def __init__(self, filename, threshold=0.95):
         """
-        filename :: str
-            path to logmap output file (.rdf)
+        Class for using LogMap (or other system) alignments. 
+        Args:
+            filename : str \n
+                Path to logmap output file (.rdf) \n
+            threshold : float \n
+                Alignment threshold.
         """
         super(LogMapMapping, self).__init__()
         
         self.threshold = threshold
-        self.mappings = self.load_mapping(filename)
+        self.mappings = self._load_mapping(filename)
     
-    def load_mapping(self, filename):
+    def _load_mapping(self, filename):
+        """
+        Load mappings from alignment system.
+        Args:
+            filename : str \n
+            Path to file. 
+        Return:
+            dict\n
+            On the form {from:to}
+        """
         out = {}
         g = Graph()
         g.parse(filename)
@@ -92,18 +153,35 @@ class LogMapMapping(Alignment):
 
         
 class StringMatchingMapping(Alignment):
-    def __init__(self, dict1, dict2):
+    def __init__(self, dict1, dict2, threshold = 0.95):
         """
-        g1 :: dict 
-        g2 :: dict
-            {entity:list of strings}
+        Class for creating mapping between two label dictonaries using string matching. 
+        Args:
+            dict1 : dict \n
+                Dictonary on the form {entity:list of labels} \n
+            dict2 : dict \n
+                Same as dict1.\n
+            threshold : float \n
+                Alignment threshold.
         """
         super(StringMatchingMapping, self).__init__()
         
-        self.threshold = 0.95
-        self.mappings = self.load_mapping(dict1,dict2)
+        self.threshold = threshold
+        self.mappings = self._load_mapping(dict1,dict2)
     
-    def load_mapping(self, dict1, dict2):
+    def _load_mapping(self, dict1, dict2):
+        """
+        Args:
+            dict1 : dict \n
+                Dictonary on the form {entity:list of labels} \n
+            dict2 : dict \n
+                Same as dict1.\n
+            threshold : float \n
+                Alignment threshold.
+        Return:
+            dict \n
+            On the form {from:to}
+        """
         tmp = defaultdict(float)
         for k1 in dict1:
             for k2 in dict2:
@@ -118,20 +196,38 @@ class StringMatchingMapping(Alignment):
         return {k1:k2 for k1,k2 in tmp}
     
 class StringGraphMapping(Alignment):
-    def __init__(self, g1, g2):
+    def __init__(self, g1, g2, threshold = 0.95):
         """
-        g1 :: Graph
-        g2 :: Graph
-        Uses literal to align entities in g1 and g2.
+        Class for creating mapping between two graph using string matching. 
+        Args:
+            g1 : rdflib.Graph \n
+            g2 : rdflib.Graph \n
+            threshold : float \n
+                Alignment threshold.
+        Return:
+            dict \n
+            On the form {from:to}
         """
         super(StringGraphMapping, self).__init__()
         
-        self.threshold = 0.95
+        self.threshold = threshold
         dict1 = graph_to_dict(g1)
         dict2 = graph_to_dict(g2)
-        self.mappings = self.load_mapping(dict1, dict2)
+        self.mappings = self._load_mapping(dict1, dict2)
     
-    def load_mapping(self, dict1, dict2):
+    def _load_mapping(self, dict1, dict2):
+        """
+        Args:
+            dict1 : dict \n
+                Dictonary on the form {entity:list of labels} \n
+            dict2 : dict \n
+                Same as dict1.\n
+            threshold : float \n
+                Alignment threshold.
+        Return:
+            dict \n
+            On the form {from:to}
+        """
         tmp = defaultdict(float)
         for k1 in dict1:
             for k2 in dict2:
@@ -148,6 +244,7 @@ class StringGraphMapping(Alignment):
 
 class InchikeyToCas(WikidataMapping):
     def __init__(self):
+        """Class which creates inchikey to cas mapping."""
         query = """
         SELECT ?from ?to
             { 
@@ -159,6 +256,7 @@ class InchikeyToCas(WikidataMapping):
     
 class InchikeyToPubChem(WikidataMapping):
     def __init__(self):
+        """Class which creates inchikey to pubchem mapping."""
         query = """
         SELECT ?from ?to
             { 
@@ -170,6 +268,7 @@ class InchikeyToPubChem(WikidataMapping):
     
 class InchikeyToChEBI(WikidataMapping):
     def __init__(self):
+        """Class which creates inchikey to chebi mapping."""
         query = """
         SELECT ?from ?to
             { 
@@ -181,6 +280,7 @@ class InchikeyToChEBI(WikidataMapping):
 
 class InchikeyToChEMBL(WikidataMapping):
     def __init__(self):
+        """Class which creates inchikey to chemble mapping."""
         query = """
         SELECT ?from ?to
             { 
@@ -192,6 +292,7 @@ class InchikeyToChEMBL(WikidataMapping):
         
 class InchikeyToMeSH(WikidataMapping):
     def __init__(self):
+        """Class which creates inchikey to mesh mapping."""
         query = """
         SELECT ?from ?to
             { 
@@ -203,6 +304,7 @@ class InchikeyToMeSH(WikidataMapping):
 
 class NCBIToEOL(WikidataMapping):
     def __init__(self):
+        """Class which creates ncbi to eol mapping."""
         query = """
         SELECT ?from ?to
             { 
@@ -216,7 +318,12 @@ class NCBIToEOL(WikidataMapping):
 #TODO change ncbi -> ecotox mapping to concensus mappings.
 class NCBIToEcotox(StringGraphMapping):
     def __init__(self, dataobject1, dataobject2):
+        """Class which creates ncbi to ecotox mapping."""
         super(NCBIToEcotox, self).__init__(dataobject1.graph,
                                            dataobject2.graph)
         
-        
+
+
+
+
+
