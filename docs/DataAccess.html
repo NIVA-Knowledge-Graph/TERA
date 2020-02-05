@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.4" />
 <title>tera.DataAccess API documentation</title>
-<meta name="description" content="DataAccess …" />
+<meta name="description" content="A set of APIs to access data created with DataAggregation and DataIntegration moduels." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,15 +20,12 @@
 <h1 class="title">Module <code>tera.DataAccess</code></h1>
 </header>
 <section id="section-intro">
-<p>DataAccess</p>
 <p>A set of APIs to access data created with DataAggregation and DataIntegration moduels.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;
-DataAccess
-
 A set of APIs to access data created with DataAggregation and DataIntegration moduels.
 &#34;&#34;&#34;
 
@@ -60,7 +57,12 @@ class API:
 
         dataobject : tera.DataObject, default None
             see DataAggregation
-            
+        
+        Raises
+        ------
+        NotImplementedError 
+            * If both endpoint and dataobject is None.
+        
         &#34;&#34;&#34;
         if not endpoint and not dataobject:
             raise NotImplementedError
@@ -820,6 +822,15 @@ class EffectsAPI(API):
 <dd>SPARQL endpoint URL</dd>
 <dt><strong><code>dataobject</code></strong> :&ensp;<code>tera.DataObject</code>, default <code>None</code></dt>
 <dd>see DataAggregation</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>NotImplementedError</code></dt>
+<dd>
+<ul>
+<li>If both endpoint and dataobject is None.</li>
+</ul>
+</dd>
 </dl></section>
 <details class="source">
 <summary>
@@ -843,7 +854,12 @@ class EffectsAPI(API):
 
         dataobject : tera.DataObject, default None
             see DataAggregation
-            
+        
+        Raises
+        ------
+        NotImplementedError 
+            * If both endpoint and dataobject is None.
+        
         &#34;&#34;&#34;
         if not endpoint and not dataobject:
             raise NotImplementedError
