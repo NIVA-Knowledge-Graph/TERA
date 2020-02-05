@@ -1,0 +1,15 @@
+decorator==4.4.1
+fuzzywuzzy==0.17.0
+isodate==0.6.0
+numpy==1.18.1
+pandas==1.0.0
+pkg-resources==0.0.0
+PubChemPy==1.0.4
+pyparsing==2.4.6
+python-dateutil==2.8.1
+python-Levenshtein==0.12.0
+pytz==2019.3
+rdflib==4.2.2
+six==1.14.0
+SPARQLWrapper==1.8.5
+validators==0.14.2
