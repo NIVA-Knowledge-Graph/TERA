@@ -36,11 +36,12 @@ import pandas as pd
 import validators
 import glob
 import math
+from tqdm import tqdm
 
 nan_values = [&#39;nan&#39;, float(&#39;nan&#39;),&#39;--&#39;,&#39;-X&#39;,&#39;NA&#39;,&#39;NC&#39;,-1,&#39;&#39;,&#39;sp.&#39;, -1,&#39;sp,&#39;,&#39;var.&#39;,&#39;variant&#39;,&#39;NR&#39;]
 
 class DataObject:
-    def __init__(self, namespace = &#39;http://www.example.org/&#39;, name = &#39;Data Object&#39;):
+    def __init__(self, namespace = &#39;http://www.example.org/&#39;, verbose = True, name = &#39;Data Object&#39;):
         &#34;&#34;&#34;
         Base class for aggregation of data.
         
@@ -48,10 +49,13 @@ class DataObject:
         ----------
         namespace : str 
             Base URI for the data set.
+            
+        verbose : bool
         &#34;&#34;&#34;
         self.graph = Graph()
         self.namespace = Namespace(namespace)
         self.name = name 
+        self.verbose = verbose
         
     def __str__(self):
         return self.name 
@@ -61,6 +65,9 @@ class DataObject:
                 &#39;namespace&#39;:self.namespace,
                 &#39;num_triples&#39;:len(self.graph)
             }
+    
+    def __del__(self):
+        self.graph = Graph()
     
     def save(self, path):
         &#34;&#34;&#34;Save graph to file.
@@ -94,11 +101,21 @@ class DataObject:
             self.graph.remove((old,None,None))
             self.graph.remove((None,None,old))
             
+    def apply_func(self, func, dataframe, cols, sub_bar=False):
+        pbar = None
+        if self.verbose and not sub_bar:
+            pbar = tqdm(total=len(dataframe.index),desc=self.name)
+            
+        for row in zip(*[dataframe[c] for c in cols]):
+            func(row)
+            if pbar: pbar.update(1)
+            
 
 class Taxonomy(DataObject):
     def __init__(self, 
                  namespace = &#39;https://www.ncbi.nlm.nih.gov/taxonomy&#39;,
                  name = &#39;NCBI Taxonomy&#39;,
+                 verbose = True, 
                  directory = None):
         &#34;&#34;&#34;
         Aggregation of the NCBI Taxonomy. 
@@ -107,11 +124,14 @@ class Taxonomy(DataObject):
         ---------- 
         directory : str 
             Path to data set. Downloaded from ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.zip
+            
         &#34;&#34;&#34;
-        super(Taxonomy, self).__init__(namespace, name)
+        super(Taxonomy, self).__init__(namespace, verbose, name)
         
         if directory:
             self._load_ncbi_taxonomy(directory)
+        
+        self.verbose = verbose
     
     def _load_ncbi_taxonomy(self, directory):
         self._load_hierarchy(directory+&#39;nodes.dmp&#39;)
@@ -121,6 +141,7 @@ class Taxonomy(DataObject):
     def _load_hierarchy(self, path):
         df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2,4], names=[&#39;child&#39;,&#39;parent&#39;,&#39;rank&#39;,&#39;division&#39;], na_values = nan_values)
         df.dropna(inplace=True)
+        df.apply(lambda x: x.str.strip())
 
         def func(row):
             c,p,r,d = row
@@ -137,13 +158,12 @@ class Taxonomy(DataObject):
             d = self.namespace[&#39;division/&#39;+str(d)]
             self.graph.add((c, RDFS.subClassOf, d))
         
-        for row in zip(df[&#39;child&#39;],df[&#39;parent&#39;],df[&#39;rank&#39;],df[&#39;division&#39;]):
-            func(row)
+        self.apply_func(func, df, [&#39;child&#39;,&#39;parent&#39;,&#39;rank&#39;,&#39;division&#39;])
     
     def _load_names(self, path):
         df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2,3], names=[&#39;taxon&#39;,&#39;name&#39;,&#39;unique_name&#39;,&#39;name_type&#39;],na_values = nan_values)
         df.dropna(inplace=True)
-
+        df.apply(lambda x: x.str.strip())
 
         def func(row):
             c,n,un,nt = row
@@ -156,12 +176,12 @@ class Taxonomy(DataObject):
             self.graph.add((c,nt,n))
             self.graph.add((nt,RDFS.label,ntl))
         
-        for row in zip(df[&#39;taxon&#39;],df[&#39;name&#39;],df[&#39;unique_name&#39;],df[&#39;name_type&#39;]):
-            func(row)
+        self.apply_func(func, df, [&#39;taxon&#39;,&#39;name&#39;,&#39;unique_name&#39;,&#39;name_type&#39;])
         
     def _load_divisions(self, path):
         df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2], names=[&#39;division&#39;,&#39;acronym&#39;,&#39;name&#39;], na_values = nan_values)
         df.dropna(inplace=True)
+        df.apply(lambda x: x.str.strip())
 
         def func(row):
             d,a,n = row
@@ -170,14 +190,13 @@ class Taxonomy(DataObject):
             self.graph.add((d,RDFS.label,Literal(n)))
             self.graph.add((d,RDFS.label,Literal(a)))
         
-        for row in zip(df[&#39;division&#39;],df[&#39;acronym&#39;],df[&#39;name&#39;]):
-            func(row)
-    
+        self.apply_func(func, df, [&#39;division&#39;,&#39;acronym&#39;,&#39;name&#39;])
     
 class Traits(DataObject):
     def __init__(self, 
                  namespace = &#39;https://eol.org/schema/terms/&#39;,
                  name = &#39;EOL Traits&#39;,
+                 verbose = True,
                  directory = None):
         &#34;&#34;&#34;
         Encyclopedia of Life Traits. 
@@ -186,8 +205,9 @@ class Traits(DataObject):
         ----------
         directory : str  
             Path to data set. See https://opendata.eol.org/dataset/all-trait-data-large
+            
         &#34;&#34;&#34;
-        super(Traits, self).__init__(namespace, name)
+        super(Traits, self).__init__(namespace, verbose, name)
         
         if directory:
             self._load_eol_traits(directory)
@@ -214,19 +234,24 @@ class Traits(DataObject):
             if validators.url(s) and validators.url(p) and val:
                 self.graph.add((URIRef(s),URIRef(p),o))
 
+        pbar = None 
+        if self.verbose: pbar = tqdm(total=sum([1 for l in open(path,&#39;r&#39;)]))
         for chunk in df:
             chunk.dropna(inplace=True)
-            for row in zip(chunk[&#39;page_id&#39;],chunk[&#39;predicate&#39;],chunk[&#39;value_uri&#39;]):
-                func(row)
-                
+            chunk.apply(lambda x: x.str.strip())
+            self.apply_func(func, chunk, [&#39;page_id&#39;,&#39;predicate&#39;,&#39;value_uri&#39;], sub_bar = True)
+            pbar.update(len(chunk.index))
+            
     def _load_eol_subclasses(self, path):
         try: 
             try:
                 df = pd.read_csv(path,sep=&#39;,&#39;,usecols=[&#39;child&#39;,&#39;parent&#39;],low_memory=False,na_values = nan_values)
                 df.dropna(inplace=True)
+                df.apply(lambda x: x.str.strip())
             except ValueError:
                 df = pd.read_csv(path,sep=&#39;,&#39;,header=None,low_memory=False,na_values = nan_values)
                 df.dropna(inplace=True)
+                df.apply(lambda x: x.str.strip())
                 df.columns = [&#39;parent&#39;,&#39;child&#39;]
             
         except FileNotFoundError as e:
@@ -238,14 +263,14 @@ class Traits(DataObject):
                 c,p = URIRef(c),URIRef(p)
                 self.graph.add((c,RDFS.subClassOf,p))
         
-        for row in zip(df[&#39;child&#39;],df[&#39;parent&#39;]):
-            func(row)
+        self.apply_func(func, df, [&#39;child&#39;,&#39;parent&#39;])
         
     
 class Effects(DataObject):
     def __init__(self, 
                     namespace = &#39;https://cfpub.epa.gov/ecotox/&#39;,
                     name = &#39;Ecotox Effects&#39;,
+                    verbose = True,
                     directory = None):
         &#34;&#34;&#34;
         Ecotox effects data aggregation.
@@ -255,7 +280,7 @@ class Effects(DataObject):
         directory : str 
             Path to data set. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
         &#34;&#34;&#34;
-        super(Effects, self).__init__(namespace, name)
+        super(Effects, self).__init__(namespace, verbose, name)
         
         self._load_effect_data(directory + &#39;tests.txt&#39;, directory + &#39;results.txt&#39;)
         
@@ -265,9 +290,11 @@ class Effects(DataObject):
                         &#39;test_cas&#39;,
                         &#39;species_number&#39;])
         tests.fillna(inplace=True, value=&#39;missing&#39;)
+        tests.apply(lambda x: x.str.strip())
         results = pd.read_csv(results_path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
         results.dropna(inplace=True, subset=[&#39;test_id&#39;,&#39;endpoint&#39;,&#39;conc1_mean&#39;,&#39;conc1_unit&#39;,&#39;effect&#39;])
         results.fillna(inplace=True, value=&#39;missing&#39;)
+        results.apply(lambda x: x.str.strip())
 
         def test_func(row):
             test_id, cas_number, species_number, stdm, stdu, habitat, lifestage, age, ageunit, weight, weightunit = row
@@ -284,7 +311,8 @@ class Effects(DataObject):
                 if v != &#39;missing&#39;:
                     b = BNode()
                     self.graph.add( (b, RDF.value, Literal(v)) )
-                    self.graph.add( (b, UNIT.units, Literal(u)) )
+                    if u != &#39;missing&#39;:
+                        self.graph.add( (b, UNIT.units, Literal(u)) )
                     self.graph.add( (t, self.namespace[p], b) )
             
             if habitat != &#39;missing&#39;:
@@ -304,32 +332,34 @@ class Effects(DataObject):
             self.graph.add((r,self.namespace[&#39;effect&#39;],ef))
             b = BNode()
             self.graph.add( (b, RDF.value, Literal(conc)) )
-            self.graph.add( (b, UNIT.units, Literal(conc_unit)) ) #TODO creating mapping for units not in UNIT.units
+            if conc1_unit != &#39;missing&#39;:
+                #TODO creating mapping for units not in UNIT.units
+                self.graph.add( (b, UNIT.units, Literal(conc_unit)) )
+                
             self.graph.add( (r, self.namespace[&#39;concentration&#39;], b) )
             
             self.graph.add((t,self.namespace[&#39;hasResult&#39;],r))
             
-        for row in zip(tests[&#39;test_id&#39;],
-                        tests[&#39;test_cas&#39;],
-                        tests[&#39;species_number&#39;],
-                        tests[&#39;study_duration_mean&#39;],
-                        tests[&#39;study_duration_unit&#39;],
-                        tests[&#39;organism_habitat&#39;],
-                        tests[&#39;organism_lifestage&#39;],
-                        tests[&#39;organism_age_mean&#39;],
-                        tests[&#39;organism_age_unit&#39;],
-                        tests[&#39;organism_init_wt_mean&#39;],
-                        tests[&#39;organism_init_wt_unit&#39;]):
-            test_func(row)
+        self.apply_func(test_func, tests, [&#39;test_id&#39;,
+                        &#39;test_cas&#39;,
+                        &#39;species_number&#39;,
+                        &#39;study_duration_mean&#39;,
+                        &#39;study_duration_unit&#39;,
+                        &#39;organism_habitat&#39;,
+                        &#39;organism_lifestage&#39;,
+                        &#39;organism_age_mean&#39;,
+                        &#39;organism_age_unit&#39;,
+                        &#39;organism_init_wt_mean&#39;,
+                        &#39;organism_init_wt_unit&#39;])
         
-        for row in zip(results[&#39;test_id&#39;], results[&#39;endpoint&#39;], results[&#39;conc1_mean&#39;], results[&#39;conc1_unit&#39;], results[&#39;effect&#39;]):
-            results_func(row)
+        self.apply_func(results_func, results, [&#39;test_id&#39;,&#39;endpoint&#39;,&#39;conc1_mean&#39;,&#39;conc1_unit&#39;,&#39;effect&#39;])
 
 
 class EcotoxTaxonomy(DataObject):
     def __init__(self, 
                     namespace = &#39;https://cfpub.epa.gov/ecotox/&#39;,
                     name = &#39;Ecotox Taxonomy&#39;,
+                    verbose = True,
                     directory = None):
         &#34;&#34;&#34;
         Ecotox taxonomy aggregation. 
@@ -339,7 +369,7 @@ class EcotoxTaxonomy(DataObject):
         directory : str 
             Path to dataset. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
         &#34;&#34;&#34;
-        super(EcotoxTaxonomy, self).__init__(namespace, name)
+        super(EcotoxTaxonomy, self).__init__(namespace, verbose, name)
         
         self._load_species(directory + &#39;validation/species.txt&#39; )
         self._load_synonyms(directory + &#39;validation/species_synonyms.txt&#39;)
@@ -348,6 +378,7 @@ class EcotoxTaxonomy(DataObject):
     def _load_species(self, path):
         df = pd.read_csv(path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
         df.dropna(inplace=True)
+        df.apply(lambda x: x.str.strip())
         
         def func(row):
             s, cn, ln, group = row
@@ -369,24 +400,25 @@ class EcotoxTaxonomy(DataObject):
             self.graph.add((s, self.namespace[&#39;commonName&#39;], Literal(cn)))
             self.graph.add((s, self.namespace[&#39;latinName&#39;], Literal(ln)))
         
-        for row in zip(df[&#39;species_number&#39;], df[&#39;common_name&#39;], df[&#39;latin_name&#39;],df[&#39;ecotox_group&#39;]):
-            func(row)
+        self.apply_func(func, df, [&#39;species_number&#39;,&#39;common_name&#39;,&#39;latin_name&#39;,&#39;ecotox_group&#39;])
             
     def _load_synonyms(self, path):
         df = pd.read_csv(path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
         df.dropna(inplace=True)
+        df.apply(lambda x: x.str.strip())
         
         def func(row):
             s, ln = row
             s = self.namespace[&#39;taxon/&#39;+s]
             self.graph.add((s, self.namespace[&#39;latinName&#39;], Literal(ln)))
         
-        for row in zip(df[&#39;species_number&#39;],df[&#39;latin_name&#39;]):
-            func(row)
+        self.apply_func(func, df, [&#39;species_number&#39;,&#39;latin_name&#39;])
+            
     
     def _load_hierarchy(self, path):
         df = pd.read_csv(path, sep= &#39;|&#39;, low_memory = False, dtype = str)
         df.dropna(inplace=True)
+        df.apply(lambda x: x.str.strip())
         
         def func(row):
             sn, lineage = row
@@ -395,7 +427,9 @@ class EcotoxTaxonomy(DataObject):
                 curr = self.namespace[&#39;taxon/&#39;+str(curr)]
                 self.graph.add((curr, RDFS.subClassOf, self.namespace[&#39;taxon/&#39;+str(l)]))
                 curr = l
-                
+        
+        pbar = None
+        if self.verbose: pbar = tqdm(total=len(df.index))
         for row in zip(df[&#39;species_number&#39;],
                         zip(df[&#39;variety&#39;],
                             df[&#39;subspecies&#39;],
@@ -409,12 +443,14 @@ class EcotoxTaxonomy(DataObject):
                             df[&#39;phylum_division&#39;],
                             df[&#39;kingdom&#39;])):
             func(row)
-                
+            if pbar: pbar.update(1)
+        
         
 class EcotoxChemicals(DataObject):
     def __init__(self, 
                     namespace = &#39;https://cfpub.epa.gov/ecotox/&#39;,
                     name = &#39;Ecotox Chemicals&#39;,
+                    verbose = True,
                     directory = None):
         &#34;&#34;&#34;
         Ecotox chemicals aggregation. 
@@ -424,13 +460,14 @@ class EcotoxChemicals(DataObject):
         directory : str 
             Path to dataset. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
         &#34;&#34;&#34;
-        super(EcotoxChemicals, self).__init__(namespace, name)
+        super(EcotoxChemicals, self).__init__(namespace, verbose, name)
         
         self._load_chemicals(directory + &#39;validation/chemicals.txt&#39;)
         
     def _load_chemicals(self, path):
         df = pd.read_csv(path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
         df.dropna(inplace=True)
+        df.apply(lambda x: x.str.strip())
         
         def func(row):
             c, n, group = row
@@ -451,9 +488,8 @@ class EcotoxChemicals(DataObject):
                 self.graph.add((gri, RDFS.label, Literal(n)))
                 self.graph.add((gri, RDF.type, self.namespace[&#39;ChemicalGroup&#39;]))
         
-        for row in zip(df[&#39;cas_number&#39;], df[&#39;chemical_name&#39;], df[&#39;ecotox_group&#39;]):
-            func(row)
-    
+        self.apply_func(func, df, [&#39;cas_number&#39;,&#39;chemical_name&#39;,&#39;ecotox_group&#39;])
+        
 class PubChem(DataObject):
     def __init__(self, 
                     namespace = &#39;http://rdf.ncbi.nlm.nih.gov/pubchem/compound/&#39;,
@@ -578,7 +614,7 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
 </dd>
 <dt id="tera.DataAggregation.DataObject"><code class="flex name class">
 <span>class <span class="ident">DataObject</span></span>
-<span>(</span><span>namespace='http://www.example.org/', name='Data Object')</span>
+<span>(</span><span>namespace='http://www.example.org/', verbose=True, name='Data Object')</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for aggregation of data.</p>
@@ -586,13 +622,15 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
 <dl>
 <dt><strong><code>namespace</code></strong> :&ensp;<code>str</code></dt>
 <dd>Base URI for the data set.</dd>
+<dt><strong><code>verbose</code></strong> :&ensp;<code>bool</code></dt>
+<dd>&nbsp;</dd>
 </dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class DataObject:
-    def __init__(self, namespace = &#39;http://www.example.org/&#39;, name = &#39;Data Object&#39;):
+    def __init__(self, namespace = &#39;http://www.example.org/&#39;, verbose = True, name = &#39;Data Object&#39;):
         &#34;&#34;&#34;
         Base class for aggregation of data.
         
@@ -600,10 +638,13 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
         ----------
         namespace : str 
             Base URI for the data set.
+            
+        verbose : bool
         &#34;&#34;&#34;
         self.graph = Graph()
         self.namespace = Namespace(namespace)
         self.name = name 
+        self.verbose = verbose
         
     def __str__(self):
         return self.name 
@@ -613,6 +654,9 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
                 &#39;namespace&#39;:self.namespace,
                 &#39;num_triples&#39;:len(self.graph)
             }
+    
+    def __del__(self):
+        self.graph = Graph()
     
     def save(self, path):
         &#34;&#34;&#34;Save graph to file.
@@ -644,7 +688,16 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
             tmp |= set([(s,p,new) for s,p,_ in triples])
             
             self.graph.remove((old,None,None))
-            self.graph.remove((None,None,old))</code></pre>
+            self.graph.remove((None,None,old))
+            
+    def apply_func(self, func, dataframe, cols, sub_bar=False):
+        pbar = None
+        if self.verbose and not sub_bar:
+            pbar = tqdm(total=len(dataframe.index),desc=self.name)
+            
+        for row in zip(*[dataframe[c] for c in cols]):
+            func(row)
+            if pbar: pbar.update(1)</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -659,6 +712,25 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
 </ul>
 <h3>Methods</h3>
 <dl>
+<dt id="tera.DataAggregation.DataObject.apply_func"><code class="name flex">
+<span>def <span class="ident">apply_func</span></span>(<span>self, func, dataframe, cols, sub_bar=False)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def apply_func(self, func, dataframe, cols, sub_bar=False):
+    pbar = None
+    if self.verbose and not sub_bar:
+        pbar = tqdm(total=len(dataframe.index),desc=self.name)
+        
+    for row in zip(*[dataframe[c] for c in cols]):
+        func(row)
+        if pbar: pbar.update(1)</code></pre>
+</details>
+</dd>
 <dt id="tera.DataAggregation.DataObject.replace"><code class="name flex">
 <span>def <span class="ident">replace</span></span>(<span>self, f, t)</span>
 </code></dt>
@@ -727,7 +799,7 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
 </dd>
 <dt id="tera.DataAggregation.EcotoxChemicals"><code class="flex name class">
 <span>class <span class="ident">EcotoxChemicals</span></span>
-<span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', name='Ecotox Chemicals', directory=None)</span>
+<span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', name='Ecotox Chemicals', verbose=True, directory=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Ecotox chemicals aggregation. </p>
@@ -744,6 +816,7 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
     def __init__(self, 
                     namespace = &#39;https://cfpub.epa.gov/ecotox/&#39;,
                     name = &#39;Ecotox Chemicals&#39;,
+                    verbose = True,
                     directory = None):
         &#34;&#34;&#34;
         Ecotox chemicals aggregation. 
@@ -753,13 +826,14 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
         directory : str 
             Path to dataset. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
         &#34;&#34;&#34;
-        super(EcotoxChemicals, self).__init__(namespace, name)
+        super(EcotoxChemicals, self).__init__(namespace, verbose, name)
         
         self._load_chemicals(directory + &#39;validation/chemicals.txt&#39;)
         
     def _load_chemicals(self, path):
         df = pd.read_csv(path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
         df.dropna(inplace=True)
+        df.apply(lambda x: x.str.strip())
         
         def func(row):
             c, n, group = row
@@ -780,8 +854,7 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
                 self.graph.add((gri, RDFS.label, Literal(n)))
                 self.graph.add((gri, RDF.type, self.namespace[&#39;ChemicalGroup&#39;]))
         
-        for row in zip(df[&#39;cas_number&#39;], df[&#39;chemical_name&#39;], df[&#39;ecotox_group&#39;]):
-            func(row)</code></pre>
+        self.apply_func(func, df, [&#39;cas_number&#39;,&#39;chemical_name&#39;,&#39;ecotox_group&#39;])</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -799,7 +872,7 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
 </dd>
 <dt id="tera.DataAggregation.EcotoxTaxonomy"><code class="flex name class">
 <span>class <span class="ident">EcotoxTaxonomy</span></span>
-<span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', name='Ecotox Taxonomy', directory=None)</span>
+<span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', name='Ecotox Taxonomy', verbose=True, directory=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Ecotox taxonomy aggregation. </p>
@@ -816,6 +889,7 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
     def __init__(self, 
                     namespace = &#39;https://cfpub.epa.gov/ecotox/&#39;,
                     name = &#39;Ecotox Taxonomy&#39;,
+                    verbose = True,
                     directory = None):
         &#34;&#34;&#34;
         Ecotox taxonomy aggregation. 
@@ -825,7 +899,7 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
         directory : str 
             Path to dataset. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
         &#34;&#34;&#34;
-        super(EcotoxTaxonomy, self).__init__(namespace, name)
+        super(EcotoxTaxonomy, self).__init__(namespace, verbose, name)
         
         self._load_species(directory + &#39;validation/species.txt&#39; )
         self._load_synonyms(directory + &#39;validation/species_synonyms.txt&#39;)
@@ -834,6 +908,7 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
     def _load_species(self, path):
         df = pd.read_csv(path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
         df.dropna(inplace=True)
+        df.apply(lambda x: x.str.strip())
         
         def func(row):
             s, cn, ln, group = row
@@ -855,24 +930,25 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
             self.graph.add((s, self.namespace[&#39;commonName&#39;], Literal(cn)))
             self.graph.add((s, self.namespace[&#39;latinName&#39;], Literal(ln)))
         
-        for row in zip(df[&#39;species_number&#39;], df[&#39;common_name&#39;], df[&#39;latin_name&#39;],df[&#39;ecotox_group&#39;]):
-            func(row)
+        self.apply_func(func, df, [&#39;species_number&#39;,&#39;common_name&#39;,&#39;latin_name&#39;,&#39;ecotox_group&#39;])
             
     def _load_synonyms(self, path):
         df = pd.read_csv(path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
         df.dropna(inplace=True)
+        df.apply(lambda x: x.str.strip())
         
         def func(row):
             s, ln = row
             s = self.namespace[&#39;taxon/&#39;+s]
             self.graph.add((s, self.namespace[&#39;latinName&#39;], Literal(ln)))
         
-        for row in zip(df[&#39;species_number&#39;],df[&#39;latin_name&#39;]):
-            func(row)
+        self.apply_func(func, df, [&#39;species_number&#39;,&#39;latin_name&#39;])
+            
     
     def _load_hierarchy(self, path):
         df = pd.read_csv(path, sep= &#39;|&#39;, low_memory = False, dtype = str)
         df.dropna(inplace=True)
+        df.apply(lambda x: x.str.strip())
         
         def func(row):
             sn, lineage = row
@@ -881,7 +957,9 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
                 curr = self.namespace[&#39;taxon/&#39;+str(curr)]
                 self.graph.add((curr, RDFS.subClassOf, self.namespace[&#39;taxon/&#39;+str(l)]))
                 curr = l
-                
+        
+        pbar = None
+        if self.verbose: pbar = tqdm(total=len(df.index))
         for row in zip(df[&#39;species_number&#39;],
                         zip(df[&#39;variety&#39;],
                             df[&#39;subspecies&#39;],
@@ -894,7 +972,8 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
                             df[&#39;subphylum_div&#39;],
                             df[&#39;phylum_division&#39;],
                             df[&#39;kingdom&#39;])):
-            func(row)</code></pre>
+            func(row)
+            if pbar: pbar.update(1)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -912,7 +991,7 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
 </dd>
 <dt id="tera.DataAggregation.Effects"><code class="flex name class">
 <span>class <span class="ident">Effects</span></span>
-<span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', name='Ecotox Effects', directory=None)</span>
+<span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', name='Ecotox Effects', verbose=True, directory=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Ecotox effects data aggregation.</p>
@@ -927,6 +1006,7 @@ Path to data set. Downloaded from <a href="ftp://newftp.epa.gov/ecotox/ecotox_as
     def __init__(self, 
                     namespace = &#39;https://cfpub.epa.gov/ecotox/&#39;,
                     name = &#39;Ecotox Effects&#39;,
+                    verbose = True,
                     directory = None):
         &#34;&#34;&#34;
         Ecotox effects data aggregation.
@@ -936,7 +1016,7 @@ Path to data set. Downloaded from <a href="ftp://newftp.epa.gov/ecotox/ecotox_as
         directory : str 
             Path to data set. Downloaded from ftp://newftp.epa.gov/ecotox/ecotox_ascii_12_12_2019.exe
         &#34;&#34;&#34;
-        super(Effects, self).__init__(namespace, name)
+        super(Effects, self).__init__(namespace, verbose, name)
         
         self._load_effect_data(directory + &#39;tests.txt&#39;, directory + &#39;results.txt&#39;)
         
@@ -946,9 +1026,11 @@ Path to data set. Downloaded from <a href="ftp://newftp.epa.gov/ecotox/ecotox_as
                         &#39;test_cas&#39;,
                         &#39;species_number&#39;])
         tests.fillna(inplace=True, value=&#39;missing&#39;)
+        tests.apply(lambda x: x.str.strip())
         results = pd.read_csv(results_path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
         results.dropna(inplace=True, subset=[&#39;test_id&#39;,&#39;endpoint&#39;,&#39;conc1_mean&#39;,&#39;conc1_unit&#39;,&#39;effect&#39;])
         results.fillna(inplace=True, value=&#39;missing&#39;)
+        results.apply(lambda x: x.str.strip())
 
         def test_func(row):
             test_id, cas_number, species_number, stdm, stdu, habitat, lifestage, age, ageunit, weight, weightunit = row
@@ -965,7 +1047,8 @@ Path to data set. Downloaded from <a href="ftp://newftp.epa.gov/ecotox/ecotox_as
                 if v != &#39;missing&#39;:
                     b = BNode()
                     self.graph.add( (b, RDF.value, Literal(v)) )
-                    self.graph.add( (b, UNIT.units, Literal(u)) )
+                    if u != &#39;missing&#39;:
+                        self.graph.add( (b, UNIT.units, Literal(u)) )
                     self.graph.add( (t, self.namespace[p], b) )
             
             if habitat != &#39;missing&#39;:
@@ -985,26 +1068,27 @@ Path to data set. Downloaded from <a href="ftp://newftp.epa.gov/ecotox/ecotox_as
             self.graph.add((r,self.namespace[&#39;effect&#39;],ef))
             b = BNode()
             self.graph.add( (b, RDF.value, Literal(conc)) )
-            self.graph.add( (b, UNIT.units, Literal(conc_unit)) ) #TODO creating mapping for units not in UNIT.units
+            if conc1_unit != &#39;missing&#39;:
+                #TODO creating mapping for units not in UNIT.units
+                self.graph.add( (b, UNIT.units, Literal(conc_unit)) )
+                
             self.graph.add( (r, self.namespace[&#39;concentration&#39;], b) )
             
             self.graph.add((t,self.namespace[&#39;hasResult&#39;],r))
             
-        for row in zip(tests[&#39;test_id&#39;],
-                        tests[&#39;test_cas&#39;],
-                        tests[&#39;species_number&#39;],
-                        tests[&#39;study_duration_mean&#39;],
-                        tests[&#39;study_duration_unit&#39;],
-                        tests[&#39;organism_habitat&#39;],
-                        tests[&#39;organism_lifestage&#39;],
-                        tests[&#39;organism_age_mean&#39;],
-                        tests[&#39;organism_age_unit&#39;],
-                        tests[&#39;organism_init_wt_mean&#39;],
-                        tests[&#39;organism_init_wt_unit&#39;]):
-            test_func(row)
+        self.apply_func(test_func, tests, [&#39;test_id&#39;,
+                        &#39;test_cas&#39;,
+                        &#39;species_number&#39;,
+                        &#39;study_duration_mean&#39;,
+                        &#39;study_duration_unit&#39;,
+                        &#39;organism_habitat&#39;,
+                        &#39;organism_lifestage&#39;,
+                        &#39;organism_age_mean&#39;,
+                        &#39;organism_age_unit&#39;,
+                        &#39;organism_init_wt_mean&#39;,
+                        &#39;organism_init_wt_unit&#39;])
         
-        for row in zip(results[&#39;test_id&#39;], results[&#39;endpoint&#39;], results[&#39;conc1_mean&#39;], results[&#39;conc1_unit&#39;], results[&#39;effect&#39;]):
-            results_func(row)</code></pre>
+        self.apply_func(results_func, results, [&#39;test_id&#39;,&#39;endpoint&#39;,&#39;conc1_mean&#39;,&#39;conc1_unit&#39;,&#39;effect&#39;])</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1122,7 +1206,7 @@ Path to data set. Downloaded from <a href="ftp://newftp.epa.gov/ecotox/ecotox_as
 </dd>
 <dt id="tera.DataAggregation.Taxonomy"><code class="flex name class">
 <span>class <span class="ident">Taxonomy</span></span>
-<span>(</span><span>namespace='https://www.ncbi.nlm.nih.gov/taxonomy', name='NCBI Taxonomy', directory=None)</span>
+<span>(</span><span>namespace='https://www.ncbi.nlm.nih.gov/taxonomy', name='NCBI Taxonomy', verbose=True, directory=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Aggregation of the NCBI Taxonomy. </p>
@@ -1137,6 +1221,7 @@ Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxono
     def __init__(self, 
                  namespace = &#39;https://www.ncbi.nlm.nih.gov/taxonomy&#39;,
                  name = &#39;NCBI Taxonomy&#39;,
+                 verbose = True, 
                  directory = None):
         &#34;&#34;&#34;
         Aggregation of the NCBI Taxonomy. 
@@ -1145,11 +1230,14 @@ Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxono
         ---------- 
         directory : str 
             Path to data set. Downloaded from ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.zip
+            
         &#34;&#34;&#34;
-        super(Taxonomy, self).__init__(namespace, name)
+        super(Taxonomy, self).__init__(namespace, verbose, name)
         
         if directory:
             self._load_ncbi_taxonomy(directory)
+        
+        self.verbose = verbose
     
     def _load_ncbi_taxonomy(self, directory):
         self._load_hierarchy(directory+&#39;nodes.dmp&#39;)
@@ -1159,6 +1247,7 @@ Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxono
     def _load_hierarchy(self, path):
         df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2,4], names=[&#39;child&#39;,&#39;parent&#39;,&#39;rank&#39;,&#39;division&#39;], na_values = nan_values)
         df.dropna(inplace=True)
+        df.apply(lambda x: x.str.strip())
 
         def func(row):
             c,p,r,d = row
@@ -1175,13 +1264,12 @@ Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxono
             d = self.namespace[&#39;division/&#39;+str(d)]
             self.graph.add((c, RDFS.subClassOf, d))
         
-        for row in zip(df[&#39;child&#39;],df[&#39;parent&#39;],df[&#39;rank&#39;],df[&#39;division&#39;]):
-            func(row)
+        self.apply_func(func, df, [&#39;child&#39;,&#39;parent&#39;,&#39;rank&#39;,&#39;division&#39;])
     
     def _load_names(self, path):
         df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2,3], names=[&#39;taxon&#39;,&#39;name&#39;,&#39;unique_name&#39;,&#39;name_type&#39;],na_values = nan_values)
         df.dropna(inplace=True)
-
+        df.apply(lambda x: x.str.strip())
 
         def func(row):
             c,n,un,nt = row
@@ -1194,12 +1282,12 @@ Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxono
             self.graph.add((c,nt,n))
             self.graph.add((nt,RDFS.label,ntl))
         
-        for row in zip(df[&#39;taxon&#39;],df[&#39;name&#39;],df[&#39;unique_name&#39;],df[&#39;name_type&#39;]):
-            func(row)
+        self.apply_func(func, df, [&#39;taxon&#39;,&#39;name&#39;,&#39;unique_name&#39;,&#39;name_type&#39;])
         
     def _load_divisions(self, path):
         df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2], names=[&#39;division&#39;,&#39;acronym&#39;,&#39;name&#39;], na_values = nan_values)
         df.dropna(inplace=True)
+        df.apply(lambda x: x.str.strip())
 
         def func(row):
             d,a,n = row
@@ -1208,8 +1296,7 @@ Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxono
             self.graph.add((d,RDFS.label,Literal(n)))
             self.graph.add((d,RDFS.label,Literal(a)))
         
-        for row in zip(df[&#39;division&#39;],df[&#39;acronym&#39;],df[&#39;name&#39;]):
-            func(row)</code></pre>
+        self.apply_func(func, df, [&#39;division&#39;,&#39;acronym&#39;,&#39;name&#39;])</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1227,7 +1314,7 @@ Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxono
 </dd>
 <dt id="tera.DataAggregation.Traits"><code class="flex name class">
 <span>class <span class="ident">Traits</span></span>
-<span>(</span><span>namespace='https://eol.org/schema/terms/', name='EOL Traits', directory=None)</span>
+<span>(</span><span>namespace='https://eol.org/schema/terms/', name='EOL Traits', verbose=True, directory=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Encyclopedia of Life Traits. </p>
@@ -1244,6 +1331,7 @@ Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxono
     def __init__(self, 
                  namespace = &#39;https://eol.org/schema/terms/&#39;,
                  name = &#39;EOL Traits&#39;,
+                 verbose = True,
                  directory = None):
         &#34;&#34;&#34;
         Encyclopedia of Life Traits. 
@@ -1252,8 +1340,9 @@ Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxono
         ----------
         directory : str  
             Path to data set. See https://opendata.eol.org/dataset/all-trait-data-large
+            
         &#34;&#34;&#34;
-        super(Traits, self).__init__(namespace, name)
+        super(Traits, self).__init__(namespace, verbose, name)
         
         if directory:
             self._load_eol_traits(directory)
@@ -1280,19 +1369,24 @@ Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxono
             if validators.url(s) and validators.url(p) and val:
                 self.graph.add((URIRef(s),URIRef(p),o))
 
+        pbar = None 
+        if self.verbose: pbar = tqdm(total=sum([1 for l in open(path,&#39;r&#39;)]))
         for chunk in df:
             chunk.dropna(inplace=True)
-            for row in zip(chunk[&#39;page_id&#39;],chunk[&#39;predicate&#39;],chunk[&#39;value_uri&#39;]):
-                func(row)
-                
+            chunk.apply(lambda x: x.str.strip())
+            self.apply_func(func, chunk, [&#39;page_id&#39;,&#39;predicate&#39;,&#39;value_uri&#39;], sub_bar = True)
+            pbar.update(len(chunk.index))
+            
     def _load_eol_subclasses(self, path):
         try: 
             try:
                 df = pd.read_csv(path,sep=&#39;,&#39;,usecols=[&#39;child&#39;,&#39;parent&#39;],low_memory=False,na_values = nan_values)
                 df.dropna(inplace=True)
+                df.apply(lambda x: x.str.strip())
             except ValueError:
                 df = pd.read_csv(path,sep=&#39;,&#39;,header=None,low_memory=False,na_values = nan_values)
                 df.dropna(inplace=True)
+                df.apply(lambda x: x.str.strip())
                 df.columns = [&#39;parent&#39;,&#39;child&#39;]
             
         except FileNotFoundError as e:
@@ -1304,8 +1398,7 @@ Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxono
                 c,p = URIRef(c),URIRef(p)
                 self.graph.add((c,RDFS.subClassOf,p))
         
-        for row in zip(df[&#39;child&#39;],df[&#39;parent&#39;]):
-            func(row)</code></pre>
+        self.apply_func(func, df, [&#39;child&#39;,&#39;parent&#39;])</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1343,6 +1436,7 @@ Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxono
 <li>
 <h4><code><a title="tera.DataAggregation.DataObject" href="#tera.DataAggregation.DataObject">DataObject</a></code></h4>
 <ul class="">
+<li><code><a title="tera.DataAggregation.DataObject.apply_func" href="#tera.DataAggregation.DataObject.apply_func">apply_func</a></code></li>
 <li><code><a title="tera.DataAggregation.DataObject.replace" href="#tera.DataAggregation.DataObject.replace">replace</a></code></li>
 <li><code><a title="tera.DataAggregation.DataObject.save" href="#tera.DataAggregation.DataObject.save">save</a></code></li>
 </ul>
