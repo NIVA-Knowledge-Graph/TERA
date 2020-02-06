@@ -7,6 +7,7 @@ from rdflib.namespace import RDF, RDFS, OWL
 UNIT = Namespace('http://qudt.org/vocab/unit#')
 from .utils import query_endpoint, test_endpoint, query_graph, prefixes, do_recursively_in_class, strip_namespace, tanimoto
 from typing import Union
+from collections import defaultdict
 
 import pubchempy
 
@@ -898,7 +899,8 @@ class EffectsAPI(API):
     
     def get_endpoint(self, 
                        c: Union[URIRef, str, list, set], 
-                       s: Union[URIRef, str, list, set]):
+                       s: Union[URIRef, str, list, set],
+                       endpoint = None):
         """
         Return endpoints that use chemical c and species s.
         
@@ -906,23 +908,49 @@ class EffectsAPI(API):
         ---------- 
         c : rdflib.URIRef, str, list, set 
             Chemical URIs. If None, c <- query_chemicals
+        
         s : rdflib.URIRef, str, list, set 
             Species URIs. If None, s <- query_species
-        
+
         Returns 
         -------
         dict 
             On the form {chemical:{species:endpoint values}}
         """
         if not c:
-            c = self.query_chemicals()
+            c = self.get_chemicals()
         if not s:
-            s = self.query_species()
+            s = self.get_species()
+        
+        if not c and not s:
+            q = """
+            SELECT ?c ?s ?cc ?cu ?ep ?ef ?sd ?sdu WHERE {
+                ?test rdf:type ns:Test ;
+                  ns:chemical ?c ;
+                   ns:species ?s ;
+                   ns:hasResult [ 
+                   ns:endpoint ?ep ;
+                   ns:effect ?ef ;
+                   ns:concentration [rdf:value ?cc ; 
+                                        unit:units ?cu] ] .
+               
+                OPTIONAL {
+                    ?test ns:studyDuration [rdf:value ?sd ;
+                                            unit:units ?sdu] .
+                }
+            }"""
+                
+            res = self.query(q, ['c','s','cc','cu','ep','ef','sd','sdu'])
+            out = defaultdict(defaultdict(tuple))
+            for c,s,*v in res:
+                out[c][s] = v
+            return out
             
         if isinstance(c,(list,set)):
             return {a:self.get_endpoint(a,s) for a in c}
         if isinstance(s,(list,set)):
             return {a:self.get_endpoint(c,a) for a in s}
+        
         q = """
             SELECT ?cc ?cu ?ep ?ef ?sd ?sdu WHERE {
                 ?test rdf:type ns:Test ;
