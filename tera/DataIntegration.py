@@ -8,7 +8,7 @@ import validators
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 from collections import defaultdict
-import tera.utils as utils
+import tera.utils as ut
 
 class Alignment:
     def __init__(self, name = 'Alignment'):
@@ -46,7 +46,7 @@ class Alignment:
         else:
             return 'no mapping'
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def convert(self, id_, reverse=True, strip = False):
         """
         Convert a set of ids into new identifiers.
@@ -68,7 +68,7 @@ class Alignment:
             Mapped values.
         """
         if strip:
-            id_ = utils.strip_namespace(str(id_),['/','#','CID'])
+            id_ = ut.strip_namespace(str(id_),['/','#','CID'])
         return self._mapping(id_,reverse)
 
 class EndpointMapping(Alignment):
@@ -102,7 +102,7 @@ class EndpointMapping(Alignment):
             ?s <http://www.w3.org/2002/07/owl#sameAs> ?o .
         } 
         """
-        res = utils.query_endpoint(endpoint, query, var = ['s','o'])
+        res = ut.query_endpoint(endpoint, query, var = ['s','o'])
         return {str(s):str(o) for s,o in res}
 
 class WikidataMapping(Alignment):
@@ -138,7 +138,7 @@ class WikidataMapping(Alignment):
         dict
             On the form {from:to}
         """
-        res = utils.query_endpoint('https://query.wikidata.org/sparql', 
+        res = ut.query_endpoint('https://query.wikidata.org/sparql', 
                              query, 
                              var = ['from', 'to'])
         return {str(f):str(t) for f,t in res}
@@ -266,8 +266,8 @@ class StringGraphMapping(Alignment):
         super(StringGraphMapping, self).__init__()
         
         self.threshold = threshold
-        dict1 = utils.graph_to_dict(g1)
-        dict2 = utils.graph_to_dict(g2)
+        dict1 = ut.graph_to_dict(g1)
+        dict2 = ut.graph_to_dict(g2)
         self.mappings = self._load_mapping(dict1, dict2)
     
     def _load_mapping(self, dict1, dict2):

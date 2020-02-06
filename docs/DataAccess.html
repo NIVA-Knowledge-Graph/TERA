@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.4" />
 <title>tera.DataAccess API documentation</title>
-<meta name="description" content="A set of APIs to access data created with DataAggregation and DataIntegration moduels." />
+<meta name="description" content="A set of APIs to access data created with DataAggregation and DataIntegration modules." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,13 +20,13 @@
 <h1 class="title">Module <code>tera.DataAccess</code></h1>
 </header>
 <section id="section-intro">
-<p>A set of APIs to access data created with DataAggregation and DataIntegration moduels.</p>
+<p>A set of APIs to access data created with DataAggregation and DataIntegration modules.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;
-A set of APIs to access data created with DataAggregation and DataIntegration moduels.
+A set of APIs to access data created with DataAggregation and DataIntegration modules.
 &#34;&#34;&#34;
 
 from rdflib import Graph, Namespace, URIRef
@@ -39,7 +39,7 @@ import pubchempy
 
 import tera.DataIntegration as di
 import tera.DataAggregation as da
-import tera.utils as utils
+import tera.utils as ut
 
 class API:
     def __init__(self, 
@@ -71,7 +71,7 @@ class API:
         assert endpoint or dataobject
         
         if endpoint:
-            assert utils.test_endpoint(endpoint)
+            assert ut.test_endpoint(endpoint)
             self.endpoint = endpoint
             self.use_endpoint = True
             self.namespace = Namespace(namespace)
@@ -94,7 +94,7 @@ class API:
                        &#39;pubchem&#39;:Namespace(&#39;http://rdf.ncbi.nlm.nih.gov/pubchem/vocabulary#&#39;),
                        &#39;compound&#39;:Namespace(&#39;http://rdf.ncbi.nlm.nih.gov/pubchem/compound/&#39;)}
         
-        self.base_query = utils.prefixes(self.initNs)
+        self.base_query = ut.prefixes(self.initNs)
             
     def query(self, q, var):
         &#34;&#34;&#34;Pass SPARQL to graph or endpoint.
@@ -113,9 +113,9 @@ class API:
         &#34;&#34;&#34;
         q = self.base_query + q
         if self.use_endpoint:
-            return utils.query_endpoint(self.endpoint, q, var)
+            return ut.query_endpoint(self.endpoint, q, var)
         else:
-            return utils.query_graph(self.dataobject.graph, q)
+            return ut.query_graph(self.dataobject.graph, q)
         
     def query_type(self, t):
         &#34;&#34;&#34;Return entities of type.
@@ -272,7 +272,7 @@ class API:
         
         return out
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
         &#34;&#34;&#34;
         Convert between types of ids used in data.
@@ -309,7 +309,7 @@ class API:
         if isinstance(id_, URIRef):
             id_ = str(id_)
         if strip:
-            id_ = utils.strip_namespace(id_, [&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
+            id_ = ut.strip_namespace(id_, [&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
         
         if f == self.base_identifier and t in self.mappings:
             return self.mappings[t].convert(id_)
@@ -360,7 +360,7 @@ class TaxonomyAPI(API):
         &#34;&#34;&#34;
         return self.query_type(self.namespace[&#39;Taxon&#39;])
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_division(self, t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;Return all taxa in division.
         
@@ -375,7 +375,7 @@ class TaxonomyAPI(API):
         &#34;&#34;&#34;
         return self.query_subclassof(a)
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_ssd(self, t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;Return all taxa in SSD.
         
@@ -399,7 +399,7 @@ class TaxonomyAPI(API):
         &#34;&#34;&#34;
         return self.query_type(self.namespace[&#39;Rank&#39;])
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_rank(self, t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;Return all taxa with rank.
         
@@ -441,7 +441,7 @@ class ChemicalAPI(API):
         self.mappings = mappings
         self.base_identifier = &#39;inchikey&#39;
    
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_fingerprint(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip = False):
         &#34;&#34;&#34;Get binary fingerprints.
         
@@ -473,7 +473,7 @@ class ChemicalAPI(API):
 
         return fp
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_names(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip = False):
         &#34;&#34;&#34;Get synonyms.
         
@@ -503,7 +503,7 @@ class ChemicalAPI(API):
 
         return out
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def class_hierarchy(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip=False):
         &#34;&#34;&#34;Return all triples connceted to input.
         
@@ -528,7 +528,7 @@ class ChemicalAPI(API):
         b = self.initNs[&#39;mesh&#39;][b]
         return self.construct_subgraph(a) | self.construct_subgraph(b)
         
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_features(self, id_: Union[URIRef, str, list, set], params=None, f=&#39;inchikey&#39;, strip=False):
         &#34;&#34;&#34;Return chemical features.
         
@@ -568,7 +568,7 @@ class ChemicalAPI(API):
 
         return out
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def which_features(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip=False):
         &#34;&#34;&#34;Chemical features avalible.
         
@@ -589,7 +589,7 @@ class ChemicalAPI(API):
         &#34;&#34;&#34;
         return [p for p in dir(Compound) if isinstance(getattr(Compound, p), property)]
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def simiarity(self, id_: Union[URIRef, str, list, set], ids, f=&#39;inchikey&#39;,strip=False):
         &#34;&#34;&#34;Returns chemical simiarity between id and ids
         
@@ -613,7 +613,7 @@ class ChemicalAPI(API):
         &#34;&#34;&#34;
         fp = self.get_fingerprint(id_, f, strip)
         fps = self.get_fingerprint(ids, f, strip)
-        return {i:utils.tanimoto(fp,f) for i,f in fps.items() if f and fp}
+        return {i:ut.tanimoto(fp,f) for i,f in fps.items() if f and fp}
         
     def compounds(self):
         &#34;&#34;&#34;Return all compounds.
@@ -656,7 +656,7 @@ class TraitsAPI(TaxonomyAPI):
                                         mappings,
                                         name)
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_concervation_status(self,t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;Return concervation status of t.
         
@@ -676,7 +676,7 @@ class TraitsAPI(TaxonomyAPI):
         &#34;&#34;&#34; % str(t)
         return self.query(q,&#39;h&#39;)
 
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_extinct_status(self,t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;Return extinct status (true/false).
         
@@ -696,7 +696,7 @@ class TraitsAPI(TaxonomyAPI):
         &#34;&#34;&#34; % str(t)
         return self.query(q,&#39;h&#39;)
         
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_endemic_to(self,t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;Return endemic region.
         
@@ -716,7 +716,7 @@ class TraitsAPI(TaxonomyAPI):
         &#34;&#34;&#34; % str(t)
         return self.query(q,&#39;h&#39;)
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_ecoregion(self,t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;Return ecoregion.
         
@@ -736,7 +736,7 @@ class TraitsAPI(TaxonomyAPI):
         &#34;&#34;&#34; % str(t)
         return self.query(q,&#39;h&#39;)
         
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_habitat(self,t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;Return habiat.
         
@@ -775,7 +775,7 @@ class EcotoxChemicalAPI(ChemicalAPI):
         &#34;&#34;&#34;
         super(EcotoxChemicalAPI, self).__init__(namespace, endpoint, dataobject, name)
         
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def query_chemical_names(self,t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;
         Return chemical names.
@@ -854,7 +854,7 @@ class EffectsAPI(API):
         &#34;&#34;&#34;
         super(EffectsAPI, self).__init__(namespace, endpoint, dataobject, name)
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_chemicals_from_species(self,t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;Return chemical involved in experiment with certain species.
   
@@ -876,7 +876,7 @@ class EffectsAPI(API):
         &#34;&#34;&#34; % str(t)
         return self.query(q,&#39;c&#39;)
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;Return species involved in experiment using chemical.
         
@@ -1070,7 +1070,7 @@ class EffectsAPI(API):
         assert endpoint or dataobject
         
         if endpoint:
-            assert utils.test_endpoint(endpoint)
+            assert ut.test_endpoint(endpoint)
             self.endpoint = endpoint
             self.use_endpoint = True
             self.namespace = Namespace(namespace)
@@ -1093,7 +1093,7 @@ class EffectsAPI(API):
                        &#39;pubchem&#39;:Namespace(&#39;http://rdf.ncbi.nlm.nih.gov/pubchem/vocabulary#&#39;),
                        &#39;compound&#39;:Namespace(&#39;http://rdf.ncbi.nlm.nih.gov/pubchem/compound/&#39;)}
         
-        self.base_query = utils.prefixes(self.initNs)
+        self.base_query = ut.prefixes(self.initNs)
             
     def query(self, q, var):
         &#34;&#34;&#34;Pass SPARQL to graph or endpoint.
@@ -1112,9 +1112,9 @@ class EffectsAPI(API):
         &#34;&#34;&#34;
         q = self.base_query + q
         if self.use_endpoint:
-            return utils.query_endpoint(self.endpoint, q, var)
+            return ut.query_endpoint(self.endpoint, q, var)
         else:
-            return utils.query_graph(self.dataobject.graph, q)
+            return ut.query_graph(self.dataobject.graph, q)
         
     def query_type(self, t):
         &#34;&#34;&#34;Return entities of type.
@@ -1271,7 +1271,7 @@ class EffectsAPI(API):
         
         return out
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
         &#34;&#34;&#34;
         Convert between types of ids used in data.
@@ -1308,7 +1308,7 @@ class EffectsAPI(API):
         if isinstance(id_, URIRef):
             id_ = str(id_)
         if strip:
-            id_ = utils.strip_namespace(id_, [&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
+            id_ = ut.strip_namespace(id_, [&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
         
         if f == self.base_identifier and t in self.mappings:
             return self.mappings[t].convert(id_)
@@ -1444,7 +1444,7 @@ class EffectsAPI(API):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@utils.do_recursively_in_class
+<pre><code class="python">@ut.do_recursively_in_class
 def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
     &#34;&#34;&#34;
     Convert between types of ids used in data.
@@ -1481,7 +1481,7 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
     if isinstance(id_, URIRef):
         id_ = str(id_)
     if strip:
-        id_ = utils.strip_namespace(id_, [&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
+        id_ = ut.strip_namespace(id_, [&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
     
     if f == self.base_identifier and t in self.mappings:
         return self.mappings[t].convert(id_)
@@ -1531,9 +1531,9 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
     &#34;&#34;&#34;
     q = self.base_query + q
     if self.use_endpoint:
-        return utils.query_endpoint(self.endpoint, q, var)
+        return ut.query_endpoint(self.endpoint, q, var)
     else:
-        return utils.query_graph(self.dataobject.graph, q)</code></pre>
+        return ut.query_graph(self.dataobject.graph, q)</code></pre>
 </details>
 </dd>
 <dt id="tera.DataAccess.API.query_alt_labels"><code class="name flex">
@@ -1827,7 +1827,7 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
         self.mappings = mappings
         self.base_identifier = &#39;inchikey&#39;
    
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_fingerprint(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip = False):
         &#34;&#34;&#34;Get binary fingerprints.
         
@@ -1859,7 +1859,7 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
 
         return fp
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_names(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip = False):
         &#34;&#34;&#34;Get synonyms.
         
@@ -1889,7 +1889,7 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
 
         return out
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def class_hierarchy(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip=False):
         &#34;&#34;&#34;Return all triples connceted to input.
         
@@ -1914,7 +1914,7 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
         b = self.initNs[&#39;mesh&#39;][b]
         return self.construct_subgraph(a) | self.construct_subgraph(b)
         
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_features(self, id_: Union[URIRef, str, list, set], params=None, f=&#39;inchikey&#39;, strip=False):
         &#34;&#34;&#34;Return chemical features.
         
@@ -1954,7 +1954,7 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
 
         return out
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def which_features(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip=False):
         &#34;&#34;&#34;Chemical features avalible.
         
@@ -1975,7 +1975,7 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
         &#34;&#34;&#34;
         return [p for p in dir(Compound) if isinstance(getattr(Compound, p), property)]
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def simiarity(self, id_: Union[URIRef, str, list, set], ids, f=&#39;inchikey&#39;,strip=False):
         &#34;&#34;&#34;Returns chemical simiarity between id and ids
         
@@ -1999,7 +1999,7 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
         &#34;&#34;&#34;
         fp = self.get_fingerprint(id_, f, strip)
         fps = self.get_fingerprint(ids, f, strip)
-        return {i:utils.tanimoto(fp,f) for i,f in fps.items() if f and fp}
+        return {i:ut.tanimoto(fp,f) for i,f in fps.items() if f and fp}
         
     def compounds(self):
         &#34;&#34;&#34;Return all compounds.
@@ -2049,7 +2049,7 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@utils.do_recursively_in_class
+<pre><code class="python">@ut.do_recursively_in_class
 def class_hierarchy(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip=False):
     &#34;&#34;&#34;Return all triples connceted to input.
     
@@ -2132,7 +2132,7 @@ To see all avalible features use which_features().</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@utils.do_recursively_in_class
+<pre><code class="python">@ut.do_recursively_in_class
 def get_features(self, id_: Union[URIRef, str, list, set], params=None, f=&#39;inchikey&#39;, strip=False):
     &#34;&#34;&#34;Return chemical features.
     
@@ -2196,7 +2196,7 @@ def get_features(self, id_: Union[URIRef, str, list, set], params=None, f=&#39;i
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@utils.do_recursively_in_class
+<pre><code class="python">@ut.do_recursively_in_class
 def get_fingerprint(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip = False):
     &#34;&#34;&#34;Get binary fingerprints.
     
@@ -2252,7 +2252,7 @@ def get_fingerprint(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#3
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@utils.do_recursively_in_class
+<pre><code class="python">@ut.do_recursively_in_class
 def get_names(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip = False):
     &#34;&#34;&#34;Get synonyms.
     
@@ -2308,7 +2308,7 @@ def get_names(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, st
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@utils.do_recursively_in_class
+<pre><code class="python">@ut.do_recursively_in_class
 def simiarity(self, id_: Union[URIRef, str, list, set], ids, f=&#39;inchikey&#39;,strip=False):
     &#34;&#34;&#34;Returns chemical simiarity between id and ids
     
@@ -2332,7 +2332,7 @@ def simiarity(self, id_: Union[URIRef, str, list, set], ids, f=&#39;inchikey&#39
     &#34;&#34;&#34;
     fp = self.get_fingerprint(id_, f, strip)
     fps = self.get_fingerprint(ids, f, strip)
-    return {i:utils.tanimoto(fp,f) for i,f in fps.items() if f and fp}</code></pre>
+    return {i:ut.tanimoto(fp,f) for i,f in fps.items() if f and fp}</code></pre>
 </details>
 </dd>
 <dt id="tera.DataAccess.ChemicalAPI.which_features"><code class="name flex">
@@ -2358,7 +2358,7 @@ def simiarity(self, id_: Union[URIRef, str, list, set], ids, f=&#39;inchikey&#39
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@utils.do_recursively_in_class
+<pre><code class="python">@ut.do_recursively_in_class
 def which_features(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip=False):
     &#34;&#34;&#34;Chemical features avalible.
     
@@ -2437,7 +2437,7 @@ def which_features(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39
         &#34;&#34;&#34;
         super(EcotoxChemicalAPI, self).__init__(namespace, endpoint, dataobject, name)
         
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def query_chemical_names(self,t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;
         Return chemical names.
@@ -2486,7 +2486,7 @@ URI </p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@utils.do_recursively_in_class
+<pre><code class="python">@ut.do_recursively_in_class
 def query_chemical_names(self,t: Union[URIRef, str, list, set]):
     &#34;&#34;&#34;
     Return chemical names.
@@ -2655,7 +2655,7 @@ def query_chemical_names(self,t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;
         super(EffectsAPI, self).__init__(namespace, endpoint, dataobject, name)
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_chemicals_from_species(self,t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;Return chemical involved in experiment with certain species.
   
@@ -2677,7 +2677,7 @@ def query_chemical_names(self,t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34; % str(t)
         return self.query(q,&#39;c&#39;)
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;Return species involved in experiment using chemical.
         
@@ -2856,7 +2856,7 @@ def query_chemical_names(self,t: Union[URIRef, str, list, set]):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@utils.do_recursively_in_class
+<pre><code class="python">@ut.do_recursively_in_class
 def get_chemicals_from_species(self,t: Union[URIRef, str, list, set]):
     &#34;&#34;&#34;Return chemical involved in experiment with certain species.
 
@@ -3018,7 +3018,7 @@ On the form {chemical:{species:endpoint values}}</p></section>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@utils.do_recursively_in_class
+<pre><code class="python">@ut.do_recursively_in_class
 def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
     &#34;&#34;&#34;Return species involved in experiment using chemical.
     
@@ -3127,7 +3127,7 @@ def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
 </dd>
 <dt id="tera.DataAccess.TaxonomyAPI"><code class="flex name class">
 <span>class <span class="ident">TaxonomyAPI</span></span>
-<span>(</span><span>namespace=None, endpoint=None, dataobject=None, mappings={&#x27;eol&#x27;, &lt;tera.DataIntegration.NCBIToEOL object&gt;}, name='Taxonomy API')</span>
+<span>(</span><span>namespace=None, endpoint=None, dataobject=None, mappings={&lt;tera.DataIntegration.NCBIToEOL object&gt;, &#x27;eol&#x27;}, name='Taxonomy API')</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for accessing taxonomic data. </p>
@@ -3173,7 +3173,7 @@ def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;
         return self.query_type(self.namespace[&#39;Taxon&#39;])
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_division(self, t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;Return all taxa in division.
         
@@ -3188,7 +3188,7 @@ def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;
         return self.query_subclassof(a)
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_ssd(self, t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;Return all taxa in SSD.
         
@@ -3212,7 +3212,7 @@ def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;
         return self.query_type(self.namespace[&#39;Rank&#39;])
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_rank(self, t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;Return all taxa with rank.
         
@@ -3258,7 +3258,7 @@ def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@utils.do_recursively_in_class
+<pre><code class="python">@ut.do_recursively_in_class
 def get_division(self, t: Union[URIRef, str, list, set]):
     &#34;&#34;&#34;Return all taxa in division.
     
@@ -3293,7 +3293,7 @@ def get_division(self, t: Union[URIRef, str, list, set]):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@utils.do_recursively_in_class
+<pre><code class="python">@ut.do_recursively_in_class
 def get_rank(self, t: Union[URIRef, str, list, set]):
     &#34;&#34;&#34;Return all taxa with rank.
     
@@ -3352,7 +3352,7 @@ def get_rank(self, t: Union[URIRef, str, list, set]):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@utils.do_recursively_in_class
+<pre><code class="python">@ut.do_recursively_in_class
 def get_ssd(self, t: Union[URIRef, str, list, set]):
     &#34;&#34;&#34;Return all taxa in SSD.
     
@@ -3413,7 +3413,7 @@ def get_ssd(self, t: Union[URIRef, str, list, set]):
 </dd>
 <dt id="tera.DataAccess.TraitsAPI"><code class="flex name class">
 <span>class <span class="ident">TraitsAPI</span></span>
-<span>(</span><span>namespace='https://eol.org/schema/terms/', endpoint=None, dataobject=None, mappings={&#x27;eol&#x27;, &lt;tera.DataIntegration.NCBIToEOL object&gt;}, name='EOL API')</span>
+<span>(</span><span>namespace='https://eol.org/schema/terms/', endpoint=None, dataobject=None, mappings={&lt;tera.DataIntegration.NCBIToEOL object&gt;, &#x27;eol&#x27;}, name='EOL API')</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Class for accessing EOL traits data.</p>
@@ -3458,7 +3458,7 @@ def get_ssd(self, t: Union[URIRef, str, list, set]):
                                         mappings,
                                         name)
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_concervation_status(self,t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;Return concervation status of t.
         
@@ -3478,7 +3478,7 @@ def get_ssd(self, t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34; % str(t)
         return self.query(q,&#39;h&#39;)
 
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_extinct_status(self,t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;Return extinct status (true/false).
         
@@ -3498,7 +3498,7 @@ def get_ssd(self, t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34; % str(t)
         return self.query(q,&#39;h&#39;)
         
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_endemic_to(self,t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;Return endemic region.
         
@@ -3518,7 +3518,7 @@ def get_ssd(self, t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34; % str(t)
         return self.query(q,&#39;h&#39;)
     
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_ecoregion(self,t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;Return ecoregion.
         
@@ -3538,7 +3538,7 @@ def get_ssd(self, t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34; % str(t)
         return self.query(q,&#39;h&#39;)
         
-    @utils.do_recursively_in_class
+    @ut.do_recursively_in_class
     def get_habitat(self,t: Union[URIRef, str, list, set]):
         &#34;&#34;&#34;Return habiat.
         
@@ -3582,7 +3582,7 @@ URI </p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@utils.do_recursively_in_class
+<pre><code class="python">@ut.do_recursively_in_class
 def get_concervation_status(self,t: Union[URIRef, str, list, set]):
     &#34;&#34;&#34;Return concervation status of t.
     
@@ -3622,7 +3622,7 @@ def get_concervation_status(self,t: Union[URIRef, str, list, set]):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@utils.do_recursively_in_class
+<pre><code class="python">@ut.do_recursively_in_class
 def get_ecoregion(self,t: Union[URIRef, str, list, set]):
     &#34;&#34;&#34;Return ecoregion.
     
@@ -3662,7 +3662,7 @@ def get_ecoregion(self,t: Union[URIRef, str, list, set]):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@utils.do_recursively_in_class
+<pre><code class="python">@ut.do_recursively_in_class
 def get_endemic_to(self,t: Union[URIRef, str, list, set]):
     &#34;&#34;&#34;Return endemic region.
     
@@ -3702,7 +3702,7 @@ def get_endemic_to(self,t: Union[URIRef, str, list, set]):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@utils.do_recursively_in_class
+<pre><code class="python">@ut.do_recursively_in_class
 def get_extinct_status(self,t: Union[URIRef, str, list, set]):
     &#34;&#34;&#34;Return extinct status (true/false).
     
@@ -3742,7 +3742,7 @@ def get_extinct_status(self,t: Union[URIRef, str, list, set]):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@utils.do_recursively_in_class
+<pre><code class="python">@ut.do_recursively_in_class
 def get_habitat(self,t: Union[URIRef, str, list, set]):
     &#34;&#34;&#34;Return habiat.
     
