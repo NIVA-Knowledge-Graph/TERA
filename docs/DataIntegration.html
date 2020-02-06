@@ -28,16 +28,14 @@
 <pre><code class="python">&#34;&#34;&#34;
 A set of classes for aligning data aggregated with tools in DataAggregation.
 &#34;&#34;&#34;
-
-
 from rdflib import Graph, Namespace, Literal, URIRef
 from rdflib.namespace import RDF, OWL, RDFS
 import pandas as pd
 import validators
-from .utils import query_endpoint, strip_namespace, do_recursively_in_class, graph_to_dict
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 from collections import defaultdict
+import tera.utils as utils
 
 class Alignment:
     def __init__(self, name = &#39;Alignment&#39;):
@@ -75,7 +73,7 @@ class Alignment:
         else:
             return &#39;no mapping&#39;
     
-    @do_recursively_in_class
+    @utils.do_recursively_in_class
     def convert(self, id_, reverse=True, strip = False):
         &#34;&#34;&#34;
         Convert a set of ids into new identifiers.
@@ -97,7 +95,7 @@ class Alignment:
             Mapped values.
         &#34;&#34;&#34;
         if strip:
-            id_ = strip_namespace(str(id_),[&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
+            id_ = utils.strip_namespace(str(id_),[&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
         return self._mapping(id_,reverse)
 
 class EndpointMapping(Alignment):
@@ -131,7 +129,7 @@ class EndpointMapping(Alignment):
             ?s &lt;http://www.w3.org/2002/07/owl#sameAs&gt; ?o .
         } 
         &#34;&#34;&#34;
-        res = query_endpoint(endpoint, query, var = [&#39;s&#39;,&#39;o&#39;])
+        res = utils.query_endpoint(endpoint, query, var = [&#39;s&#39;,&#39;o&#39;])
         return {str(s):str(o) for s,o in res}
 
 class WikidataMapping(Alignment):
@@ -167,7 +165,7 @@ class WikidataMapping(Alignment):
         dict
             On the form {from:to}
         &#34;&#34;&#34;
-        res = query_endpoint(&#39;https://query.wikidata.org/sparql&#39;, 
+        res = utils.query_endpoint(&#39;https://query.wikidata.org/sparql&#39;, 
                              query, 
                              var = [&#39;from&#39;, &#39;to&#39;])
         return {str(f):str(t) for f,t in res}
@@ -295,8 +293,8 @@ class StringGraphMapping(Alignment):
         super(StringGraphMapping, self).__init__()
         
         self.threshold = threshold
-        dict1 = graph_to_dict(g1)
-        dict2 = graph_to_dict(g2)
+        dict1 = utils.graph_to_dict(g1)
+        dict2 = utils.graph_to_dict(g2)
         self.mappings = self._load_mapping(dict1, dict2)
     
     def _load_mapping(self, dict1, dict2):
@@ -474,7 +472,7 @@ class NCBIToEcotox(StringGraphMapping):
         else:
             return &#39;no mapping&#39;
     
-    @do_recursively_in_class
+    @utils.do_recursively_in_class
     def convert(self, id_, reverse=True, strip = False):
         &#34;&#34;&#34;
         Convert a set of ids into new identifiers.
@@ -496,7 +494,7 @@ class NCBIToEcotox(StringGraphMapping):
             Mapped values.
         &#34;&#34;&#34;
         if strip:
-            id_ = strip_namespace(str(id_),[&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
+            id_ = utils.strip_namespace(str(id_),[&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
         return self._mapping(id_,reverse)</code></pre>
 </details>
 <h3>Subclasses</h3>
@@ -532,7 +530,7 @@ class NCBIToEcotox(StringGraphMapping):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@do_recursively_in_class
+<pre><code class="python">@utils.do_recursively_in_class
 def convert(self, id_, reverse=True, strip = False):
     &#34;&#34;&#34;
     Convert a set of ids into new identifiers.
@@ -554,7 +552,7 @@ def convert(self, id_, reverse=True, strip = False):
         Mapped values.
     &#34;&#34;&#34;
     if strip:
-        id_ = strip_namespace(str(id_),[&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
+        id_ = utils.strip_namespace(str(id_),[&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
     return self._mapping(id_,reverse)</code></pre>
 </details>
 </dd>
@@ -606,7 +604,7 @@ def convert(self, id_, reverse=True, strip = False):
             ?s &lt;http://www.w3.org/2002/07/owl#sameAs&gt; ?o .
         } 
         &#34;&#34;&#34;
-        res = query_endpoint(endpoint, query, var = [&#39;s&#39;,&#39;o&#39;])
+        res = utils.query_endpoint(endpoint, query, var = [&#39;s&#39;,&#39;o&#39;])
         return {str(s):str(o) for s,o in res}</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -985,8 +983,8 @@ def convert(self, id_, reverse=True, strip = False):
         super(StringGraphMapping, self).__init__()
         
         self.threshold = threshold
-        dict1 = graph_to_dict(g1)
-        dict2 = graph_to_dict(g2)
+        dict1 = utils.graph_to_dict(g1)
+        dict2 = utils.graph_to_dict(g2)
         self.mappings = self._load_mapping(dict1, dict2)
     
     def _load_mapping(self, dict1, dict2):
@@ -1177,7 +1175,7 @@ def convert(self, id_, reverse=True, strip = False):
         dict
             On the form {from:to}
         &#34;&#34;&#34;
-        res = query_endpoint(&#39;https://query.wikidata.org/sparql&#39;, 
+        res = utils.query_endpoint(&#39;https://query.wikidata.org/sparql&#39;, 
                              query, 
                              var = [&#39;from&#39;, &#39;to&#39;])
         return {str(f):str(t) for f,t in res}</code></pre>

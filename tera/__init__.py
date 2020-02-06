@@ -5,8 +5,3 @@ __doc__ = """
     
     The set of APIs enables aggregation, integration and access of several data sources relevant to the toxicological and risk assessment domain. 
 """
-
-from .DataAccess import *
-from .DataIntegration import *
-from .DataAggregation import *
-from .utils import *
