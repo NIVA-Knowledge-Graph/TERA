@@ -5,6 +5,7 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 from functools import wraps
 from rdflib import Literal
 from collections import defaultdict
+import warnings
 
 nan_values = ['nan', float('nan'),'--','-X','NA','NC',-1,'','sp.', -1,'sp,','var.','variant','NR']
 
@@ -96,6 +97,7 @@ def query_endpoint(endpoint, q, var = 'p'):
                 out[v] = [None] * len(results['results']['bindings'])
         return set(zip(*[out[k] for k in out]))
     except Exception as e:
+        warnings.warn('Query failed:\n' + q, UserWarning)
         return set()
 
 
