@@ -66,9 +66,9 @@ class DataObject:
         assert len(f) == len(t)
         
         for old, new in zip(f, t):
-            triples = self.graph.triples(subject=old)
+            triples = self.graph.triples((old,None,None))
             tmp = set([(new,p,o) for _,p,o in triples])
-            triples = self.graph.triples(objects=old)
+            triples = self.graph.triples((None, None, old))
             tmp |= set([(s,p,new) for s,p,_ in triples])
             
             self.graph.remove((old,None,None))
