@@ -86,7 +86,7 @@ class DataObject:
 
 class Taxonomy(DataObject):
     def __init__(self, 
-                 namespace = 'https://www.ncbi.nlm.nih.gov/taxonomy',
+                 namespace = 'https://www.ncbi.nlm.nih.gov/taxonomy/',
                  name = 'NCBI Taxonomy',
                  verbose = True, 
                  directory = None):
@@ -112,9 +112,9 @@ class Taxonomy(DataObject):
         self._load_names(directory+'names.dmp')
 
     def _load_hierarchy(self, path):
-        df = pd.read_csv(path, sep='|', usecols=[0,1,2,4], names=['child','parent','rank','division'], na_values = nan_values)
+        df = pd.read_csv(path, sep='|', usecols=[0,1,2,4], names=['child','parent','rank','division'], na_values = nan_values, dtype = str)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
 
         def func(row):
             c,p,r,d = row
@@ -134,9 +134,9 @@ class Taxonomy(DataObject):
         self.apply_func(func, df, ['child','parent','rank','division'])
     
     def _load_names(self, path):
-        df = pd.read_csv(path, sep='|', usecols=[0,1,2,3], names=['taxon','name','unique_name','name_type'],na_values = nan_values)
+        df = pd.read_csv(path, sep='|', usecols=[0,1,2,3], names=['taxon','name','unique_name','name_type'],na_values = nan_values,dtype = str)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
 
         def func(row):
             c,n,un,nt = row
@@ -152,9 +152,9 @@ class Taxonomy(DataObject):
         self.apply_func(func, df, ['taxon','name','unique_name','name_type'])
         
     def _load_divisions(self, path):
-        df = pd.read_csv(path, sep='|', usecols=[0,1,2], names=['division','acronym','name'], na_values = nan_values)
+        df = pd.read_csv(path, sep='|', usecols=[0,1,2], names=['division','acronym','name'], na_values = nan_values, dtype = str)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
 
         def func(row):
             d,a,n = row
@@ -167,7 +167,7 @@ class Taxonomy(DataObject):
     
 class Traits(DataObject):
     def __init__(self, 
-                 namespace = 'https://eol.org/schema/terms/',
+                 namespace = 'https://eol.org/pages/',
                  name = 'EOL Traits',
                  verbose = True,
                  directory = None):
@@ -191,7 +191,9 @@ class Traits(DataObject):
             self._load_eol_subclasses(f)
     
     def _load_traits(self, path):
-        df = pd.read_csv(path, sep=',', usecols=['page_id','predicate','value_uri'], low_memory=False, chunksize=10**3, na_values = nan_values)
+        df = pd.read_csv(path, sep=',', usecols=['page_id','predicate','value_uri'], na_values = nan_values, dtype=str)
+        df.dropna(inplace=True)
+        df = df.apply(lambda x: x.str.strip())
 
         def func(row):
             s,p,o = row
@@ -207,25 +209,19 @@ class Traits(DataObject):
             if validators.url(s) and validators.url(p) and val:
                 self.graph.add((URIRef(s),URIRef(p),o))
 
-        pbar = None 
-        if self.verbose: pbar = tqdm(total=sum([1 for l in open(path,'r')]))
-        for chunk in df:
-            chunk.dropna(inplace=True)
-            chunk.apply(lambda x: x.str.strip())
-            self.apply_func(func, chunk, ['page_id','predicate','value_uri'], sub_bar = True)
-            pbar.update(len(chunk.index))
+        self.apply_func(func, df, ['page_id','predicate','value_uri'])            
             
     def _load_eol_subclasses(self, path):
         try: 
             try:
-                df = pd.read_csv(path,sep=',',usecols=['child','parent'],low_memory=False,na_values = nan_values)
+                df = pd.read_csv(path,sep=',',usecols=['child','parent'],na_values = nan_values, dtype=str)
                 df.dropna(inplace=True)
-                df.apply(lambda x: x.str.strip())
+                df = df.apply(lambda x: x.str.strip())
             except ValueError:
-                df = pd.read_csv(path,sep=',',header=None,low_memory=False,na_values = nan_values)
-                df.dropna(inplace=True)
-                df.apply(lambda x: x.str.strip())
+                df = pd.read_csv(path,sep=',',header=None,na_values = nan_values, dtype=str)
                 df.columns = ['parent','child']
+                df.dropna(inplace=True)
+                df = df.apply(lambda x: x.str.strip())
             
         except FileNotFoundError as e:
             print(e,path)
@@ -258,16 +254,16 @@ class Effects(DataObject):
         self._load_effect_data(directory + 'tests.txt', directory + 'results.txt')
         
     def _load_effect_data(self, tests_path, results_path):
-        tests = pd.read_csv(tests_path, sep='|', low_memory=False, dtype = str, na_values = nan_values)
+        tests = pd.read_csv(tests_path, sep='|', dtype = str, na_values = nan_values)
         tests.dropna(inplace=True, subset=['test_id',
                         'test_cas',
                         'species_number'])
         tests.fillna(inplace=True, value='missing')
-        tests.apply(lambda x: x.str.strip())
-        results = pd.read_csv(results_path, sep='|', low_memory=False, dtype = str, na_values = nan_values)
+        tests = tests.apply(lambda x: x.str.strip())
+        results = pd.read_csv(results_path, sep='|',  dtype = str, na_values = nan_values)
         results.dropna(inplace=True, subset=['test_id','endpoint','conc1_mean','conc1_unit','effect'])
         results.fillna(inplace=True, value='missing')
-        results.apply(lambda x: x.str.strip())
+        results = results.apply(lambda x: x.str.strip())
 
         def test_func(row):
             test_id, cas_number, species_number, stdm, stdu, habitat, lifestage, age, ageunit, weight, weightunit = row
@@ -305,7 +301,7 @@ class Effects(DataObject):
             self.graph.add((r,self.namespace['effect'],ef))
             b = BNode()
             self.graph.add( (b, RDF.value, Literal(conc)) )
-            if conc1_unit != 'missing':
+            if conc_unit != 'missing':
                 #TODO creating mapping for units not in UNIT.units
                 self.graph.add( (b, UNIT.units, Literal(conc_unit)) )
                 
@@ -349,9 +345,9 @@ class EcotoxTaxonomy(DataObject):
         self._load_hierarchy(directory + 'validation/species.txt')
         
     def _load_species(self, path):
-        df = pd.read_csv(path, sep='|', low_memory=False, dtype = str, na_values = nan_values)
+        df = pd.read_csv(path, sep='|',  dtype = str, na_values = nan_values)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
         
         def func(row):
             s, cn, ln, group = row
@@ -376,9 +372,9 @@ class EcotoxTaxonomy(DataObject):
         self.apply_func(func, df, ['species_number','common_name','latin_name','ecotox_group'])
             
     def _load_synonyms(self, path):
-        df = pd.read_csv(path, sep='|', low_memory=False, dtype = str, na_values = nan_values)
+        df = pd.read_csv(path, sep='|',  dtype = str, na_values = nan_values)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
         
         def func(row):
             s, ln = row
@@ -389,9 +385,9 @@ class EcotoxTaxonomy(DataObject):
             
     
     def _load_hierarchy(self, path):
-        df = pd.read_csv(path, sep= '|', low_memory = False, dtype = str)
+        df = pd.read_csv(path, sep= '|', dtype = str)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
         
         def func(row):
             sn, lineage = row
@@ -438,9 +434,9 @@ class EcotoxChemicals(DataObject):
         self._load_chemicals(directory + 'validation/chemicals.txt')
         
     def _load_chemicals(self, path):
-        df = pd.read_csv(path, sep='|', low_memory=False, dtype = str, na_values = nan_values)
+        df = pd.read_csv(path, sep='|',  dtype = str, na_values = nan_values)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
         
         def func(row):
             c, n, group = row
