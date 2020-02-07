@@ -35,10 +35,11 @@ class API:
         dataobject : tera.DataObject, default None
             see DataAggregation
             
-        mappings : tera.DataIntegration.Mapping
+        mappings : dict
+            On the form {'id type': tera.DataIntegration.Alignment}
         
         base_identifier : str 
-            With identifier type to map from in mappings. eg. 'ncbi' -> provide mappings from NCBI to other data sets (eg. NCBIToEOL).
+            Which identifier type to map from in mappings. eg. 'ncbi' -> provide mappings from NCBI to other data sets (eg. NCBIToEOL).
             
         Raises
         ------
