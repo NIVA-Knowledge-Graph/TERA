@@ -79,25 +79,23 @@ class DataObject:
         &#34;&#34;&#34;
         self.graph.serialize(path, format=path.split(&#39;.&#39;).pop(-1))
         
-    def replace(self, f, t):
-        &#34;&#34;&#34;Replace list f of entities with t. Usefull after converting between datasets.
+    def replace(self, converted):
+        &#34;&#34;&#34;Replace old entities with new in data object. 
+        Usefull after converting between datasets.
         
         Parameters
         ----------
-        f : list 
-            Old entities to replace.
-        
-        t : list 
-            New entities. 
+        converted : list
+            list of (old, new) tuples. 
+            
         &#34;&#34;&#34;
-        assert len(f) == len(t)
+        f, t = converted
         
         for old, new in zip(f, t):
             triples = self.graph.triples((old,None,None))
             tmp = set([(new,p,o) for _,p,o in triples])
             triples = self.graph.triples((None, None, old))
             tmp |= set([(s,p,new) for s,p,_ in triples])
-            
             self.graph.remove((old,None,None))
             self.graph.remove((None,None,old))
             
@@ -664,25 +662,23 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
         &#34;&#34;&#34;
         self.graph.serialize(path, format=path.split(&#39;.&#39;).pop(-1))
         
-    def replace(self, f, t):
-        &#34;&#34;&#34;Replace list f of entities with t. Usefull after converting between datasets.
+    def replace(self, converted):
+        &#34;&#34;&#34;Replace old entities with new in data object. 
+        Usefull after converting between datasets.
         
         Parameters
         ----------
-        f : list 
-            Old entities to replace.
-        
-        t : list 
-            New entities. 
+        converted : list
+            list of (old, new) tuples. 
+            
         &#34;&#34;&#34;
-        assert len(f) == len(t)
+        f, t = converted
         
         for old, new in zip(f, t):
             triples = self.graph.triples((old,None,None))
             tmp = set([(new,p,o) for _,p,o in triples])
             triples = self.graph.triples((None, None, old))
             tmp |= set([(s,p,new) for s,p,_ in triples])
-            
             self.graph.remove((old,None,None))
             self.graph.remove((None,None,old))
             
@@ -728,40 +724,37 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
 </details>
 </dd>
 <dt id="tera.DataAggregation.DataObject.replace"><code class="name flex">
-<span>def <span class="ident">replace</span></span>(<span>self, f, t)</span>
+<span>def <span class="ident">replace</span></span>(<span>self, converted)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Replace list f of entities with t. Usefull after converting between datasets.</p>
+<section class="desc"><p>Replace old entities with new in data object.
+Usefull after converting between datasets.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>f</code></strong> :&ensp;<code>list</code></dt>
-<dd>Old entities to replace.</dd>
-<dt><strong><code>t</code></strong> :&ensp;<code>list</code></dt>
-<dd>New entities.</dd>
+<dt><strong><code>converted</code></strong> :&ensp;<code>list</code></dt>
+<dd>list of (old, new) tuples.</dd>
 </dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def replace(self, f, t):
-    &#34;&#34;&#34;Replace list f of entities with t. Usefull after converting between datasets.
+<pre><code class="python">def replace(self, converted):
+    &#34;&#34;&#34;Replace old entities with new in data object. 
+    Usefull after converting between datasets.
     
     Parameters
     ----------
-    f : list 
-        Old entities to replace.
-    
-    t : list 
-        New entities. 
+    converted : list
+        list of (old, new) tuples. 
+        
     &#34;&#34;&#34;
-    assert len(f) == len(t)
+    f, t = converted
     
     for old, new in zip(f, t):
         triples = self.graph.triples((old,None,None))
         tmp = set([(new,p,o) for _,p,o in triples])
         triples = self.graph.triples((None, None, old))
         tmp |= set([(s,p,new) for s,p,_ in triples])
-        
         self.graph.remove((old,None,None))
         self.graph.remove((None,None,old))</code></pre>
 </details>

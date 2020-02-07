@@ -46,6 +46,8 @@ class API:
                  namespace=None, 
                  endpoint=None, 
                  dataobject=None, 
+                 mappings=None,
+                 base_identifier=None,
                  name=&#39;API&#39;):
         &#34;&#34;&#34;API for accessing data sets. 
         
@@ -59,7 +61,12 @@ class API:
 
         dataobject : tera.DataObject, default None
             see DataAggregation
+            
+        mappings : tera.DataIntegration.Mapping
         
+        base_identifier : str 
+            With identifier type to map from in mappings. eg. &#39;ncbi&#39; -&gt; provide mappings from NCBI to other data sets (eg. NCBIToEOL).
+            
         Raises
         ------
         AssertionError 
@@ -95,6 +102,8 @@ class API:
                        &#39;compound&#39;:Namespace(&#39;http://rdf.ncbi.nlm.nih.gov/pubchem/compound/&#39;)}
         
         self.base_query = ut.prefixes(self.initNs)
+        self.mappings = mappings
+        self.base_identifier = base_identifier
             
     def query(self, q, var):
         &#34;&#34;&#34;Pass SPARQL to graph or endpoint.
@@ -335,6 +344,7 @@ class TaxonomyAPI(API):
                  endpoint=None,
                  dataobject = None,
                  mappings = {&#39;eol&#39;,di.NCBIToEOL()},
+                 base_identifier = &#39;ncbi&#39;,
                  name = &#39;Taxonomy API&#39;):
         &#34;&#34;&#34;Base class for accessing taxonomic data. 
         
@@ -347,9 +357,7 @@ class TaxonomyAPI(API):
             Mappings (tera.Alignment) from base_identifier (eg. ncbi) to other datasets. 
             
         &#34;&#34;&#34;
-        super(TaxonomyAPI, self).__init__(namespace, endpoint, dataobject, name)
-        self.mappings = mappings
-        self.base_identifier = &#39;ncbi&#39;
+        super(TaxonomyAPI, self).__init__(namespace, endpoint, dataobject, mappings, base_identifier, name)
         
     def get_taxa(self):
         &#34;&#34;&#34;Return all taxa in taxonomy.
@@ -424,6 +432,7 @@ class ChemicalAPI(API):
                             &#39;chebi&#39;:di.InchikeyToChEBI(),
                             &#39;chemble&#39;:di.InchikeyToChEMBL(),
                             &#39;mesh&#39;:di.InchikeyToMeSH()},
+                 base_identifier = &#39;inchikey&#39;,
                  name = &#39;Chemical API&#39;):
         &#34;&#34;&#34;
         Base class for accessing chemical data. 
@@ -437,9 +446,7 @@ class ChemicalAPI(API):
             Mappings from base_identifier (eg. ncbi) to other datasets. 
             
         &#34;&#34;&#34;
-        super(ChemicalAPI, self).__init__(namespace, endpoint, dataobject, name)
-        self.mappings = mappings
-        self.base_identifier = &#39;inchikey&#39;
+        super(ChemicalAPI, self).__init__(namespace, endpoint, dataobject, mappings, base_identifier, name)
    
     @ut.do_recursively_in_class
     def get_fingerprint(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip = False):
@@ -606,6 +613,7 @@ class ChemicalAPI(API):
             
         strip : bool 
             Remove namespace. Should be true if URI is passed.
+            
         
         Returns 
         -------
@@ -636,6 +644,7 @@ class TraitsAPI(TaxonomyAPI):
                  endpoint = None, 
                  dataobject = None,
                  mappings = {&#39;eol&#39;,di.NCBIToEOL()},
+                 base_identifier = &#39;ncbi&#39;,
                  name = &#39;EOL API&#39;):
         &#34;&#34;&#34;
         Class for accessing EOL traits data.
@@ -649,11 +658,14 @@ class TraitsAPI(TaxonomyAPI):
         dataobject : tera.DataObject
         
         mapping : dict 
+        
+        base_identifier : str 
         &#34;&#34;&#34;
         super(TraitsAPI, self).__init__(namespace, 
                                         endpoint, 
                                         dataobject, 
                                         mappings,
+                                        base_identifier,
                                         name)
     
     @ut.do_recursively_in_class
@@ -761,6 +773,8 @@ class EcotoxChemicalAPI(ChemicalAPI):
                  namespace=&#39;https://cfpub.epa.gov/ecotox/&#39;, 
                  endpoint = None, 
                  dataobject = None, 
+                 mappings = None,
+                 base_identifier = None,
                  name = &#39;ECOTOX Chemical API&#39;):
         &#34;&#34;&#34;
         Class for accessing chemical data in Ecotox. 
@@ -773,7 +787,7 @@ class EcotoxChemicalAPI(ChemicalAPI):
         
         dataobject : tera.DataObject
         &#34;&#34;&#34;
-        super(EcotoxChemicalAPI, self).__init__(namespace, endpoint, dataobject, name)
+        super(EcotoxChemicalAPI, self).__init__(namespace, endpoint, dataobject, mappings, base_identifier, name)
         
     @ut.do_recursively_in_class
     def query_chemical_names(self,t: Union[URIRef, str, list, set]):
@@ -805,6 +819,8 @@ class EcotoxTaxonomyAPI(TaxonomyAPI):
                  namespace=&#39;https://cfpub.epa.gov/ecotox/&#39;, 
                  endpoint = None, 
                  dataobject = None, 
+                 mappings = None,
+                 base_identifier = None,
                  name = &#39;ECOTOX Taxonomy API&#39;):
         &#34;&#34;&#34;Class for accessing Ecotox taxonomic data.
         
@@ -816,13 +832,15 @@ class EcotoxTaxonomyAPI(TaxonomyAPI):
         
         dataobject : tera.DataObject
         &#34;&#34;&#34;
-        super(EcotoxTaxonomyAPI, self).__init__(namespace, endpoint, dataobject, name)
+        super(EcotoxTaxonomyAPI, self).__init__(namespace, endpoint, dataobject, mappings, base_identifier, name)
         
 class NCBITaxonomyAPI(TaxonomyAPI):
     def __init__(self, 
                  namespace=&#39;https://www.ncbi.nlm.nih.gov/taxonomy&#39;, 
                  endpoint = None, 
                  dataobject = None, 
+                 mappings = None,
+                 base_identifier = None,
                  name = &#39;NCBI API&#39;):
         &#34;&#34;&#34;Class for accessing NCBI taxonomic data.
         
@@ -841,6 +859,8 @@ class EffectsAPI(API):
                  namespace=&#39;https://cfpub.epa.gov/ecotox/&#39;, 
                  endpoint = None, 
                  dataobject = None, 
+                 mappings = None,
+                 base_identifier = None,
                  name = &#39;ECOTOX Effects API&#39;):
         &#34;&#34;&#34;Class for accessing Ecotox effect data.
         
@@ -852,7 +872,7 @@ class EffectsAPI(API):
         
         dataobject : tera.DataObject
         &#34;&#34;&#34;
-        super(EffectsAPI, self).__init__(namespace, endpoint, dataobject, name)
+        super(EffectsAPI, self).__init__(namespace, endpoint, dataobject, mappings, base_identifier, name)
     
     @ut.do_recursively_in_class
     def get_chemicals_from_species(self,t: Union[URIRef, str, list, set]):
@@ -1012,7 +1032,7 @@ class EffectsAPI(API):
 <dl>
 <dt id="tera.DataAccess.API"><code class="flex name class">
 <span>class <span class="ident">API</span></span>
-<span>(</span><span>namespace=None, endpoint=None, dataobject=None, name='API')</span>
+<span>(</span><span>namespace=None, endpoint=None, dataobject=None, mappings=None, base_identifier=None, name='API')</span>
 </code></dt>
 <dd>
 <section class="desc"><p>API for accessing data sets. </p>
@@ -1024,6 +1044,10 @@ class EffectsAPI(API):
 <dd>SPARQL endpoint URL</dd>
 <dt><strong><code>dataobject</code></strong> :&ensp;<code>tera.DataObject</code>, default <code>None</code></dt>
 <dd>see DataAggregation</dd>
+<dt><strong><code>mappings</code></strong> :&ensp;<code>tera.DataIntegration.Mapping</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>base_identifier</code></strong> :&ensp;<code>str</code></dt>
+<dd>With identifier type to map from in mappings. eg. 'ncbi' -&gt; provide mappings from NCBI to other data sets (eg. NCBIToEOL).</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
@@ -1045,6 +1069,8 @@ class EffectsAPI(API):
                  namespace=None, 
                  endpoint=None, 
                  dataobject=None, 
+                 mappings=None,
+                 base_identifier=None,
                  name=&#39;API&#39;):
         &#34;&#34;&#34;API for accessing data sets. 
         
@@ -1058,7 +1084,12 @@ class EffectsAPI(API):
 
         dataobject : tera.DataObject, default None
             see DataAggregation
+            
+        mappings : tera.DataIntegration.Mapping
         
+        base_identifier : str 
+            With identifier type to map from in mappings. eg. &#39;ncbi&#39; -&gt; provide mappings from NCBI to other data sets (eg. NCBIToEOL).
+            
         Raises
         ------
         AssertionError 
@@ -1094,6 +1125,8 @@ class EffectsAPI(API):
                        &#39;compound&#39;:Namespace(&#39;http://rdf.ncbi.nlm.nih.gov/pubchem/compound/&#39;)}
         
         self.base_query = ut.prefixes(self.initNs)
+        self.mappings = mappings
+        self.base_identifier = base_identifier
             
     def query(self, q, var):
         &#34;&#34;&#34;Pass SPARQL to graph or endpoint.
@@ -1785,7 +1818,7 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
 </dd>
 <dt id="tera.DataAccess.ChemicalAPI"><code class="flex name class">
 <span>class <span class="ident">ChemicalAPI</span></span>
-<span>(</span><span>namespace=None, endpoint=None, dataobject=None, mappings={&#x27;cas&#x27;: &lt;tera.DataIntegration.InchikeyToCas object&gt;, &#x27;cid&#x27;: &lt;tera.DataIntegration.InchikeyToPubChem object&gt;, &#x27;chebi&#x27;: &lt;tera.DataIntegration.InchikeyToChEBI object&gt;, &#x27;chemble&#x27;: &lt;tera.DataIntegration.InchikeyToChEMBL object&gt;, &#x27;mesh&#x27;: &lt;tera.DataIntegration.InchikeyToMeSH object&gt;}, name='Chemical API')</span>
+<span>(</span><span>namespace=None, endpoint=None, dataobject=None, mappings={&#x27;cas&#x27;: &lt;tera.DataIntegration.InchikeyToCas object&gt;, &#x27;cid&#x27;: &lt;tera.DataIntegration.InchikeyToPubChem object&gt;, &#x27;chebi&#x27;: &lt;tera.DataIntegration.InchikeyToChEBI object&gt;, &#x27;chemble&#x27;: &lt;tera.DataIntegration.InchikeyToChEMBL object&gt;, &#x27;mesh&#x27;: &lt;tera.DataIntegration.InchikeyToMeSH object&gt;}, base_identifier='inchikey', name='Chemical API')</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for accessing chemical data. </p>
@@ -1810,6 +1843,7 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
                             &#39;chebi&#39;:di.InchikeyToChEBI(),
                             &#39;chemble&#39;:di.InchikeyToChEMBL(),
                             &#39;mesh&#39;:di.InchikeyToMeSH()},
+                 base_identifier = &#39;inchikey&#39;,
                  name = &#39;Chemical API&#39;):
         &#34;&#34;&#34;
         Base class for accessing chemical data. 
@@ -1823,9 +1857,7 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
             Mappings from base_identifier (eg. ncbi) to other datasets. 
             
         &#34;&#34;&#34;
-        super(ChemicalAPI, self).__init__(namespace, endpoint, dataobject, name)
-        self.mappings = mappings
-        self.base_identifier = &#39;inchikey&#39;
+        super(ChemicalAPI, self).__init__(namespace, endpoint, dataobject, mappings, base_identifier, name)
    
     @ut.do_recursively_in_class
     def get_fingerprint(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39;, strip = False):
@@ -1992,6 +2024,7 @@ def convert_id(self, id_: Union[URIRef, str, list, set],f,t, strip=False):
             
         strip : bool 
             Remove namespace. Should be true if URI is passed.
+            
         
         Returns 
         -------
@@ -2325,6 +2358,7 @@ def simiarity(self, id_: Union[URIRef, str, list, set], ids, f=&#39;inchikey&#39
         
     strip : bool 
         Remove namespace. Should be true if URI is passed.
+        
     
     Returns 
     -------
@@ -2401,7 +2435,7 @@ def which_features(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39
 </dd>
 <dt id="tera.DataAccess.EcotoxChemicalAPI"><code class="flex name class">
 <span>class <span class="ident">EcotoxChemicalAPI</span></span>
-<span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', endpoint=None, dataobject=None, name='ECOTOX Chemical API')</span>
+<span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', endpoint=None, dataobject=None, mappings=None, base_identifier=None, name='ECOTOX Chemical API')</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Class for accessing chemical data in Ecotox. </p>
@@ -2423,6 +2457,8 @@ def which_features(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39
                  namespace=&#39;https://cfpub.epa.gov/ecotox/&#39;, 
                  endpoint = None, 
                  dataobject = None, 
+                 mappings = None,
+                 base_identifier = None,
                  name = &#39;ECOTOX Chemical API&#39;):
         &#34;&#34;&#34;
         Class for accessing chemical data in Ecotox. 
@@ -2435,7 +2471,7 @@ def which_features(self, id_: Union[URIRef, str, list, set], f=&#39;inchikey&#39
         
         dataobject : tera.DataObject
         &#34;&#34;&#34;
-        super(EcotoxChemicalAPI, self).__init__(namespace, endpoint, dataobject, name)
+        super(EcotoxChemicalAPI, self).__init__(namespace, endpoint, dataobject, mappings, base_identifier, name)
         
     @ut.do_recursively_in_class
     def query_chemical_names(self,t: Union[URIRef, str, list, set]):
@@ -2555,7 +2591,7 @@ def query_chemical_names(self,t: Union[URIRef, str, list, set]):
 </dd>
 <dt id="tera.DataAccess.EcotoxTaxonomyAPI"><code class="flex name class">
 <span>class <span class="ident">EcotoxTaxonomyAPI</span></span>
-<span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', endpoint=None, dataobject=None, name='ECOTOX Taxonomy API')</span>
+<span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', endpoint=None, dataobject=None, mappings=None, base_identifier=None, name='ECOTOX Taxonomy API')</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Class for accessing Ecotox taxonomic data.</p>
@@ -2577,6 +2613,8 @@ def query_chemical_names(self,t: Union[URIRef, str, list, set]):
                  namespace=&#39;https://cfpub.epa.gov/ecotox/&#39;, 
                  endpoint = None, 
                  dataobject = None, 
+                 mappings = None,
+                 base_identifier = None,
                  name = &#39;ECOTOX Taxonomy API&#39;):
         &#34;&#34;&#34;Class for accessing Ecotox taxonomic data.
         
@@ -2588,7 +2626,7 @@ def query_chemical_names(self,t: Union[URIRef, str, list, set]):
         
         dataobject : tera.DataObject
         &#34;&#34;&#34;
-        super(EcotoxTaxonomyAPI, self).__init__(namespace, endpoint, dataobject, name)</code></pre>
+        super(EcotoxTaxonomyAPI, self).__init__(namespace, endpoint, dataobject, mappings, base_identifier, name)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -2620,7 +2658,7 @@ def query_chemical_names(self,t: Union[URIRef, str, list, set]):
 </dd>
 <dt id="tera.DataAccess.EffectsAPI"><code class="flex name class">
 <span>class <span class="ident">EffectsAPI</span></span>
-<span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', endpoint=None, dataobject=None, name='ECOTOX Effects API')</span>
+<span>(</span><span>namespace='https://cfpub.epa.gov/ecotox/', endpoint=None, dataobject=None, mappings=None, base_identifier=None, name='ECOTOX Effects API')</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Class for accessing Ecotox effect data.</p>
@@ -2642,6 +2680,8 @@ def query_chemical_names(self,t: Union[URIRef, str, list, set]):
                  namespace=&#39;https://cfpub.epa.gov/ecotox/&#39;, 
                  endpoint = None, 
                  dataobject = None, 
+                 mappings = None,
+                 base_identifier = None,
                  name = &#39;ECOTOX Effects API&#39;):
         &#34;&#34;&#34;Class for accessing Ecotox effect data.
         
@@ -2653,7 +2693,7 @@ def query_chemical_names(self,t: Union[URIRef, str, list, set]):
         
         dataobject : tera.DataObject
         &#34;&#34;&#34;
-        super(EffectsAPI, self).__init__(namespace, endpoint, dataobject, name)
+        super(EffectsAPI, self).__init__(namespace, endpoint, dataobject, mappings, base_identifier, name)
     
     @ut.do_recursively_in_class
     def get_chemicals_from_species(self,t: Union[URIRef, str, list, set]):
@@ -3062,7 +3102,7 @@ def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
 </dd>
 <dt id="tera.DataAccess.NCBITaxonomyAPI"><code class="flex name class">
 <span>class <span class="ident">NCBITaxonomyAPI</span></span>
-<span>(</span><span>namespace='https://www.ncbi.nlm.nih.gov/taxonomy', endpoint=None, dataobject=None, name='NCBI API')</span>
+<span>(</span><span>namespace='https://www.ncbi.nlm.nih.gov/taxonomy', endpoint=None, dataobject=None, mappings=None, base_identifier=None, name='NCBI API')</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Class for accessing NCBI taxonomic data.</p>
@@ -3084,6 +3124,8 @@ def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
                  namespace=&#39;https://www.ncbi.nlm.nih.gov/taxonomy&#39;, 
                  endpoint = None, 
                  dataobject = None, 
+                 mappings = None,
+                 base_identifier = None,
                  name = &#39;NCBI API&#39;):
         &#34;&#34;&#34;Class for accessing NCBI taxonomic data.
         
@@ -3127,7 +3169,7 @@ def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
 </dd>
 <dt id="tera.DataAccess.TaxonomyAPI"><code class="flex name class">
 <span>class <span class="ident">TaxonomyAPI</span></span>
-<span>(</span><span>namespace=None, endpoint=None, dataobject=None, mappings={&lt;tera.DataIntegration.NCBIToEOL object&gt;, &#x27;eol&#x27;}, name='Taxonomy API')</span>
+<span>(</span><span>namespace=None, endpoint=None, dataobject=None, mappings={&#x27;eol&#x27;, &lt;tera.DataIntegration.NCBIToEOL object&gt;}, base_identifier='ncbi', name='Taxonomy API')</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for accessing taxonomic data. </p>
@@ -3148,6 +3190,7 @@ def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
                  endpoint=None,
                  dataobject = None,
                  mappings = {&#39;eol&#39;,di.NCBIToEOL()},
+                 base_identifier = &#39;ncbi&#39;,
                  name = &#39;Taxonomy API&#39;):
         &#34;&#34;&#34;Base class for accessing taxonomic data. 
         
@@ -3160,9 +3203,7 @@ def get_species_from_chemicals(self, t: Union[URIRef, str, list, set]):
             Mappings (tera.Alignment) from base_identifier (eg. ncbi) to other datasets. 
             
         &#34;&#34;&#34;
-        super(TaxonomyAPI, self).__init__(namespace, endpoint, dataobject, name)
-        self.mappings = mappings
-        self.base_identifier = &#39;ncbi&#39;
+        super(TaxonomyAPI, self).__init__(namespace, endpoint, dataobject, mappings, base_identifier, name)
         
     def get_taxa(self):
         &#34;&#34;&#34;Return all taxa in taxonomy.
@@ -3413,7 +3454,7 @@ def get_ssd(self, t: Union[URIRef, str, list, set]):
 </dd>
 <dt id="tera.DataAccess.TraitsAPI"><code class="flex name class">
 <span>class <span class="ident">TraitsAPI</span></span>
-<span>(</span><span>namespace='https://eol.org/schema/terms/', endpoint=None, dataobject=None, mappings={&#x27;eol&#x27;, &lt;tera.DataIntegration.NCBIToEOL object&gt;}, name='EOL API')</span>
+<span>(</span><span>namespace='https://eol.org/schema/terms/', endpoint=None, dataobject=None, mappings={&#x27;eol&#x27;, &lt;tera.DataIntegration.NCBIToEOL object&gt;}, base_identifier='ncbi', name='EOL API')</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Class for accessing EOL traits data.</p>
@@ -3427,6 +3468,8 @@ def get_ssd(self, t: Union[URIRef, str, list, set]):
 <dd>&nbsp;</dd>
 <dt><strong><code>mapping</code></strong> :&ensp;<code>dict</code></dt>
 <dd>&nbsp;</dd>
+<dt><strong><code>base_identifier</code></strong> :&ensp;<code>str</code></dt>
+<dd>&nbsp;</dd>
 </dl></section>
 <details class="source">
 <summary>
@@ -3438,6 +3481,7 @@ def get_ssd(self, t: Union[URIRef, str, list, set]):
                  endpoint = None, 
                  dataobject = None,
                  mappings = {&#39;eol&#39;,di.NCBIToEOL()},
+                 base_identifier = &#39;ncbi&#39;,
                  name = &#39;EOL API&#39;):
         &#34;&#34;&#34;
         Class for accessing EOL traits data.
@@ -3451,11 +3495,14 @@ def get_ssd(self, t: Union[URIRef, str, list, set]):
         dataobject : tera.DataObject
         
         mapping : dict 
+        
+        base_identifier : str 
         &#34;&#34;&#34;
         super(TraitsAPI, self).__init__(namespace, 
                                         endpoint, 
                                         dataobject, 
                                         mappings,
+                                        base_identifier,
                                         name)
     
     @ut.do_recursively_in_class
