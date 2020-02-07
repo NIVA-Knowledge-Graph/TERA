@@ -113,7 +113,7 @@ class DataObject:
 
 class Taxonomy(DataObject):
     def __init__(self, 
-                 namespace = &#39;https://www.ncbi.nlm.nih.gov/taxonomy&#39;,
+                 namespace = &#39;https://www.ncbi.nlm.nih.gov/taxonomy/&#39;,
                  name = &#39;NCBI Taxonomy&#39;,
                  verbose = True, 
                  directory = None):
@@ -139,9 +139,9 @@ class Taxonomy(DataObject):
         self._load_names(directory+&#39;names.dmp&#39;)
 
     def _load_hierarchy(self, path):
-        df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2,4], names=[&#39;child&#39;,&#39;parent&#39;,&#39;rank&#39;,&#39;division&#39;], na_values = nan_values)
+        df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2,4], names=[&#39;child&#39;,&#39;parent&#39;,&#39;rank&#39;,&#39;division&#39;], na_values = nan_values, dtype = str)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
 
         def func(row):
             c,p,r,d = row
@@ -161,9 +161,9 @@ class Taxonomy(DataObject):
         self.apply_func(func, df, [&#39;child&#39;,&#39;parent&#39;,&#39;rank&#39;,&#39;division&#39;])
     
     def _load_names(self, path):
-        df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2,3], names=[&#39;taxon&#39;,&#39;name&#39;,&#39;unique_name&#39;,&#39;name_type&#39;],na_values = nan_values)
+        df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2,3], names=[&#39;taxon&#39;,&#39;name&#39;,&#39;unique_name&#39;,&#39;name_type&#39;],na_values = nan_values,dtype = str)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
 
         def func(row):
             c,n,un,nt = row
@@ -179,9 +179,9 @@ class Taxonomy(DataObject):
         self.apply_func(func, df, [&#39;taxon&#39;,&#39;name&#39;,&#39;unique_name&#39;,&#39;name_type&#39;])
         
     def _load_divisions(self, path):
-        df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2], names=[&#39;division&#39;,&#39;acronym&#39;,&#39;name&#39;], na_values = nan_values)
+        df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2], names=[&#39;division&#39;,&#39;acronym&#39;,&#39;name&#39;], na_values = nan_values, dtype = str)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
 
         def func(row):
             d,a,n = row
@@ -194,7 +194,7 @@ class Taxonomy(DataObject):
     
 class Traits(DataObject):
     def __init__(self, 
-                 namespace = &#39;https://eol.org/schema/terms/&#39;,
+                 namespace = &#39;https://eol.org/pages/&#39;,
                  name = &#39;EOL Traits&#39;,
                  verbose = True,
                  directory = None):
@@ -218,7 +218,9 @@ class Traits(DataObject):
             self._load_eol_subclasses(f)
     
     def _load_traits(self, path):
-        df = pd.read_csv(path, sep=&#39;,&#39;, usecols=[&#39;page_id&#39;,&#39;predicate&#39;,&#39;value_uri&#39;], low_memory=False, chunksize=10**3, na_values = nan_values)
+        df = pd.read_csv(path, sep=&#39;,&#39;, usecols=[&#39;page_id&#39;,&#39;predicate&#39;,&#39;value_uri&#39;], na_values = nan_values, dtype=str)
+        df.dropna(inplace=True)
+        df = df.apply(lambda x: x.str.strip())
 
         def func(row):
             s,p,o = row
@@ -234,25 +236,19 @@ class Traits(DataObject):
             if validators.url(s) and validators.url(p) and val:
                 self.graph.add((URIRef(s),URIRef(p),o))
 
-        pbar = None 
-        if self.verbose: pbar = tqdm(total=sum([1 for l in open(path,&#39;r&#39;)]))
-        for chunk in df:
-            chunk.dropna(inplace=True)
-            chunk.apply(lambda x: x.str.strip())
-            self.apply_func(func, chunk, [&#39;page_id&#39;,&#39;predicate&#39;,&#39;value_uri&#39;], sub_bar = True)
-            pbar.update(len(chunk.index))
+        self.apply_func(func, df, [&#39;page_id&#39;,&#39;predicate&#39;,&#39;value_uri&#39;])            
             
     def _load_eol_subclasses(self, path):
         try: 
             try:
-                df = pd.read_csv(path,sep=&#39;,&#39;,usecols=[&#39;child&#39;,&#39;parent&#39;],low_memory=False,na_values = nan_values)
+                df = pd.read_csv(path,sep=&#39;,&#39;,usecols=[&#39;child&#39;,&#39;parent&#39;],na_values = nan_values, dtype=str)
                 df.dropna(inplace=True)
-                df.apply(lambda x: x.str.strip())
+                df = df.apply(lambda x: x.str.strip())
             except ValueError:
-                df = pd.read_csv(path,sep=&#39;,&#39;,header=None,low_memory=False,na_values = nan_values)
-                df.dropna(inplace=True)
-                df.apply(lambda x: x.str.strip())
+                df = pd.read_csv(path,sep=&#39;,&#39;,header=None,na_values = nan_values, dtype=str)
                 df.columns = [&#39;parent&#39;,&#39;child&#39;]
+                df.dropna(inplace=True)
+                df = df.apply(lambda x: x.str.strip())
             
         except FileNotFoundError as e:
             print(e,path)
@@ -285,16 +281,16 @@ class Effects(DataObject):
         self._load_effect_data(directory + &#39;tests.txt&#39;, directory + &#39;results.txt&#39;)
         
     def _load_effect_data(self, tests_path, results_path):
-        tests = pd.read_csv(tests_path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
+        tests = pd.read_csv(tests_path, sep=&#39;|&#39;, dtype = str, na_values = nan_values)
         tests.dropna(inplace=True, subset=[&#39;test_id&#39;,
                         &#39;test_cas&#39;,
                         &#39;species_number&#39;])
         tests.fillna(inplace=True, value=&#39;missing&#39;)
-        tests.apply(lambda x: x.str.strip())
-        results = pd.read_csv(results_path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
+        tests = tests.apply(lambda x: x.str.strip())
+        results = pd.read_csv(results_path, sep=&#39;|&#39;,  dtype = str, na_values = nan_values)
         results.dropna(inplace=True, subset=[&#39;test_id&#39;,&#39;endpoint&#39;,&#39;conc1_mean&#39;,&#39;conc1_unit&#39;,&#39;effect&#39;])
         results.fillna(inplace=True, value=&#39;missing&#39;)
-        results.apply(lambda x: x.str.strip())
+        results = results.apply(lambda x: x.str.strip())
 
         def test_func(row):
             test_id, cas_number, species_number, stdm, stdu, habitat, lifestage, age, ageunit, weight, weightunit = row
@@ -332,7 +328,7 @@ class Effects(DataObject):
             self.graph.add((r,self.namespace[&#39;effect&#39;],ef))
             b = BNode()
             self.graph.add( (b, RDF.value, Literal(conc)) )
-            if conc1_unit != &#39;missing&#39;:
+            if conc_unit != &#39;missing&#39;:
                 #TODO creating mapping for units not in UNIT.units
                 self.graph.add( (b, UNIT.units, Literal(conc_unit)) )
                 
@@ -376,9 +372,9 @@ class EcotoxTaxonomy(DataObject):
         self._load_hierarchy(directory + &#39;validation/species.txt&#39;)
         
     def _load_species(self, path):
-        df = pd.read_csv(path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
+        df = pd.read_csv(path, sep=&#39;|&#39;,  dtype = str, na_values = nan_values)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
         
         def func(row):
             s, cn, ln, group = row
@@ -403,9 +399,9 @@ class EcotoxTaxonomy(DataObject):
         self.apply_func(func, df, [&#39;species_number&#39;,&#39;common_name&#39;,&#39;latin_name&#39;,&#39;ecotox_group&#39;])
             
     def _load_synonyms(self, path):
-        df = pd.read_csv(path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
+        df = pd.read_csv(path, sep=&#39;|&#39;,  dtype = str, na_values = nan_values)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
         
         def func(row):
             s, ln = row
@@ -416,9 +412,9 @@ class EcotoxTaxonomy(DataObject):
             
     
     def _load_hierarchy(self, path):
-        df = pd.read_csv(path, sep= &#39;|&#39;, low_memory = False, dtype = str)
+        df = pd.read_csv(path, sep= &#39;|&#39;, dtype = str)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
         
         def func(row):
             sn, lineage = row
@@ -465,9 +461,9 @@ class EcotoxChemicals(DataObject):
         self._load_chemicals(directory + &#39;validation/chemicals.txt&#39;)
         
     def _load_chemicals(self, path):
-        df = pd.read_csv(path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
+        df = pd.read_csv(path, sep=&#39;|&#39;,  dtype = str, na_values = nan_values)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
         
         def func(row):
             c, n, group = row
@@ -831,9 +827,9 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
         self._load_chemicals(directory + &#39;validation/chemicals.txt&#39;)
         
     def _load_chemicals(self, path):
-        df = pd.read_csv(path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
+        df = pd.read_csv(path, sep=&#39;|&#39;,  dtype = str, na_values = nan_values)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
         
         def func(row):
             c, n, group = row
@@ -906,9 +902,9 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
         self._load_hierarchy(directory + &#39;validation/species.txt&#39;)
         
     def _load_species(self, path):
-        df = pd.read_csv(path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
+        df = pd.read_csv(path, sep=&#39;|&#39;,  dtype = str, na_values = nan_values)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
         
         def func(row):
             s, cn, ln, group = row
@@ -933,9 +929,9 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
         self.apply_func(func, df, [&#39;species_number&#39;,&#39;common_name&#39;,&#39;latin_name&#39;,&#39;ecotox_group&#39;])
             
     def _load_synonyms(self, path):
-        df = pd.read_csv(path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
+        df = pd.read_csv(path, sep=&#39;|&#39;,  dtype = str, na_values = nan_values)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
         
         def func(row):
             s, ln = row
@@ -946,9 +942,9 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
             
     
     def _load_hierarchy(self, path):
-        df = pd.read_csv(path, sep= &#39;|&#39;, low_memory = False, dtype = str)
+        df = pd.read_csv(path, sep= &#39;|&#39;, dtype = str)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
         
         def func(row):
             sn, lineage = row
@@ -1021,16 +1017,16 @@ Path to data set. Downloaded from <a href="ftp://newftp.epa.gov/ecotox/ecotox_as
         self._load_effect_data(directory + &#39;tests.txt&#39;, directory + &#39;results.txt&#39;)
         
     def _load_effect_data(self, tests_path, results_path):
-        tests = pd.read_csv(tests_path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
+        tests = pd.read_csv(tests_path, sep=&#39;|&#39;, dtype = str, na_values = nan_values)
         tests.dropna(inplace=True, subset=[&#39;test_id&#39;,
                         &#39;test_cas&#39;,
                         &#39;species_number&#39;])
         tests.fillna(inplace=True, value=&#39;missing&#39;)
-        tests.apply(lambda x: x.str.strip())
-        results = pd.read_csv(results_path, sep=&#39;|&#39;, low_memory=False, dtype = str, na_values = nan_values)
+        tests = tests.apply(lambda x: x.str.strip())
+        results = pd.read_csv(results_path, sep=&#39;|&#39;,  dtype = str, na_values = nan_values)
         results.dropna(inplace=True, subset=[&#39;test_id&#39;,&#39;endpoint&#39;,&#39;conc1_mean&#39;,&#39;conc1_unit&#39;,&#39;effect&#39;])
         results.fillna(inplace=True, value=&#39;missing&#39;)
-        results.apply(lambda x: x.str.strip())
+        results = results.apply(lambda x: x.str.strip())
 
         def test_func(row):
             test_id, cas_number, species_number, stdm, stdu, habitat, lifestage, age, ageunit, weight, weightunit = row
@@ -1068,7 +1064,7 @@ Path to data set. Downloaded from <a href="ftp://newftp.epa.gov/ecotox/ecotox_as
             self.graph.add((r,self.namespace[&#39;effect&#39;],ef))
             b = BNode()
             self.graph.add( (b, RDF.value, Literal(conc)) )
-            if conc1_unit != &#39;missing&#39;:
+            if conc_unit != &#39;missing&#39;:
                 #TODO creating mapping for units not in UNIT.units
                 self.graph.add( (b, UNIT.units, Literal(conc_unit)) )
                 
@@ -1206,7 +1202,7 @@ Path to data set. Downloaded from <a href="ftp://newftp.epa.gov/ecotox/ecotox_as
 </dd>
 <dt id="tera.DataAggregation.Taxonomy"><code class="flex name class">
 <span>class <span class="ident">Taxonomy</span></span>
-<span>(</span><span>namespace='https://www.ncbi.nlm.nih.gov/taxonomy', name='NCBI Taxonomy', verbose=True, directory=None)</span>
+<span>(</span><span>namespace='https://www.ncbi.nlm.nih.gov/taxonomy/', name='NCBI Taxonomy', verbose=True, directory=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Aggregation of the NCBI Taxonomy. </p>
@@ -1219,7 +1215,7 @@ Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxono
 </summary>
 <pre><code class="python">class Taxonomy(DataObject):
     def __init__(self, 
-                 namespace = &#39;https://www.ncbi.nlm.nih.gov/taxonomy&#39;,
+                 namespace = &#39;https://www.ncbi.nlm.nih.gov/taxonomy/&#39;,
                  name = &#39;NCBI Taxonomy&#39;,
                  verbose = True, 
                  directory = None):
@@ -1245,9 +1241,9 @@ Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxono
         self._load_names(directory+&#39;names.dmp&#39;)
 
     def _load_hierarchy(self, path):
-        df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2,4], names=[&#39;child&#39;,&#39;parent&#39;,&#39;rank&#39;,&#39;division&#39;], na_values = nan_values)
+        df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2,4], names=[&#39;child&#39;,&#39;parent&#39;,&#39;rank&#39;,&#39;division&#39;], na_values = nan_values, dtype = str)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
 
         def func(row):
             c,p,r,d = row
@@ -1267,9 +1263,9 @@ Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxono
         self.apply_func(func, df, [&#39;child&#39;,&#39;parent&#39;,&#39;rank&#39;,&#39;division&#39;])
     
     def _load_names(self, path):
-        df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2,3], names=[&#39;taxon&#39;,&#39;name&#39;,&#39;unique_name&#39;,&#39;name_type&#39;],na_values = nan_values)
+        df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2,3], names=[&#39;taxon&#39;,&#39;name&#39;,&#39;unique_name&#39;,&#39;name_type&#39;],na_values = nan_values,dtype = str)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
 
         def func(row):
             c,n,un,nt = row
@@ -1285,9 +1281,9 @@ Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxono
         self.apply_func(func, df, [&#39;taxon&#39;,&#39;name&#39;,&#39;unique_name&#39;,&#39;name_type&#39;])
         
     def _load_divisions(self, path):
-        df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2], names=[&#39;division&#39;,&#39;acronym&#39;,&#39;name&#39;], na_values = nan_values)
+        df = pd.read_csv(path, sep=&#39;|&#39;, usecols=[0,1,2], names=[&#39;division&#39;,&#39;acronym&#39;,&#39;name&#39;], na_values = nan_values, dtype = str)
         df.dropna(inplace=True)
-        df.apply(lambda x: x.str.strip())
+        df = df.apply(lambda x: x.str.strip())
 
         def func(row):
             d,a,n = row
@@ -1314,7 +1310,7 @@ Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxono
 </dd>
 <dt id="tera.DataAggregation.Traits"><code class="flex name class">
 <span>class <span class="ident">Traits</span></span>
-<span>(</span><span>namespace='https://eol.org/schema/terms/', name='EOL Traits', verbose=True, directory=None)</span>
+<span>(</span><span>namespace='https://eol.org/pages/', name='EOL Traits', verbose=True, directory=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Encyclopedia of Life Traits. </p>
@@ -1329,7 +1325,7 @@ Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxono
 </summary>
 <pre><code class="python">class Traits(DataObject):
     def __init__(self, 
-                 namespace = &#39;https://eol.org/schema/terms/&#39;,
+                 namespace = &#39;https://eol.org/pages/&#39;,
                  name = &#39;EOL Traits&#39;,
                  verbose = True,
                  directory = None):
@@ -1353,7 +1349,9 @@ Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxono
             self._load_eol_subclasses(f)
     
     def _load_traits(self, path):
-        df = pd.read_csv(path, sep=&#39;,&#39;, usecols=[&#39;page_id&#39;,&#39;predicate&#39;,&#39;value_uri&#39;], low_memory=False, chunksize=10**3, na_values = nan_values)
+        df = pd.read_csv(path, sep=&#39;,&#39;, usecols=[&#39;page_id&#39;,&#39;predicate&#39;,&#39;value_uri&#39;], na_values = nan_values, dtype=str)
+        df.dropna(inplace=True)
+        df = df.apply(lambda x: x.str.strip())
 
         def func(row):
             s,p,o = row
@@ -1369,25 +1367,19 @@ Path to data set. Downloaded from <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxono
             if validators.url(s) and validators.url(p) and val:
                 self.graph.add((URIRef(s),URIRef(p),o))
 
-        pbar = None 
-        if self.verbose: pbar = tqdm(total=sum([1 for l in open(path,&#39;r&#39;)]))
-        for chunk in df:
-            chunk.dropna(inplace=True)
-            chunk.apply(lambda x: x.str.strip())
-            self.apply_func(func, chunk, [&#39;page_id&#39;,&#39;predicate&#39;,&#39;value_uri&#39;], sub_bar = True)
-            pbar.update(len(chunk.index))
+        self.apply_func(func, df, [&#39;page_id&#39;,&#39;predicate&#39;,&#39;value_uri&#39;])            
             
     def _load_eol_subclasses(self, path):
         try: 
             try:
-                df = pd.read_csv(path,sep=&#39;,&#39;,usecols=[&#39;child&#39;,&#39;parent&#39;],low_memory=False,na_values = nan_values)
+                df = pd.read_csv(path,sep=&#39;,&#39;,usecols=[&#39;child&#39;,&#39;parent&#39;],na_values = nan_values, dtype=str)
                 df.dropna(inplace=True)
-                df.apply(lambda x: x.str.strip())
+                df = df.apply(lambda x: x.str.strip())
             except ValueError:
-                df = pd.read_csv(path,sep=&#39;,&#39;,header=None,low_memory=False,na_values = nan_values)
-                df.dropna(inplace=True)
-                df.apply(lambda x: x.str.strip())
+                df = pd.read_csv(path,sep=&#39;,&#39;,header=None,na_values = nan_values, dtype=str)
                 df.columns = [&#39;parent&#39;,&#39;child&#39;]
+                df.dropna(inplace=True)
+                df = df.apply(lambda x: x.str.strip())
             
         except FileNotFoundError as e:
             print(e,path)
