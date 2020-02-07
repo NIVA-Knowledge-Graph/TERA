@@ -170,7 +170,7 @@ def do_recursively_in_class(func):
     """
     @wraps(func)
     def call_recursively(my_class_instance, x, **kwargs):
-        if isinstance(x, (list,set,tuple,iter)):
+        if isinstance(x, (list,set,tuple)):
             return {j: func(my_class_instance, j, **kwargs) for j in x}
         else:
             return func(my_class_instance, x, **kwargs)

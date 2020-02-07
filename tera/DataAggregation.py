@@ -52,18 +52,17 @@ class DataObject:
         """
         self.graph.serialize(path, format=path.split('.').pop(-1))
         
-    def replace(self, f, t):
-        """Replace list f of entities with t. Usefull after converting between datasets.
+    def replace(self, converted):
+        """Replace old entities with new in data object. 
+        Usefull after converting between datasets.
         
         Parameters
         ----------
-        f : list 
-            Old entities to replace.
-        
-        t : list 
-            New entities. 
+        converted : list
+            list of (old, new) tuples. 
+            
         """
-        assert len(f) == len(t)
+        f, t = converted
         
         for old, new in zip(f, t):
             triples = self.graph.triples((old,None,None))
