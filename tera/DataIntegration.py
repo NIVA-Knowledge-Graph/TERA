@@ -60,7 +60,7 @@ class Alignment:
         x = str(x)
         return tmp[x]
         
-    
+    @ut.do_recursively_in_class
     def convert(self, id_, reverse=True, strip = False):
         """
         Convert a set of ids into new identifiers.
@@ -330,8 +330,8 @@ class InchikeyToCas(WikidataMapping):
         query = """
         SELECT ?from ?to WHERE
             { 
-            ?compound wdt:P235 ?to .
-            ?compound wdt:P231 ?from .
+            [] wdt:P235 ?to ;
+               wdt:P231 ?from .
             }
         """
         super(InchikeyToCas, self).__init__(query=query)
@@ -342,8 +342,8 @@ class InchikeyToPubChem(WikidataMapping):
         query = """
         SELECT ?from ?to WHERE
             { 
-            ?compound wdt:P235 ?from .
-            ?compound wdt:P662 ?to .
+            [] wdt:P235 ?from ;
+               wdt:P662 ?to .
             }
         """
         super(InchikeyToPubChem, self).__init__(query=query)
@@ -354,8 +354,8 @@ class InchikeyToChEBI(WikidataMapping):
         query = """
         SELECT ?from ?to WHERE
             { 
-            ?compound wdt:P235 ?from .
-            ?compound wdt:P683 ?to .
+            [] wdt:P235 ?from ;
+               wdt:P683 ?to .
             }
         """
         super(InchikeyToChEBI, self).__init__(query=query)
@@ -366,8 +366,8 @@ class InchikeyToChEMBL(WikidataMapping):
         query = """
         SELECT ?from ?to WHERE
             { 
-            ?compound wdt:P235 ?from .
-            ?compound wdt:P592 ?to .
+            [] wdt:P235 ?from ;
+               wdt:P592 ?to .
             }
         """
         super(InchikeyToChEMBL, self).__init__(query=query)
@@ -378,8 +378,8 @@ class InchikeyToMeSH(WikidataMapping):
         query = """
         SELECT ?from ?to WHERE
             { 
-            ?compound wdt:P235 ?from .
-            ?compound wdt:P486 ?to .
+            [] wdt:P235 ?from ;
+               wdt:P486 ?to .
             }
         """
         super(InchikeyToMeSH, self).__init__(query=query)
@@ -390,8 +390,8 @@ class NCBIToEOL(WikidataMapping):
         query = """
         SELECT ?from ?to WHERE
             { 
-            ?taxon wdt:P685 ?from .
-            ?taxon wdt:P830 ?to .
+            [] wdt:P685 ?from ;
+               wdt:P830 ?to .
             }
         """
         super(NCBIToEOL, self).__init__(query=query)
