@@ -6,6 +6,7 @@ from functools import wraps
 from rdflib import Literal
 from collections import defaultdict
 import warnings
+from tqdm import tqdm
 
 nan_values = ['nan', float('nan'),'--','-X','NA','NC',-1,'','sp.', -1,'sp,','var.','variant','NR']
 
@@ -97,6 +98,7 @@ def query_endpoint(endpoint, q, var = 'p'):
                 out[v] = [None] * len(results['results']['bindings'])
         return set(zip(*[out[k] for k in out]))
     except Exception as e:
+        print(e)
         warnings.warn('Query failed:\n' + q, UserWarning)
         return set()
 
@@ -173,7 +175,7 @@ def do_recursively_in_class(func):
     @wraps(func)
     def call_recursively(my_class_instance, x, **kwargs):
         if isinstance(x, (list,set,tuple)):
-            return {j: func(my_class_instance, j, **kwargs) for j in x}
+            return dict(zip(x,map(lambda x: func(my_class_instance, x, **kwargs), x)))
         else:
             return func(my_class_instance, x, **kwargs)
         

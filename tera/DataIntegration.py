@@ -20,6 +20,12 @@ class Alignment:
         """
         self.name = name
     
+    def load(self):
+        raise NotImplementedError
+    
+    def _to_defaultdict(self):
+        self.mappings = defaultdict('no mapping',self.mappings)
+    
     def _mapping(self, x, reverse = False):
         """
         Maps from one id type to another. 
@@ -37,16 +43,20 @@ class Alignment:
         str 
             If no mapping exists, returns 'no mapping'
         """
+        if not hasattr(self, 'mappings'):
+            self.load()
+            
         tmp = self.mappings
         if reverse:
-            tmp = {tmp[k]:k for k in tmp}
+            tmp = defaultdict('no mapping')
+            for k,i in self.mappings.items():
+                k,i = str(k),str(i)
+                if not i == 'no mapping':
+                    tmp[i] = k
         x = str(x)
-        if x in tmp:
-            return tmp[x]
-        else:
-            return 'no mapping'
+        return tmp[x]
+        
     
-    @ut.do_recursively_in_class
     def convert(self, id_, reverse=True, strip = False):
         """
         Convert a set of ids into new identifiers.
@@ -81,9 +91,9 @@ class EndpointMapping(Alignment):
         endpoint : str 
             SPARQL endpoint URL.
         """
-        self.mappings = self._load_mapping(endpoint)
+        self.endpoint = endpoint
     
-    def _load_mapping(self, endpoint):
+    def load(self):
         """
         Load mappings from endpoint.
         
@@ -102,8 +112,9 @@ class EndpointMapping(Alignment):
             ?s <http://www.w3.org/2002/07/owl#sameAs> ?o .
         } 
         """
-        res = ut.query_endpoint(endpoint, query, var = ['s','o'])
-        return {str(s):str(o) for s,o in res}
+        res = ut.query_endpoint(self.endpoint, query, var = ['s','o'])
+        self.mappings = {str(s):str(o) for s,o in res}
+        self._to_defaultdict()
 
 class WikidataMapping(Alignment):
     def __init__(self, query):
@@ -122,9 +133,9 @@ class WikidataMapping(Alignment):
             ?compound wdt:P231 ?to .} 
         """
         super(WikidataMapping, self).__init__()
-        self.mappings = self._load_mapping(query)
+        self.query = query
         
-    def _load_mapping(self, query):
+    def load(self):
         """
         Load mappings from wikidata.
         
@@ -139,9 +150,10 @@ class WikidataMapping(Alignment):
             On the form {from:to}
         """
         res = ut.query_endpoint('https://query.wikidata.org/sparql', 
-                             query, 
+                             self.query, 
                              var = ['from', 'to'])
-        return {str(f):str(t) for f,t in res}
+        self.mappings = {str(f):str(t) for f,t in res}
+        self._to_defaultdict()
 
 class LogMapMapping(Alignment):
     def __init__(self, filename, threshold=0.95):
@@ -159,9 +171,9 @@ class LogMapMapping(Alignment):
         super(LogMapMapping, self).__init__()
         
         self.threshold = threshold
-        self.mappings = self._load_mapping(filename)
+        self.filename = filename
     
-    def _load_mapping(self, filename):
+    def load(self):
         """
         Load mappings from alignment system.
         
@@ -177,7 +189,7 @@ class LogMapMapping(Alignment):
         """
         out = {}
         g = Graph()
-        g.parse(filename)
+        g.parse(self.filename)
         o = URIRef('http://knowledgeweb.semanticweb.org/heterogeneity/alignmentCell')
         for s in g.subjects(predicate=RDF.type, object = o):
             e1 = list(g.objects(subject=s,predicate=URIRef('http://knowledgeweb.semanticweb.org/heterogeneity/alignmententity1'))).pop(0)
@@ -188,7 +200,8 @@ class LogMapMapping(Alignment):
             if score >= self.threshold:
                 out[str(e1)] = str(e2)
         
-        return out
+        self.mappings = out
+        self._to_defaultdict()
 
         
 class StringMatchingMapping(Alignment):
@@ -210,9 +223,10 @@ class StringMatchingMapping(Alignment):
         super(StringMatchingMapping, self).__init__()
         
         self.threshold = threshold
-        self.mappings = self._load_mapping(dict1,dict2)
+        self.dict1 = dict1
+        self.dict2 = dict2
     
-    def _load_mapping(self, dict1, dict2):
+    def load(self):
         """
         
         Parameters
@@ -232,17 +246,18 @@ class StringMatchingMapping(Alignment):
             On the form {from:to}
         """
         tmp = defaultdict(float)
-        for k1 in dict1:
-            for k2 in dict2:
+        for k1 in self.dict1:
+            for k2 in self.dict2:
                 try:
-                    _, score = process.extractOne(dict1[k1],dict2[k2])
+                    _, score = process.extractOne(self.dict1[k1],self.dict2[k2])
                 except TypeError:
                     score = 0
                     
                 if score >= self.threshold:
                     tmp[k1,k2] = max(tmp[k1,k2],score)
         
-        return {k1:k2 for k1,k2 in tmp}
+        self.mappings = {k1:k2 for k1,k2 in tmp}
+        self._to_defaultdict()
     
 class StringGraphMapping(Alignment):
     def __init__(self, g1, g2, threshold = 0.95):
@@ -266,13 +281,11 @@ class StringGraphMapping(Alignment):
         super(StringGraphMapping, self).__init__()
         
         self.threshold = threshold
-        dict1 = ut.graph_to_dict(g1)
-        dict2 = ut.graph_to_dict(g2)
-        self.mappings = self._load_mapping(dict1, dict2)
+        self.g1 = g1
+        self.g2 = g2
     
-    def _load_mapping(self, dict1, dict2):
+    def load(self):
         """
-        
         Parameters
         ----------
         dict1 : dict 
@@ -289,6 +302,9 @@ class StringGraphMapping(Alignment):
         dict 
             On the form {from:to}
         """
+        dict1 = ut.graph_to_dict(self.g1)
+        dict2 = ut.graph_to_dict(self.g2)
+        
         tmp = defaultdict(float)
         for k1 in dict1:
             for k2 in dict2:
@@ -300,14 +316,15 @@ class StringGraphMapping(Alignment):
                 if score >= self.threshold:
                     tmp[k1,k2] = max(tmp[k1,k2],score)
         
-        return {k1:k2 for k1,k2 in tmp}
+        self.mappings = {k1:k2 for k1,k2 in tmp}
+        self._to_defaultdict()
         
 
 class InchikeyToCas(WikidataMapping):
     def __init__(self):
         """Class which creates inchikey to cas mapping."""
         query = """
-        SELECT ?from ?to
+        SELECT ?from ?to WHERE
             { 
             ?compound wdt:P235 ?to .
             ?compound wdt:P231 ?from .
@@ -319,7 +336,7 @@ class InchikeyToPubChem(WikidataMapping):
     def __init__(self):
         """Class which creates inchikey to pubchem mapping."""
         query = """
-        SELECT ?from ?to
+        SELECT ?from ?to WHERE
             { 
             ?compound wdt:P235 ?from .
             ?compound wdt:P662 ?to .
@@ -331,7 +348,7 @@ class InchikeyToChEBI(WikidataMapping):
     def __init__(self):
         """Class which creates inchikey to chebi mapping."""
         query = """
-        SELECT ?from ?to
+        SELECT ?from ?to WHERE
             { 
             ?compound wdt:P235 ?from .
             ?compound wdt:P683 ?to .
@@ -343,7 +360,7 @@ class InchikeyToChEMBL(WikidataMapping):
     def __init__(self):
         """Class which creates inchikey to chemble mapping."""
         query = """
-        SELECT ?from ?to
+        SELECT ?from ?to WHERE
             { 
             ?compound wdt:P235 ?from .
             ?compound wdt:P592 ?to .
@@ -355,7 +372,7 @@ class InchikeyToMeSH(WikidataMapping):
     def __init__(self):
         """Class which creates inchikey to mesh mapping."""
         query = """
-        SELECT ?from ?to
+        SELECT ?from ?to WHERE
             { 
             ?compound wdt:P235 ?from .
             ?compound wdt:P486 ?to .
@@ -367,7 +384,7 @@ class NCBIToEOL(WikidataMapping):
     def __init__(self):
         """Class which creates ncbi to eol mapping."""
         query = """
-        SELECT ?from ?to
+        SELECT ?from ?to WHERE
             { 
             ?taxon wdt:P685 ?from .
             ?taxon wdt:P830 ?to .
