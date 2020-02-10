@@ -306,6 +306,7 @@ class StringGraphMapping(Alignment):
         dict 
             On the form {from:to}
         """
+        
         dict1 = ut.graph_to_dict(self.g1)
         dict2 = ut.graph_to_dict(self.g2)
         
