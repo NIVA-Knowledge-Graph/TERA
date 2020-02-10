@@ -31,7 +31,7 @@ class Alignment:
         raise NotImplementedError
     
     def _to_defaultdict(self):
-        self.mappings = defaultdict('no mapping',self.mappings)
+        self.mappings = defaultdict(lambda :'no mapping', self.mappings)
     
     def _mapping(self, x, reverse = False):
         """
@@ -55,11 +55,8 @@ class Alignment:
             
         tmp = self.mappings
         if reverse:
-            tmp = defaultdict('no mapping')
-            for k,i in self.mappings.items():
-                k,i = str(k),str(i)
-                if not i == 'no mapping':
-                    tmp[i] = k
+            tmp = defaultdict(lambda :'no mapping', {i:k for k,i in self.mappings.items() if i != 'no mapping'})
+            
         x = str(x)
         return tmp[x]
         
