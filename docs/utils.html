@@ -32,6 +32,8 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 from functools import wraps
 from rdflib import Literal
 from collections import defaultdict
+import warnings
+from tqdm import tqdm
 
 nan_values = [&#39;nan&#39;, float(&#39;nan&#39;),&#39;--&#39;,&#39;-X&#39;,&#39;NA&#39;,&#39;NC&#39;,-1,&#39;&#39;,&#39;sp.&#39;, -1,&#39;sp,&#39;,&#39;var.&#39;,&#39;variant&#39;,&#39;NR&#39;]
 
@@ -123,6 +125,8 @@ def query_endpoint(endpoint, q, var = &#39;p&#39;):
                 out[v] = [None] * len(results[&#39;results&#39;][&#39;bindings&#39;])
         return set(zip(*[out[k] for k in out]))
     except Exception as e:
+        print(e)
+        warnings.warn(&#39;Query failed:\n&#39; + q, UserWarning)
         return set()
 
 
@@ -198,7 +202,7 @@ def do_recursively_in_class(func):
     @wraps(func)
     def call_recursively(my_class_instance, x, **kwargs):
         if isinstance(x, (list,set,tuple)):
-            return {j: func(my_class_instance, j, **kwargs) for j in x}
+            return dict(zip(x,map(lambda x: func(my_class_instance, x, **kwargs), x)))
         else:
             return func(my_class_instance, x, **kwargs)
         
@@ -257,7 +261,7 @@ def graph_to_dict(graph):
     @wraps(func)
     def call_recursively(my_class_instance, x, **kwargs):
         if isinstance(x, (list,set,tuple)):
-            return {j: func(my_class_instance, j, **kwargs) for j in x}
+            return dict(zip(x,map(lambda x: func(my_class_instance, x, **kwargs), x)))
         else:
             return func(my_class_instance, x, **kwargs)
         
@@ -402,6 +406,8 @@ def graph_to_dict(graph):
                 out[v] = [None] * len(results[&#39;results&#39;][&#39;bindings&#39;])
         return set(zip(*[out[k] for k in out]))
     except Exception as e:
+        print(e)
+        warnings.warn(&#39;Query failed:\n&#39; + q, UserWarning)
         return set()</code></pre>
 </details>
 </dd>

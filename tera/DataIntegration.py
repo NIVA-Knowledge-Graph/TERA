@@ -21,6 +21,13 @@ class Alignment:
         self.name = name
     
     def load(self):
+        """Loading mappings. 
+        
+        Raises
+        ------
+        NotImplementedError
+            * If not implemented in sub-class.
+        """
         raise NotImplementedError
     
     def _to_defaultdict(self):

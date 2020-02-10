@@ -62,10 +62,11 @@ class API:
         dataobject : tera.DataObject, default None
             see DataAggregation
             
-        mappings : tera.DataIntegration.Mapping
+        mappings : dict
+            On the form {&#39;id type&#39;: tera.DataIntegration.Alignment}
         
         base_identifier : str 
-            With identifier type to map from in mappings. eg. &#39;ncbi&#39; -&gt; provide mappings from NCBI to other data sets (eg. NCBIToEOL).
+            Which identifier type to map from in mappings. eg. &#39;ncbi&#39; -&gt; provide mappings from NCBI to other data sets (eg. NCBIToEOL).
             
         Raises
         ------
@@ -1044,10 +1045,10 @@ class EffectsAPI(API):
 <dd>SPARQL endpoint URL</dd>
 <dt><strong><code>dataobject</code></strong> :&ensp;<code>tera.DataObject</code>, default <code>None</code></dt>
 <dd>see DataAggregation</dd>
-<dt><strong><code>mappings</code></strong> :&ensp;<code>tera.DataIntegration.Mapping</code></dt>
-<dd>&nbsp;</dd>
+<dt><strong><code>mappings</code></strong> :&ensp;<code>dict</code></dt>
+<dd>On the form {'id type': tera.DataIntegration.Alignment}</dd>
 <dt><strong><code>base_identifier</code></strong> :&ensp;<code>str</code></dt>
-<dd>With identifier type to map from in mappings. eg. 'ncbi' -&gt; provide mappings from NCBI to other data sets (eg. NCBIToEOL).</dd>
+<dd>Which identifier type to map from in mappings. eg. 'ncbi' -&gt; provide mappings from NCBI to other data sets (eg. NCBIToEOL).</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
@@ -1085,10 +1086,11 @@ class EffectsAPI(API):
         dataobject : tera.DataObject, default None
             see DataAggregation
             
-        mappings : tera.DataIntegration.Mapping
+        mappings : dict
+            On the form {&#39;id type&#39;: tera.DataIntegration.Alignment}
         
         base_identifier : str 
-            With identifier type to map from in mappings. eg. &#39;ncbi&#39; -&gt; provide mappings from NCBI to other data sets (eg. NCBIToEOL).
+            Which identifier type to map from in mappings. eg. &#39;ncbi&#39; -&gt; provide mappings from NCBI to other data sets (eg. NCBIToEOL).
             
         Raises
         ------
