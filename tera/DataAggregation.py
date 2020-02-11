@@ -67,9 +67,7 @@ class DataObject:
             warnings.warn('Empty mapping list.')
             return
     
-        f, t = converted
-        
-        for old, new in zip(f, t):
+        for old, new in converted:
             triples = self.graph.triples((old,None,None))
             tmp = set([(new,p,o) for _,p,o in triples])
             triples = self.graph.triples((None, None, old))
