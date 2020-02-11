@@ -175,7 +175,16 @@ def do_recursively_in_class(func):
     @wraps(func)
     def call_recursively(my_class_instance, x, **kwargs):
         if isinstance(x, (list,set,tuple)):
-            return dict(zip(x,map(lambda x: func(my_class_instance, x, **kwargs), x)))
+            f = lambda x: func(my_class_instance, x, **kwargs)
+            out = {}
+            pbar = None
+            if hasattr(my_class_instance, 'verbose'):
+                if my_class_instance.verbose:
+                    pbar = tqdm(total=len(x))
+            for i in x:
+                out[i] = f(i)
+                if pbar: pbar.update(1)
+            return out
         else:
             return func(my_class_instance, x, **kwargs)
         
