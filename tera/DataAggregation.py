@@ -67,13 +67,17 @@ class DataObject:
             warnings.warn('Empty mapping list.')
             return
     
+        tmp = set()
         for old, new in converted:
             triples = self.graph.triples((old,None,None))
-            tmp = set([(new,p,o) for _,p,o in triples])
+            tmp |= set([(new,p,o) for _,p,o in triples])
             triples = self.graph.triples((None, None, old))
             tmp |= set([(s,p,new) for s,p,_ in triples])
             self.graph.remove((old,None,None))
             self.graph.remove((None,None,old))
+            
+        for t in tmp:
+            self.graph.add(t)
             
     def apply_func(self, func, dataframe, cols, sub_bar=False):
         pbar = None
