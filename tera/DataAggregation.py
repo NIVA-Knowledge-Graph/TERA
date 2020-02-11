@@ -10,6 +10,7 @@ import validators
 import glob
 import math
 from tqdm import tqdm
+import warnings
 
 nan_values = ['nan', float('nan'),'--','-X','NA','NC',-1,'','sp.', -1,'sp,','var.','variant','NR']
 
@@ -62,6 +63,10 @@ class DataObject:
             list of (old, new) tuples. 
             
         """
+        if len(converted) < 1:
+            warnings.warn('Empty mapping list.')
+            return
+    
         f, t = converted
         
         for old, new in zip(f, t):
