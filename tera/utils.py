@@ -177,14 +177,11 @@ def do_recursively_in_class(func):
         if isinstance(x, (list,set,tuple)):
             f = lambda x: func(my_class_instance, x, **kwargs)
             out = {}
-            pbar = None
+            pbar = lambda x: x
             if hasattr(my_class_instance, 'verbose'):
                 if my_class_instance.verbose:
-                    pbar = tqdm(total=len(x))
-            for i in x:
-                out[i] = f(i)
-                if pbar: pbar.update(1)
-            return out
+                    pbar = lambda x: tqdm(x)
+            return dict(zip(x,map(f,pbar(x))))
         else:
             return func(my_class_instance, x, **kwargs)
         
