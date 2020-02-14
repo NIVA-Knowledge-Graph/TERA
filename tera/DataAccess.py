@@ -10,6 +10,7 @@ from collections import defaultdict
 
 from itertools import product
 import pubchempy
+from tqdm import tqdm
 
 import tera.DataIntegration as di
 import tera.DataAggregation as da
