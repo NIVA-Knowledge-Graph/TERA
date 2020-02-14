@@ -9,6 +9,7 @@ from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 from collections import defaultdict
 import tera.utils as ut
+import copy
 
 class Alignment:
     def __init__(self, verbose = False, name = 'Alignment'):
@@ -20,6 +21,14 @@ class Alignment:
         """
         self.name = name
         self.verbose = verbose
+    
+    def __add__(self, other):
+        c = copy.deepcopy(self)
+        if hasattr(c, 'mappings'):
+            c.mappings.update(other.mappings)
+        if hasattr(c, 'reverse_mappings'):
+            c.reverse_mappings.update(other.reverse_mappings)
+        return c
     
     def load(self):
         """Loading mappings. 

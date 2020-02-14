@@ -11,6 +11,7 @@ import glob
 import math
 from tqdm import tqdm
 import warnings
+import copy
 
 nan_values = ['nan', float('nan'),'--','-X','NA','NC',-1,'','sp.', -1,'sp,','var.','variant','NR']
 
@@ -31,6 +32,11 @@ class DataObject:
         self.name = name 
         self.verbose = verbose
         
+    def __add__(self, other):
+        c = copy.deepcopy(self)
+        c.graph += other.graph
+        return c
+    
     def __str__(self):
         return self.name 
         
