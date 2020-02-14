@@ -8,6 +8,7 @@ UNIT = Namespace('http://qudt.org/vocab/unit#')
 from typing import Union
 from collections import defaultdict
 
+from itertools import product
 import pubchempy
 
 import tera.DataIntegration as di
@@ -21,6 +22,7 @@ class API:
                  dataobject=None, 
                  mappings=None,
                  base_identifier=None,
+                 verbose=False,
                  name='API'):
         """API for accessing data sets. 
         
@@ -78,6 +80,7 @@ class API:
         self.base_query = ut.prefixes(self.initNs)
         self.mappings = mappings
         self.base_identifier = base_identifier
+        self.verbose = verbose
             
     def query(self, q, var):
         """Pass SPARQL to graph or endpoint.
@@ -314,12 +317,9 @@ class API:
     
 class TaxonomyAPI(API):
     def __init__(self, 
-                 namespace=None, 
-                 endpoint=None,
-                 dataobject = None,
                  mappings = {'eol',di.NCBIToEOL()},
                  base_identifier = 'ncbi',
-                 name = 'Taxonomy API'):
+                 **kwargs):
         """Base class for accessing taxonomic data. 
         
         Parameters
@@ -331,7 +331,8 @@ class TaxonomyAPI(API):
             Mappings (tera.Alignment) from base_identifier (eg. ncbi) to other datasets. 
             
         """
-        super(TaxonomyAPI, self).__init__(namespace, endpoint, dataobject, mappings, base_identifier, name)
+        super(TaxonomyAPI, self).__init__(mappings=mappings,
+                                          base_identifier=base_identifier, **kwargs)
         
     def get_taxa(self):
         """Return all taxa in taxonomy.
@@ -398,16 +399,13 @@ class TaxonomyAPI(API):
 
 class ChemicalAPI(API):
     def __init__(self, 
-                 namespace=None, 
-                 endpoint = None, 
-                 dataobject = None, 
                  mappings = {'cas':di.InchikeyToCas(),
                             'cid':di.InchikeyToPubChem(),
                             'chebi':di.InchikeyToChEBI(),
                             'chemble':di.InchikeyToChEMBL(),
                             'mesh':di.InchikeyToMeSH()},
                  base_identifier = 'inchikey',
-                 name = 'Chemical API'):
+                 **kwargs):
         """
         Base class for accessing chemical data. 
         
@@ -420,7 +418,9 @@ class ChemicalAPI(API):
             Mappings from base_identifier (eg. ncbi) to other datasets. 
             
         """
-        super(ChemicalAPI, self).__init__(namespace, endpoint, dataobject, mappings, base_identifier, name)
+        super(ChemicalAPI, self).__init__(mappings=mappings,
+                                          base_identifier=base_identifier,
+                                          **kwargs)
    
     @ut.do_recursively_in_class
     def get_fingerprint(self, id_: Union[URIRef, str, list, set], f='inchikey', strip = False):
@@ -613,13 +613,10 @@ class ChemicalAPI(API):
         return self.query(q, var = 's')
     
 class TraitsAPI(TaxonomyAPI):
-    def __init__(self, 
-                 namespace='https://eol.org/schema/terms/', 
-                 endpoint = None, 
-                 dataobject = None,
+    def __init__(self,
                  mappings = {'eol',di.NCBIToEOL()},
                  base_identifier = 'ncbi',
-                 name = 'EOL API'):
+                 **kwargs):
         """
         Class for accessing EOL traits data.
         
@@ -635,12 +632,9 @@ class TraitsAPI(TaxonomyAPI):
         
         base_identifier : str 
         """
-        super(TraitsAPI, self).__init__(namespace, 
-                                        endpoint, 
-                                        dataobject, 
-                                        mappings,
-                                        base_identifier,
-                                        name)
+        super(TraitsAPI, self).__init__(mappings=mappings,
+                                        base_identifier=base_identifier,
+                                        **kwargs)
     
     @ut.do_recursively_in_class
     def get_concervation_status(self,t: Union[URIRef, str, list, set]):
@@ -743,13 +737,10 @@ class TraitsAPI(TaxonomyAPI):
         return self.query(q,'h')
     
 class EcotoxChemicalAPI(ChemicalAPI):
-    def __init__(self, 
-                 namespace='https://cfpub.epa.gov/ecotox/', 
-                 endpoint = None, 
-                 dataobject = None, 
+    def __init__(self,
                  mappings = None,
-                 base_identifier = None,
-                 name = 'ECOTOX Chemical API'):
+                 base_identifier = 'cas',
+                 **kwargs):
         """
         Class for accessing chemical data in Ecotox. 
         
@@ -761,7 +752,9 @@ class EcotoxChemicalAPI(ChemicalAPI):
         
         dataobject : tera.DataObject
         """
-        super(EcotoxChemicalAPI, self).__init__(namespace, endpoint, dataobject, mappings, base_identifier, name)
+        super(EcotoxChemicalAPI, self).__init__(mappings=mappings,
+                                                base_identifier=base_identifier,
+                                                **kwargs)
         
     @ut.do_recursively_in_class
     def query_chemical_names(self,t: Union[URIRef, str, list, set]):
@@ -789,13 +782,10 @@ class EcotoxChemicalAPI(ChemicalAPI):
         return self.query_type(self.namespace['Chemical'])
     
 class EcotoxTaxonomyAPI(TaxonomyAPI):
-    def __init__(self, 
-                 namespace='https://cfpub.epa.gov/ecotox/', 
-                 endpoint = None, 
-                 dataobject = None, 
+    def __init__(self,
                  mappings = None,
                  base_identifier = None,
-                 name = 'ECOTOX Taxonomy API'):
+                 **kwargs):
         """Class for accessing Ecotox taxonomic data.
         
         Parameters
@@ -806,16 +796,14 @@ class EcotoxTaxonomyAPI(TaxonomyAPI):
         
         dataobject : tera.DataObject
         """
-        super(EcotoxTaxonomyAPI, self).__init__(namespace, endpoint, dataobject, mappings, base_identifier, name)
+        super(EcotoxTaxonomyAPI, self).__init__(mappings=mappings,
+                                                base_identifier=base_identifier, **kwargs)
         
 class NCBITaxonomyAPI(TaxonomyAPI):
     def __init__(self, 
-                 namespace='https://www.ncbi.nlm.nih.gov/taxonomy', 
-                 endpoint = None, 
-                 dataobject = None, 
                  mappings = None,
                  base_identifier = None,
-                 name = 'NCBI API'):
+                 **kwargs):
         """Class for accessing NCBI taxonomic data.
         
         Parameters
@@ -826,16 +814,15 @@ class NCBITaxonomyAPI(TaxonomyAPI):
         
         dataobject : tera.DataObject
         """
-        super(TaxonomyAPI, self).__init__(namespace, endpoint, dataobject, name)
+        super(TaxonomyAPI, self).__init__(mappings=mappings,
+                                          base_identifier=base_identifier,
+                                          **kwargs)
     
 class EffectsAPI(API):
-    def __init__(self, 
-                 namespace='https://cfpub.epa.gov/ecotox/', 
-                 endpoint = None, 
-                 dataobject = None, 
+    def __init__(self,
                  mappings = None,
                  base_identifier = None,
-                 name = 'ECOTOX Effects API'):
+                 **kwargs):
         """Class for accessing Ecotox effect data.
         
         Parameters
@@ -846,7 +833,9 @@ class EffectsAPI(API):
         
         dataobject : tera.DataObject
         """
-        super(EffectsAPI, self).__init__(namespace, endpoint, dataobject, mappings, base_identifier, name)
+        super(EffectsAPI, self).__init__(mappings=mappings, 
+                                         base_identifier=base_identifier, 
+                                         **kwargs)
     
     @ut.do_recursively_in_class
     def get_chemicals_from_species(self,t: Union[URIRef, str, list, set]):
@@ -938,13 +927,9 @@ class EffectsAPI(API):
 
         Returns 
         -------
-        dict 
-            On the form {chemical:{species:endpoint values}}
+        set 
+            Tuples on the form (chemical, species, *values).
         """
-        if not c:
-            c = self.get_chemicals()
-        if not s:
-            s = self.get_species()
         
         if not c and not s:
             q = """
@@ -964,32 +949,33 @@ class EffectsAPI(API):
                 }
             }"""
                 
-            res = self.query(q, ['c','s','cc','cu','ep','ef','sd','sdu'])
-            out = defaultdict(defaultdict(tuple))
-            for c,s,*v in res:
-                out[c][s] = v
-            return out
+            out = self.query(q, ['c','s','cc','cu','ep','ef','sd','sdu'])
+        else:
+            out = set()
+            if not isinstance(c,(list,set,tuple)): c = [c]
+            if not isinstance(s,(list,set,tuple)): s = [s]
+            pbar = None
+            if self.verbose: pbar = tqdm(total=len(c)*len(s))
+            for a,b in product(c,s):
+                if pbar: pbar.update(1)
+                q = """
+                    SELECT ?cc ?cu ?ep ?ef ?sd ?sdu WHERE {
+                        ?test rdf:type ns:Test ;
+                        ns:chemical <%s> ;
+                        ns:species <%s> ;
+                        ns:hasResult [ 
+                        ns:endpoint ?ep ;
+                        ns:effect ?ef ;
+                        ns:concentration [rdf:value ?cc ; 
+                                                unit:units ?cu] ] .
+                    
+                        OPTIONAL {
+                            ?test ns:studyDuration [rdf:value ?sd ;
+                                                    unit:units ?sdu] .
+                        }
+                    }""" % (str(a), str(b))
             
-        if isinstance(c,(list,set)):
-            return {a:self.get_endpoint(a,s) for a in c}
-        if isinstance(s,(list,set)):
-            return {a:self.get_endpoint(c,a) for a in s}
+                for res in self.query(q, ['cc','cu','ep','ef','sd','sdu']):
+                    out.add((a,b,*res))
         
-        q = """
-            SELECT ?cc ?cu ?ep ?ef ?sd ?sdu WHERE {
-                ?test rdf:type ns:Test ;
-                  ns:chemical <%s> ;
-                   ns:species <%s> ;
-                   ns:hasResult [ 
-                   ns:endpoint ?ep ;
-                   ns:effect ?ef ;
-                   ns:concentration [rdf:value ?cc ; 
-                                        unit:units ?cu] ] .
-               
-                OPTIONAL {
-                    ?test ns:studyDuration [rdf:value ?sd ;
-                                            unit:units ?sdu] .
-                }
-            }""" % (str(c), str(s))
-        
-        return self.query(q, ['cc','cu','ep','ef','sd','sdu'])
+        return out

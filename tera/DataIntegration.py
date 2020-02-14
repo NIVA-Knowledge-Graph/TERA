@@ -53,16 +53,23 @@ class Alignment:
         """
         if not hasattr(self, 'mappings'):
             self.load()
+        if not hasattr(self, 'reverse_mappings'):
+            self.reverse_mappings = {i:k for k,i in self.mappings.items()}
             
-        tmp = self.mappings
         if reverse:
-            tmp = defaultdict(lambda :'no mapping', {i:k for k,i in self.mappings.items() if i != 'no mapping'})
-            
+            tmp = self.reverse_mappings
+        else:
+            tmp = self.mappings
+        
         x = str(x)
-        return tmp[x]
+        if x in tmp:
+            return tmp[x]
+        
+        return 'no mapping'
+        
         
     @ut.do_recursively_in_class
-    def convert(self, id_, reverse=True, strip = False):
+    def convert(self, id_, reverse=False, strip=False):
         """
         Convert a set of ids into new identifiers.
         
@@ -106,7 +113,6 @@ class EndpointMapping(Alignment):
         """
         res = ut.query_endpoint(self.endpoint, query, var = ['s','o'])
         self.mappings = {str(s):str(o) for s,o in res}
-        self._to_defaultdict()
 
 class WikidataMapping(Alignment):
     def __init__(self, query, verbose=False):
@@ -132,10 +138,9 @@ class WikidataMapping(Alignment):
                              self.query, 
                              var = ['from', 'to'])
         self.mappings = {str(f):str(t) for f,t in res}
-        self._to_defaultdict()
 
 class LogMapMapping(Alignment):
-    def __init__(self, filename, threshold=0.95, verbose=False):
+    def __init__(self, filename, threshold=0.95, verbose=False, strip=True):
         """
         Class for using LogMap (or other system) alignments. 
         
@@ -151,6 +156,7 @@ class LogMapMapping(Alignment):
         
         self.threshold = threshold
         self.filename = filename
+        self.strip = strip
     
     def load(self):
         out = {}
@@ -164,10 +170,14 @@ class LogMapMapping(Alignment):
             
             score = float(score)
             if score >= self.threshold:
-                out[str(e1)] = str(e2)
+                e1 = str(e1)
+                e2 = str(e2)
+                if self.strip:
+                    e1 = ut.strip_namespace(e1,['/','#','CID'])
+                    e2 = ut.strip_namespace(e2,['/','#','CID'])
+                out[e1] = e2
         
         self.mappings = out
-        self._to_defaultdict()
 
         
 class StringMatchingMapping(Alignment):
@@ -205,7 +215,6 @@ class StringMatchingMapping(Alignment):
                     tmp[k1,k2] = max(tmp[k1,k2],score)
         
         self.mappings = {k1:k2 for k1,k2 in tmp}
-        self._to_defaultdict()
     
 class DownloadedWikidata(Alignment):
     def __init__(self, filename, verbose = False):
@@ -224,7 +233,6 @@ class DownloadedWikidata(Alignment):
     def load(self):
         df = pd.read_csv(self.filename,dtype=str)
         self.mappings = dict(zip(df['from'],df['to']))
-        self._to_defaultdict()
     
 class StringGraphMapping(Alignment):
     def __init__(self, g1, g2, threshold = 0.95, verbose=False):
@@ -263,8 +271,6 @@ class StringGraphMapping(Alignment):
                     tmp[k1,k2] = max(tmp[k1,k2],score)
         
         self.mappings = {k1:k2 for k1,k2 in tmp}
-        self._to_defaultdict()
-        
 
 class InchikeyToCas(WikidataMapping):
     def __init__(self, verbose=False):
@@ -273,8 +279,9 @@ class InchikeyToCas(WikidataMapping):
         SELECT ?from ?to WHERE
             { 
             [] wdt:P31 wd:Q11173 ;
-               wdt:P235 ?to ;
-               wdt:P231 ?from .
+               wdt:P235 ?from ;
+               wdt:P231 ?tmp .
+              BIND(REPLACE(?tmp, "-", "", "i") AS ?to)
             }
         """
         super(InchikeyToCas, self).__init__(query=query, verbose=verbose)
