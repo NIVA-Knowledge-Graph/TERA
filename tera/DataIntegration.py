@@ -10,6 +10,7 @@ from fuzzywuzzy import process
 from collections import defaultdict
 import tera.utils as ut
 import copy
+from tqdm import tqdm
 
 class Alignment:
     def __init__(self, verbose = False, name = 'Alignment'):
