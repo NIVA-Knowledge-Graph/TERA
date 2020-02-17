@@ -37,6 +37,18 @@ unit_lookup.update({'mg':'Milligram',
                     }
                    )
 
+prefix_table = {'kilo':1000,
+                'hekto':100,
+                'deka':10,
+                'desi':0.1,
+                'centi':0.01,
+                'milli':10e-3,
+                'micro':10e-6,
+                'nano':10e-9,
+                'percent':0.01}
+
+base_units = ['gram','mol','litre','metre']
+
 def unit_parser(string):
     """
     Takes a unit string and converts to UNIT namespace string. 
@@ -51,20 +63,26 @@ def unit_parser(string):
     Returns
     -------
     str 
+    
+    Raises
+    ------
     """
     if len(string) < 2 and string not in unit_lookup:
         return ''
     
-    if '/' in string:
-        a,b = string.split('/', 1)
-        return unit_parser(a) + 'Per' + unit_parser(b)
+    if 'dm^3' in string:
+        string.replace('dm^3','L')
+    if 'dm3' in string:
+        string.replace('dm3','L')
+    
+    for elem,name in zip(['/','^2','^3',' '],['Per','Squared','Cubed','-']):
+        if elem in string:
+            a,b = string.split(elem, 1)
+            return unit_parser(a) + name + unit_parser(b)
+    
     if '-1' in string:
         return unit_parser(string.replace('-1','/'))
     
-    if ' ' in string:
-        a,b = string.split(' ', 1)
-        return unit_parser(a) + '-' + unit_parser(b)
-        
     if string in unit_lookup:
         return unit_lookup[string]
     
@@ -79,6 +97,89 @@ def unit_parser(string):
             return u
     
     return ''
+
+def _units_of_same_type(unit1, unit2):
+    unit1 = unit1.lower()
+    unit2 = unit2.lower()
+    
+    for prefix in ['milli','nano','micro','kilo','centi']:
+        unit1 = unit1.replace(prefix,'')
+        unit2 = unit2.replace(prefix,'')
+    
+    unit1 = unit1.replace('mol','gram')
+    unit2 = unit2.replace('mol','gram')
+    
+    if 'per' in unit1 and 'per' in unit2:
+        a1,b1 = unit1.split('per',1)
+        a2,b2 = unit2.split('per',1)
+        return _units_of_same_type(a1,a2) and _units_of_same_type(b1,b2)
+    
+    if unit1 == unit2:
+        return True
+    
+    return False
+
+def _to_base_unit(unit):
+    
+    print(unit)
+    
+    unit = unit.lower()
+    if unit in base_units:
+        return 1
+    
+    if 'per' in unit:
+        a,b = unit.split('per',1)
+        return _to_base_unit(a) / _to_base_unit(b)
+    
+    if 'squared' in unit:
+        a,b = unit.split('squared',1)
+        return _to_base_unit(a)**2 * _to_base_unit(b)
+    
+    if 'cubed' in unit:
+        a,b = unit.split('cubed',1)
+        return _to_base_unit(a)**3 * _to_base_unit(b)
+    
+    if unit in prefix_table:
+        return prefix_table[unit]
+    
+    for bu in base_units:
+        return _to_base_unit(unit.replace(bu,''))
+    
+    return 0
+
+def unit_conversion(from_unit, to_unit):
+    """
+    Calculates the conversion factor from one unit to another.
+    
+    Parameters
+    ----------
+    from_unit : URIRef 
+    
+    to_unit : URIRef
+    
+    Returns
+    -------
+    float
+        The conversion ratio between from_unit and to_unit.
+        new_scalar = old_scalar*factor
+    
+    Raises
+    ------
+    AssertionError:
+        * If from_unit and to_unit is not on the same form. eg. MillimolPerLitre and MillimetrePerLiter raises error, while MillimolPerLitre and MilligramPerLiter does not.
+    
+    KeyError:
+        * If conversion is not in prefix table.
+    """
+    if from_unit == to_unit:
+        return 1
+    
+    from_unit = strip_namespace(from_unit,['/','#'])
+    to_unit = strip_namespace(to_unit,['/','#'])
+    
+    assert _units_of_same_type(from_unit, to_unit)
+    
+    return _to_base_unit(from_unit) / _to_base_unit(to_unit)
         
 
 def tanimoto(fp1, fp2):
