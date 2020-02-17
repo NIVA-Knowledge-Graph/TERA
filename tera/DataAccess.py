@@ -6,7 +6,7 @@ from rdflib import Graph, Namespace, URIRef
 from rdflib.namespace import RDF, RDFS, OWL
 UNIT = Namespace('http://qudt.org/vocab/unit#')
 from typing import Union
-from collections.abc import defaultdict
+from collections import defaultdict
 
 from itertools import product
 import pubchempy

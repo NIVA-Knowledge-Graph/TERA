@@ -4,7 +4,7 @@ Utilities used by other modules.
 from SPARQLWrapper import SPARQLWrapper, JSON
 from functools import wraps
 from rdflib import Literal
-from collections.abc import defaultdict
+from collections import defaultdict
 import warnings
 from tqdm import tqdm
 from quantulum3 import parser 
@@ -74,8 +74,9 @@ def unit_parser(string):
         res2 = map(unit_parser, res1)
         res = zip(res2,res1)
         res = [(a,b) for a,b in res if len(a) > 1]
-        u,_ = sorted(res, key=lambda x:len(x[1]),reverse=True).pop(0)
-        return u
+        if res:
+            u,_ = sorted(res, key=lambda x:len(x[1]),reverse=True).pop(0)
+            return u
     
     return ''
         
