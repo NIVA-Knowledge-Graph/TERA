@@ -7,8 +7,78 @@ from rdflib import Literal
 from collections import defaultdict
 import warnings
 from tqdm import tqdm
+from quantulum3 import parser 
+from itertools import combinations
 
 nan_values = ['nan', float('nan'),'--','-X','NA','NC',-1,'','sp.', -1,'sp,','var.','variant','NR']
+
+unit_lookup = defaultdict(lambda: '')
+
+unit_lookup.update({'mg':'Milligram',
+                    'ug': 'Microgram',
+                    'kg':'Kilogram',
+                    'mM':'Millimol',
+                    'ng':'Nanogram',
+                    'g':'Gram',
+                    'µg':'Microgram',
+                    'L':'Litre',
+                    '%':'Percent',
+                    'cm':'Centimetre',
+                    'mm':'Millimetre',
+                    'nm':'Nanometre',
+                    'deg':'Degree',
+                    'C':'Celcius',
+                    'K':'Kelvin',
+                    'l':'Litre',
+                    'psu':'PracticalSalinityUnit',
+                    'h':'Hour',
+                    'd':'Day',
+                    'w':'Week'
+                    }
+                   )
+
+def unit_parser(string):
+    """
+    Takes a unit string and converts to UNIT namespace string. 
+    eg. mg/L -> MilligramPerLitre
+    Filters out assumed missprints, eg. mg%/L -> MilligramPerLitre.
+    
+    Parameters
+    ----------
+    string : str
+        Unit string.
+    
+    Returns
+    -------
+    str 
+    """
+    if len(string) < 2 and string not in unit_lookup:
+        return ''
+    
+    if '/' in string:
+        a,b = string.split('/', 1)
+        return unit_parser(a) + 'Per' + unit_parser(b)
+    if '-1' in string:
+        return unit_parser(string.replace('-1','/'))
+    
+    if ' ' in string:
+        a,b = string.split(' ', 1)
+        return unit_parser(a) + '-' + unit_parser(b)
+        
+    if string in unit_lookup:
+        return unit_lookup[string]
+    
+    else:
+        res1 = [string[x:y] for x, y in combinations(range(len(string) + 1), r = 2)]
+        res1.remove(string)
+        res2 = map(unit_parser, res1)
+        res = zip(res2,res1)
+        res = [(a,b) for a,b in res if len(a) > 1]
+        u,_ = sorted(res, key=lambda x:len(x[1]),reverse=True).pop(0)
+        return u
+    
+    return ''
+        
 
 def tanimoto(fp1, fp2):
     """

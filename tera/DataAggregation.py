@@ -13,6 +13,8 @@ from tqdm import tqdm
 import warnings
 import copy
 
+import tera.utils as ut
+
 nan_values = ['nan', float('nan'),'--','-X','NA','NC',-1,'','sp.', -1,'sp,','var.','variant','NR']
 
 class DataObject:
@@ -292,7 +294,9 @@ class Effects(DataObject):
                     b = BNode()
                     self.graph.add( (b, RDF.value, Literal(v)) )
                     if u != 'missing':
-                        self.graph.add( (b, UNIT.units, Literal(u)) )
+                        u = ut.unit_parser(u)
+                        if u:
+                            self.graph.add( (b, UNIT.units, Literal(u)) )
                     self.graph.add( (t, self.namespace[p], b) )
             
             if habitat != 'missing':
@@ -313,8 +317,9 @@ class Effects(DataObject):
             b = BNode()
             self.graph.add( (b, RDF.value, Literal(conc)) )
             if conc_unit != 'missing':
-                #TODO creating mapping for units not in UNIT.units
-                self.graph.add( (b, UNIT.units, Literal(conc_unit)) )
+                u = ut.unit_parser(conc_unit)
+                if u:
+                    self.graph.add( (b, UNIT.units, UNIT[u]) )
                 
             self.graph.add( (r, self.namespace['concentration'], b) )
             
