@@ -4,7 +4,7 @@ Utilities used by other modules.
 from SPARQLWrapper import SPARQLWrapper, JSON
 from functools import wraps
 from rdflib import Literal
-from collections import defaultdict
+from collections.abc import defaultdict
 import warnings
 from tqdm import tqdm
 from quantulum3 import parser 

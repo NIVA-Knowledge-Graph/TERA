@@ -7,7 +7,7 @@ import pandas as pd
 import validators
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
-from collections import defaultdict
+from collections.abc import defaultdict
 import tera.utils as ut
 import copy
 from tqdm import tqdm
