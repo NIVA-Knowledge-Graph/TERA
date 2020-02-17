@@ -121,8 +121,6 @@ def _units_of_same_type(unit1, unit2):
 
 def _to_base_unit(unit):
     
-    print(unit)
-    
     unit = unit.lower()
     if unit in base_units:
         return 1
