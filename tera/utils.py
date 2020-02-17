@@ -75,7 +75,7 @@ def unit_parser(string):
     if 'dm3' in string:
         string.replace('dm3','L')
     
-    for elem,name in zip(['/','^2','^3',' '],['Per','Squared','Cubed','-']):
+    for elem,name in zip(['/','^2','^3',' '],['Per','Squared','Cubed','']):
         if elem in string:
             a,b = string.split(elem, 1)
             return unit_parser(a) + name + unit_parser(b)
@@ -157,9 +157,10 @@ def unit_conversion(from_unit, to_unit):
     
     Returns
     -------
-    float
+    factor : float
         The conversion ratio between from_unit and to_unit.
-        new_scalar = old_scalar*factor
+        new_scalar = old_scalar*factor . 
+        Returns 0 if no conversion is found.
     
     Raises
     ------

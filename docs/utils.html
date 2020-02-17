@@ -64,6 +64,18 @@ unit_lookup.update({&#39;mg&#39;:&#39;Milligram&#39;,
                     }
                    )
 
+prefix_table = {&#39;kilo&#39;:1000,
+                &#39;hekto&#39;:100,
+                &#39;deka&#39;:10,
+                &#39;desi&#39;:0.1,
+                &#39;centi&#39;:0.01,
+                &#39;milli&#39;:10e-3,
+                &#39;micro&#39;:10e-6,
+                &#39;nano&#39;:10e-9,
+                &#39;percent&#39;:0.01}
+
+base_units = [&#39;gram&#39;,&#39;mol&#39;,&#39;litre&#39;,&#39;metre&#39;]
+
 def unit_parser(string):
     &#34;&#34;&#34;
     Takes a unit string and converts to UNIT namespace string. 
@@ -78,20 +90,26 @@ def unit_parser(string):
     Returns
     -------
     str 
+    
+    Raises
+    ------
     &#34;&#34;&#34;
     if len(string) &lt; 2 and string not in unit_lookup:
         return &#39;&#39;
     
-    if &#39;/&#39; in string:
-        a,b = string.split(&#39;/&#39;, 1)
-        return unit_parser(a) + &#39;Per&#39; + unit_parser(b)
+    if &#39;dm^3&#39; in string:
+        string.replace(&#39;dm^3&#39;,&#39;L&#39;)
+    if &#39;dm3&#39; in string:
+        string.replace(&#39;dm3&#39;,&#39;L&#39;)
+    
+    for elem,name in zip([&#39;/&#39;,&#39;^2&#39;,&#39;^3&#39;,&#39; &#39;],[&#39;Per&#39;,&#39;Squared&#39;,&#39;Cubed&#39;,&#39;&#39;]):
+        if elem in string:
+            a,b = string.split(elem, 1)
+            return unit_parser(a) + name + unit_parser(b)
+    
     if &#39;-1&#39; in string:
         return unit_parser(string.replace(&#39;-1&#39;,&#39;/&#39;))
     
-    if &#39; &#39; in string:
-        a,b = string.split(&#39; &#39;, 1)
-        return unit_parser(a) + &#39;-&#39; + unit_parser(b)
-        
     if string in unit_lookup:
         return unit_lookup[string]
     
@@ -101,10 +119,93 @@ def unit_parser(string):
         res2 = map(unit_parser, res1)
         res = zip(res2,res1)
         res = [(a,b) for a,b in res if len(a) &gt; 1]
-        u,_ = sorted(res, key=lambda x:len(x[1]),reverse=True).pop(0)
-        return u
+        if res:
+            u,_ = sorted(res, key=lambda x:len(x[1]),reverse=True).pop(0)
+            return u
     
     return &#39;&#39;
+
+def _units_of_same_type(unit1, unit2):
+    unit1 = unit1.lower()
+    unit2 = unit2.lower()
+    
+    for prefix in [&#39;milli&#39;,&#39;nano&#39;,&#39;micro&#39;,&#39;kilo&#39;,&#39;centi&#39;]:
+        unit1 = unit1.replace(prefix,&#39;&#39;)
+        unit2 = unit2.replace(prefix,&#39;&#39;)
+    
+    unit1 = unit1.replace(&#39;mol&#39;,&#39;gram&#39;)
+    unit2 = unit2.replace(&#39;mol&#39;,&#39;gram&#39;)
+    
+    if &#39;per&#39; in unit1 and &#39;per&#39; in unit2:
+        a1,b1 = unit1.split(&#39;per&#39;,1)
+        a2,b2 = unit2.split(&#39;per&#39;,1)
+        return _units_of_same_type(a1,a2) and _units_of_same_type(b1,b2)
+    
+    if unit1 == unit2:
+        return True
+    
+    return False
+
+def _to_base_unit(unit):
+    
+    unit = unit.lower()
+    if unit in base_units:
+        return 1
+    
+    if &#39;per&#39; in unit:
+        a,b = unit.split(&#39;per&#39;,1)
+        return _to_base_unit(a) / _to_base_unit(b)
+    
+    if &#39;squared&#39; in unit:
+        a,b = unit.split(&#39;squared&#39;,1)
+        return _to_base_unit(a)**2 * _to_base_unit(b)
+    
+    if &#39;cubed&#39; in unit:
+        a,b = unit.split(&#39;cubed&#39;,1)
+        return _to_base_unit(a)**3 * _to_base_unit(b)
+    
+    if unit in prefix_table:
+        return prefix_table[unit]
+    
+    for bu in base_units:
+        return _to_base_unit(unit.replace(bu,&#39;&#39;))
+    
+    return 0
+
+def unit_conversion(from_unit, to_unit):
+    &#34;&#34;&#34;
+    Calculates the conversion factor from one unit to another.
+    
+    Parameters
+    ----------
+    from_unit : URIRef 
+    
+    to_unit : URIRef
+    
+    Returns
+    -------
+    factor : float
+        The conversion ratio between from_unit and to_unit.
+        new_scalar = old_scalar*factor . 
+        Returns 0 if no conversion is found.
+    
+    Raises
+    ------
+    AssertionError:
+        * If from_unit and to_unit is not on the same form. eg. MillimolPerLitre and MillimetrePerLiter raises error, while MillimolPerLitre and MilligramPerLiter does not.
+    
+    KeyError:
+        * If conversion is not in prefix table.
+    &#34;&#34;&#34;
+    if from_unit == to_unit:
+        return 1
+    
+    from_unit = strip_namespace(from_unit,[&#39;/&#39;,&#39;#&#39;])
+    to_unit = strip_namespace(to_unit,[&#39;/&#39;,&#39;#&#39;])
+    
+    assert _units_of_same_type(from_unit, to_unit)
+    
+    return _to_base_unit(from_unit) / _to_base_unit(to_unit)
         
 
 def tanimoto(fp1, fp2):
@@ -672,6 +773,74 @@ def graph_to_dict(graph):
         return False</code></pre>
 </details>
 </dd>
+<dt id="tera.utils.unit_conversion"><code class="name flex">
+<span>def <span class="ident">unit_conversion</span></span>(<span>from_unit, to_unit)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Calculates the conversion factor from one unit to another.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>from_unit</code></strong> :&ensp;<code>URIRef</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>to_unit</code></strong> :&ensp;<code>URIRef</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>factor</code></strong> :&ensp;<code>float</code></dt>
+<dd>The conversion ratio between from_unit and to_unit.
+new_scalar = old_scalar*factor .
+Returns 0 if no conversion is found.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<h2 id="assertionerror">AssertionError</h2>
+<ul>
+<li>If from_unit and to_unit is not on the same form. eg. MillimolPerLitre and MillimetrePerLiter raises error, while MillimolPerLitre and MilligramPerLiter does not.</li>
+</ul>
+<h2 id="keyerror">KeyError</h2>
+<ul>
+<li>If conversion is not in prefix table.</li>
+</ul></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unit_conversion(from_unit, to_unit):
+    &#34;&#34;&#34;
+    Calculates the conversion factor from one unit to another.
+    
+    Parameters
+    ----------
+    from_unit : URIRef 
+    
+    to_unit : URIRef
+    
+    Returns
+    -------
+    factor : float
+        The conversion ratio between from_unit and to_unit.
+        new_scalar = old_scalar*factor . 
+        Returns 0 if no conversion is found.
+    
+    Raises
+    ------
+    AssertionError:
+        * If from_unit and to_unit is not on the same form. eg. MillimolPerLitre and MillimetrePerLiter raises error, while MillimolPerLitre and MilligramPerLiter does not.
+    
+    KeyError:
+        * If conversion is not in prefix table.
+    &#34;&#34;&#34;
+    if from_unit == to_unit:
+        return 1
+    
+    from_unit = strip_namespace(from_unit,[&#39;/&#39;,&#39;#&#39;])
+    to_unit = strip_namespace(to_unit,[&#39;/&#39;,&#39;#&#39;])
+    
+    assert _units_of_same_type(from_unit, to_unit)
+    
+    return _to_base_unit(from_unit) / _to_base_unit(to_unit)</code></pre>
+</details>
+</dd>
 <dt id="tera.utils.unit_parser"><code class="name flex">
 <span>def <span class="ident">unit_parser</span></span>(<span>string)</span>
 </code></dt>
@@ -688,7 +857,8 @@ Filters out assumed missprints, eg. mg%/L -&gt; MilligramPerLitre.</p>
 <dl>
 <dt><code>str</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl>
+<h2 id="raises">Raises</h2></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -707,20 +877,26 @@ Filters out assumed missprints, eg. mg%/L -&gt; MilligramPerLitre.</p>
     Returns
     -------
     str 
+    
+    Raises
+    ------
     &#34;&#34;&#34;
     if len(string) &lt; 2 and string not in unit_lookup:
         return &#39;&#39;
     
-    if &#39;/&#39; in string:
-        a,b = string.split(&#39;/&#39;, 1)
-        return unit_parser(a) + &#39;Per&#39; + unit_parser(b)
+    if &#39;dm^3&#39; in string:
+        string.replace(&#39;dm^3&#39;,&#39;L&#39;)
+    if &#39;dm3&#39; in string:
+        string.replace(&#39;dm3&#39;,&#39;L&#39;)
+    
+    for elem,name in zip([&#39;/&#39;,&#39;^2&#39;,&#39;^3&#39;,&#39; &#39;],[&#39;Per&#39;,&#39;Squared&#39;,&#39;Cubed&#39;,&#39;&#39;]):
+        if elem in string:
+            a,b = string.split(elem, 1)
+            return unit_parser(a) + name + unit_parser(b)
+    
     if &#39;-1&#39; in string:
         return unit_parser(string.replace(&#39;-1&#39;,&#39;/&#39;))
     
-    if &#39; &#39; in string:
-        a,b = string.split(&#39; &#39;, 1)
-        return unit_parser(a) + &#39;-&#39; + unit_parser(b)
-        
     if string in unit_lookup:
         return unit_lookup[string]
     
@@ -730,8 +906,9 @@ Filters out assumed missprints, eg. mg%/L -&gt; MilligramPerLitre.</p>
         res2 = map(unit_parser, res1)
         res = zip(res2,res1)
         res = [(a,b) for a,b in res if len(a) &gt; 1]
-        u,_ = sorted(res, key=lambda x:len(x[1]),reverse=True).pop(0)
-        return u
+        if res:
+            u,_ = sorted(res, key=lambda x:len(x[1]),reverse=True).pop(0)
+            return u
     
     return &#39;&#39;</code></pre>
 </details>
@@ -762,6 +939,7 @@ Filters out assumed missprints, eg. mg%/L -&gt; MilligramPerLitre.</p>
 <li><code><a title="tera.utils.strip_namespace" href="#tera.utils.strip_namespace">strip_namespace</a></code></li>
 <li><code><a title="tera.utils.tanimoto" href="#tera.utils.tanimoto">tanimoto</a></code></li>
 <li><code><a title="tera.utils.test_endpoint" href="#tera.utils.test_endpoint">test_endpoint</a></code></li>
+<li><code><a title="tera.utils.unit_conversion" href="#tera.utils.unit_conversion">unit_conversion</a></code></li>
 <li><code><a title="tera.utils.unit_parser" href="#tera.utils.unit_parser">unit_parser</a></code></li>
 </ul>
 </li>
