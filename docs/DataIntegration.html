@@ -36,6 +36,8 @@ from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 from collections import defaultdict
 import tera.utils as ut
+import copy
+from tqdm import tqdm
 
 class Alignment:
     def __init__(self, verbose = False, name = &#39;Alignment&#39;):
@@ -47,6 +49,14 @@ class Alignment:
         &#34;&#34;&#34;
         self.name = name
         self.verbose = verbose
+    
+    def __add__(self, other):
+        c = copy.deepcopy(self)
+        if hasattr(c, &#39;mappings&#39;):
+            c.mappings.update(other.mappings)
+        if hasattr(c, &#39;reverse_mappings&#39;):
+            c.reverse_mappings.update(other.reverse_mappings)
+        return c
     
     def load(self):
         &#34;&#34;&#34;Loading mappings. 
@@ -80,16 +90,23 @@ class Alignment:
         &#34;&#34;&#34;
         if not hasattr(self, &#39;mappings&#39;):
             self.load()
+        if not hasattr(self, &#39;reverse_mappings&#39;):
+            self.reverse_mappings = {i:k for k,i in self.mappings.items()}
             
-        tmp = self.mappings
         if reverse:
-            tmp = defaultdict(lambda :&#39;no mapping&#39;, {i:k for k,i in self.mappings.items() if i != &#39;no mapping&#39;})
-            
+            tmp = self.reverse_mappings
+        else:
+            tmp = self.mappings
+        
         x = str(x)
-        return tmp[x]
+        if x in tmp:
+            return tmp[x]
+        
+        return &#39;no mapping&#39;
+        
         
     @ut.do_recursively_in_class
-    def convert(self, id_, reverse=True, strip = False):
+    def convert(self, id_, reverse=False, strip=False):
         &#34;&#34;&#34;
         Convert a set of ids into new identifiers.
         
@@ -133,7 +150,6 @@ class EndpointMapping(Alignment):
         &#34;&#34;&#34;
         res = ut.query_endpoint(self.endpoint, query, var = [&#39;s&#39;,&#39;o&#39;])
         self.mappings = {str(s):str(o) for s,o in res}
-        self._to_defaultdict()
 
 class WikidataMapping(Alignment):
     def __init__(self, query, verbose=False):
@@ -159,10 +175,9 @@ class WikidataMapping(Alignment):
                              self.query, 
                              var = [&#39;from&#39;, &#39;to&#39;])
         self.mappings = {str(f):str(t) for f,t in res}
-        self._to_defaultdict()
 
 class LogMapMapping(Alignment):
-    def __init__(self, filename, threshold=0.95, verbose=False):
+    def __init__(self, filename, threshold=0.95, verbose=False, strip=True):
         &#34;&#34;&#34;
         Class for using LogMap (or other system) alignments. 
         
@@ -178,6 +193,7 @@ class LogMapMapping(Alignment):
         
         self.threshold = threshold
         self.filename = filename
+        self.strip = strip
     
     def load(self):
         out = {}
@@ -191,10 +207,14 @@ class LogMapMapping(Alignment):
             
             score = float(score)
             if score &gt;= self.threshold:
-                out[str(e1)] = str(e2)
+                e1 = str(e1)
+                e2 = str(e2)
+                if self.strip:
+                    e1 = ut.strip_namespace(e1,[&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
+                    e2 = ut.strip_namespace(e2,[&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
+                out[e1] = e2
         
         self.mappings = out
-        self._to_defaultdict()
 
         
 class StringMatchingMapping(Alignment):
@@ -232,7 +252,6 @@ class StringMatchingMapping(Alignment):
                     tmp[k1,k2] = max(tmp[k1,k2],score)
         
         self.mappings = {k1:k2 for k1,k2 in tmp}
-        self._to_defaultdict()
     
 class DownloadedWikidata(Alignment):
     def __init__(self, filename, verbose = False):
@@ -251,7 +270,6 @@ class DownloadedWikidata(Alignment):
     def load(self):
         df = pd.read_csv(self.filename,dtype=str)
         self.mappings = dict(zip(df[&#39;from&#39;],df[&#39;to&#39;]))
-        self._to_defaultdict()
     
 class StringGraphMapping(Alignment):
     def __init__(self, g1, g2, threshold = 0.95, verbose=False):
@@ -290,8 +308,6 @@ class StringGraphMapping(Alignment):
                     tmp[k1,k2] = max(tmp[k1,k2],score)
         
         self.mappings = {k1:k2 for k1,k2 in tmp}
-        self._to_defaultdict()
-        
 
 class InchikeyToCas(WikidataMapping):
     def __init__(self, verbose=False):
@@ -300,8 +316,9 @@ class InchikeyToCas(WikidataMapping):
         SELECT ?from ?to WHERE
             { 
             [] wdt:P31 wd:Q11173 ;
-               wdt:P235 ?to ;
-               wdt:P231 ?from .
+               wdt:P235 ?from ;
+               wdt:P231 ?tmp .
+              BIND(REPLACE(?tmp, &#34;-&#34;, &#34;&#34;, &#34;i&#34;) AS ?to)
             }
         &#34;&#34;&#34;
         super(InchikeyToCas, self).__init__(query=query, verbose=verbose)
@@ -417,6 +434,14 @@ class NCBIToEcotox(StringGraphMapping):
         self.name = name
         self.verbose = verbose
     
+    def __add__(self, other):
+        c = copy.deepcopy(self)
+        if hasattr(c, &#39;mappings&#39;):
+            c.mappings.update(other.mappings)
+        if hasattr(c, &#39;reverse_mappings&#39;):
+            c.reverse_mappings.update(other.reverse_mappings)
+        return c
+    
     def load(self):
         &#34;&#34;&#34;Loading mappings. 
         
@@ -449,16 +474,23 @@ class NCBIToEcotox(StringGraphMapping):
         &#34;&#34;&#34;
         if not hasattr(self, &#39;mappings&#39;):
             self.load()
+        if not hasattr(self, &#39;reverse_mappings&#39;):
+            self.reverse_mappings = {i:k for k,i in self.mappings.items()}
             
-        tmp = self.mappings
         if reverse:
-            tmp = defaultdict(lambda :&#39;no mapping&#39;, {i:k for k,i in self.mappings.items() if i != &#39;no mapping&#39;})
-            
+            tmp = self.reverse_mappings
+        else:
+            tmp = self.mappings
+        
         x = str(x)
-        return tmp[x]
+        if x in tmp:
+            return tmp[x]
+        
+        return &#39;no mapping&#39;
+        
         
     @ut.do_recursively_in_class
-    def convert(self, id_, reverse=True, strip = False):
+    def convert(self, id_, reverse=False, strip=False):
         &#34;&#34;&#34;
         Convert a set of ids into new identifiers.
         
@@ -494,7 +526,7 @@ class NCBIToEcotox(StringGraphMapping):
 <h3>Methods</h3>
 <dl>
 <dt id="tera.DataIntegration.Alignment.convert"><code class="name flex">
-<span>def <span class="ident">convert</span></span>(<span>self, id_, reverse=True, strip=False)</span>
+<span>def <span class="ident">convert</span></span>(<span>self, id_, reverse=False, strip=False)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Convert a set of ids into new identifiers.</p>
@@ -517,7 +549,7 @@ class NCBIToEcotox(StringGraphMapping):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@ut.do_recursively_in_class
-def convert(self, id_, reverse=True, strip = False):
+def convert(self, id_, reverse=False, strip=False):
     &#34;&#34;&#34;
     Convert a set of ids into new identifiers.
     
@@ -604,8 +636,7 @@ def convert(self, id_, reverse=True, strip = False):
     
     def load(self):
         df = pd.read_csv(self.filename,dtype=str)
-        self.mappings = dict(zip(df[&#39;from&#39;],df[&#39;to&#39;]))
-        self._to_defaultdict()</code></pre>
+        self.mappings = dict(zip(df[&#39;from&#39;],df[&#39;to&#39;]))</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -655,8 +686,7 @@ def convert(self, id_, reverse=True, strip = False):
         } 
         &#34;&#34;&#34;
         res = ut.query_endpoint(self.endpoint, query, var = [&#39;s&#39;,&#39;o&#39;])
-        self.mappings = {str(s):str(o) for s,o in res}
-        self._to_defaultdict()</code></pre>
+        self.mappings = {str(s):str(o) for s,o in res}</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -689,8 +719,9 @@ def convert(self, id_, reverse=True, strip = False):
         SELECT ?from ?to WHERE
             { 
             [] wdt:P31 wd:Q11173 ;
-               wdt:P235 ?to ;
-               wdt:P231 ?from .
+               wdt:P235 ?from ;
+               wdt:P231 ?tmp .
+              BIND(REPLACE(?tmp, &#34;-&#34;, &#34;&#34;, &#34;i&#34;) AS ?to)
             }
         &#34;&#34;&#34;
         super(InchikeyToCas, self).__init__(query=query, verbose=verbose)</code></pre>
@@ -864,7 +895,7 @@ def convert(self, id_, reverse=True, strip = False):
 </dd>
 <dt id="tera.DataIntegration.LogMapMapping"><code class="flex name class">
 <span>class <span class="ident">LogMapMapping</span></span>
-<span>(</span><span>filename, threshold=0.95, verbose=False)</span>
+<span>(</span><span>filename, threshold=0.95, verbose=False, strip=True)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Class for using LogMap (or other system) alignments. </p>
@@ -880,7 +911,7 @@ def convert(self, id_, reverse=True, strip = False):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class LogMapMapping(Alignment):
-    def __init__(self, filename, threshold=0.95, verbose=False):
+    def __init__(self, filename, threshold=0.95, verbose=False, strip=True):
         &#34;&#34;&#34;
         Class for using LogMap (or other system) alignments. 
         
@@ -896,6 +927,7 @@ def convert(self, id_, reverse=True, strip = False):
         
         self.threshold = threshold
         self.filename = filename
+        self.strip = strip
     
     def load(self):
         out = {}
@@ -909,10 +941,14 @@ def convert(self, id_, reverse=True, strip = False):
             
             score = float(score)
             if score &gt;= self.threshold:
-                out[str(e1)] = str(e2)
+                e1 = str(e1)
+                e2 = str(e2)
+                if self.strip:
+                    e1 = ut.strip_namespace(e1,[&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
+                    e2 = ut.strip_namespace(e2,[&#39;/&#39;,&#39;#&#39;,&#39;CID&#39;])
+                out[e1] = e2
         
-        self.mappings = out
-        self._to_defaultdict()</code></pre>
+        self.mappings = out</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1053,8 +1089,7 @@ def convert(self, id_, reverse=True, strip = False):
                 if score &gt;= self.threshold:
                     tmp[k1,k2] = max(tmp[k1,k2],score)
         
-        self.mappings = {k1:k2 for k1,k2 in tmp}
-        self._to_defaultdict()</code></pre>
+        self.mappings = {k1:k2 for k1,k2 in tmp}</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1127,8 +1162,7 @@ def convert(self, id_, reverse=True, strip = False):
                 if score &gt;= self.threshold:
                     tmp[k1,k2] = max(tmp[k1,k2],score)
         
-        self.mappings = {k1:k2 for k1,k2 in tmp}
-        self._to_defaultdict()</code></pre>
+        self.mappings = {k1:k2 for k1,k2 in tmp}</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1188,8 +1222,7 @@ def convert(self, id_, reverse=True, strip = False):
         res = ut.query_endpoint(&#39;https://query.wikidata.org/sparql&#39;, 
                              self.query, 
                              var = [&#39;from&#39;, &#39;to&#39;])
-        self.mappings = {str(f):str(t) for f,t in res}
-        self._to_defaultdict()</code></pre>
+        self.mappings = {str(f):str(t) for f,t in res}</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">

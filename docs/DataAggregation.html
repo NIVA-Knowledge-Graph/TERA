@@ -38,6 +38,9 @@ import glob
 import math
 from tqdm import tqdm
 import warnings
+import copy
+
+import tera.utils as ut
 
 nan_values = [&#39;nan&#39;, float(&#39;nan&#39;),&#39;--&#39;,&#39;-X&#39;,&#39;NA&#39;,&#39;NC&#39;,-1,&#39;&#39;,&#39;sp.&#39;, -1,&#39;sp,&#39;,&#39;var.&#39;,&#39;variant&#39;,&#39;NR&#39;]
 
@@ -58,6 +61,11 @@ class DataObject:
         self.name = name 
         self.verbose = verbose
         
+    def __add__(self, other):
+        c = copy.deepcopy(self)
+        c.graph += other.graph
+        return c
+    
     def __str__(self):
         return self.name 
         
@@ -94,15 +102,17 @@ class DataObject:
             warnings.warn(&#39;Empty mapping list.&#39;)
             return
     
-        f, t = converted
-        
-        for old, new in zip(f, t):
+        tmp = set()
+        for old, new in converted:
             triples = self.graph.triples((old,None,None))
-            tmp = set([(new,p,o) for _,p,o in triples])
+            tmp |= set([(new,p,o) for _,p,o in triples])
             triples = self.graph.triples((None, None, old))
             tmp |= set([(s,p,new) for s,p,_ in triples])
             self.graph.remove((old,None,None))
             self.graph.remove((None,None,old))
+            
+        for t in tmp:
+            self.graph.add(t)
             
     def apply_func(self, func, dataframe, cols, sub_bar=False):
         pbar = None
@@ -311,7 +321,9 @@ class Effects(DataObject):
                     b = BNode()
                     self.graph.add( (b, RDF.value, Literal(v)) )
                     if u != &#39;missing&#39;:
-                        self.graph.add( (b, UNIT.units, Literal(u)) )
+                        u = ut.unit_parser(u)
+                        if u:
+                            self.graph.add( (b, UNIT.units, Literal(u)) )
                     self.graph.add( (t, self.namespace[p], b) )
             
             if habitat != &#39;missing&#39;:
@@ -332,8 +344,9 @@ class Effects(DataObject):
             b = BNode()
             self.graph.add( (b, RDF.value, Literal(conc)) )
             if conc_unit != &#39;missing&#39;:
-                #TODO creating mapping for units not in UNIT.units
-                self.graph.add( (b, UNIT.units, Literal(conc_unit)) )
+                u = ut.unit_parser(conc_unit)
+                if u:
+                    self.graph.add( (b, UNIT.units, UNIT[u]) )
                 
             self.graph.add( (r, self.namespace[&#39;concentration&#39;], b) )
             
@@ -645,6 +658,11 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
         self.name = name 
         self.verbose = verbose
         
+    def __add__(self, other):
+        c = copy.deepcopy(self)
+        c.graph += other.graph
+        return c
+    
     def __str__(self):
         return self.name 
         
@@ -681,15 +699,17 @@ Path to turtle RDF files. See <a href="https://www.ebi.ac.uk/rdf/datasets/">http
             warnings.warn(&#39;Empty mapping list.&#39;)
             return
     
-        f, t = converted
-        
-        for old, new in zip(f, t):
+        tmp = set()
+        for old, new in converted:
             triples = self.graph.triples((old,None,None))
-            tmp = set([(new,p,o) for _,p,o in triples])
+            tmp |= set([(new,p,o) for _,p,o in triples])
             triples = self.graph.triples((None, None, old))
             tmp |= set([(s,p,new) for s,p,_ in triples])
             self.graph.remove((old,None,None))
             self.graph.remove((None,None,old))
+            
+        for t in tmp:
+            self.graph.add(t)
             
     def apply_func(self, func, dataframe, cols, sub_bar=False):
         pbar = None
@@ -761,15 +781,17 @@ Usefull after converting between datasets.</p>
         warnings.warn(&#39;Empty mapping list.&#39;)
         return
 
-    f, t = converted
-    
-    for old, new in zip(f, t):
+    tmp = set()
+    for old, new in converted:
         triples = self.graph.triples((old,None,None))
-        tmp = set([(new,p,o) for _,p,o in triples])
+        tmp |= set([(new,p,o) for _,p,o in triples])
         triples = self.graph.triples((None, None, old))
         tmp |= set([(s,p,new) for s,p,_ in triples])
         self.graph.remove((old,None,None))
-        self.graph.remove((None,None,old))</code></pre>
+        self.graph.remove((None,None,old))
+        
+    for t in tmp:
+        self.graph.add(t)</code></pre>
 </details>
 </dd>
 <dt id="tera.DataAggregation.DataObject.save"><code class="name flex">
@@ -1050,7 +1072,9 @@ Path to data set. Downloaded from <a href="ftp://newftp.epa.gov/ecotox/ecotox_as
                     b = BNode()
                     self.graph.add( (b, RDF.value, Literal(v)) )
                     if u != &#39;missing&#39;:
-                        self.graph.add( (b, UNIT.units, Literal(u)) )
+                        u = ut.unit_parser(u)
+                        if u:
+                            self.graph.add( (b, UNIT.units, Literal(u)) )
                     self.graph.add( (t, self.namespace[p], b) )
             
             if habitat != &#39;missing&#39;:
@@ -1071,8 +1095,9 @@ Path to data set. Downloaded from <a href="ftp://newftp.epa.gov/ecotox/ecotox_as
             b = BNode()
             self.graph.add( (b, RDF.value, Literal(conc)) )
             if conc_unit != &#39;missing&#39;:
-                #TODO creating mapping for units not in UNIT.units
-                self.graph.add( (b, UNIT.units, Literal(conc_unit)) )
+                u = ut.unit_parser(conc_unit)
+                if u:
+                    self.graph.add( (b, UNIT.units, UNIT[u]) )
                 
             self.graph.add( (r, self.namespace[&#39;concentration&#39;], b) )
             
