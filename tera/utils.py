@@ -140,8 +140,11 @@ def _to_base_unit(unit):
     if unit in prefix_table:
         return prefix_table[unit]
     
-    for bu in base_units:
-        return _to_base_unit(unit.replace(bu,''))
+    tmp = unit
+    for bs in base_units:
+        unit = unit.replace(bs,'')
+    if unit != tmp:
+        return _to_base_unit(unit)
     
     return 0
 
