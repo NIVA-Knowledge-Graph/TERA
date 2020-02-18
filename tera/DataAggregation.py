@@ -315,14 +315,15 @@ class Effects(DataObject):
             self.graph.add((r,self.namespace['endpoint'],ep))
             self.graph.add((r,self.namespace['effect'],ef))
             b = BNode()
-            self.graph.add( (b, RDF.value, Literal(conc)) )
-            if conc_unit != 'missing':
-                u = ut.unit_parser(conc_unit)
-                if u:
-                    self.graph.add( (b, UNIT.units, UNIT[u]) )
-                
+            conc = ''.join(filter(str.isdigit, conc))
+            if conc:
+                self.graph.add( (b, RDF.value, Literal(conc)) )
+                if conc_unit != 'missing':
+                    u = ut.unit_parser(conc_unit)
+                    if u:
+                        self.graph.add( (b, UNIT.units, UNIT[u]) )
+                    
             self.graph.add( (r, self.namespace['concentration'], b) )
-            
             self.graph.add((t,self.namespace['hasResult'],r))
             
         self.apply_func(test_func, tests, ['test_id',
