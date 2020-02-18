@@ -324,7 +324,7 @@ class Effects(DataObject):
                         self.graph.add( (b, UNIT.units, UNIT[u]) )
                     
             self.graph.add( (r, self.namespace['concentration'], b) )
-            self.graph.add((t,self.namespace['hasResult'],r))
+            self.graph.add( (t,self.namespace['hasResult'],r) )
             
         self.apply_func(test_func, tests, ['test_id',
                         'test_cas',
@@ -390,7 +390,7 @@ class EcotoxTaxonomy(DataObject):
             
     def _load_synonyms(self, path):
         df = pd.read_csv(path, sep='|',  dtype = str, na_values = nan_values)
-        df.dropna(inplace=True)
+        df.dropna(inplace=True, subset=['species_number','latin_name'])
         df = df.apply(lambda x: x.str.strip())
         
         def func(row):
@@ -403,24 +403,22 @@ class EcotoxTaxonomy(DataObject):
     
     def _load_hierarchy(self, path):
         df = pd.read_csv(path, sep= '|', dtype = str)
-        df.dropna(inplace=True)
-        df = df.apply(lambda x: x.str.strip())
+        df.dropna(inplace=True, subset=['species_number'])
+        df = df.apply(lambda x: x.str.replace('\W',''))
         
         def func(row):
             sn, lineage = row
             curr = sn
-            for l in filter(lambda x: x != '', lineage):
-                curr = self.namespace['taxon/'+str(curr)]
+            lineage = filter(lambda x: not pd.isnull(x), lineage)
+            for l in lineage:
+                curr = self.namespace['taxon/'+str(curr).strip()]
                 self.graph.add((curr, RDFS.subClassOf, self.namespace['taxon/'+str(l)]))
                 curr = l
         
         pbar = None
         if self.verbose: pbar = tqdm(total=len(df.index))
         for row in zip(df['species_number'],
-                        zip(df['variety'],
-                            df['subspecies'],
-                            df['species'],
-                            df['genus'],
+                        zip(df['genus'],
                             df['family'],
                             df['tax_order'],
                             df['class'],
