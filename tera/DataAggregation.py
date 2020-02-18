@@ -409,8 +409,8 @@ class EcotoxTaxonomy(DataObject):
         def func(row):
             sn, lineage = row
             curr = sn
-            lineage = filter(lambda x: not pd.isnull(x), lineage)
             for l in lineage:
+                if pd.isnull(l): continue
                 curr = self.namespace['taxon/'+str(curr).strip()]
                 self.graph.add((curr, RDFS.subClassOf, self.namespace['taxon/'+str(l)]))
                 curr = l
