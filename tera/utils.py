@@ -119,15 +119,11 @@ def _units_of_same_type(unit1, unit2):
     
     return False
 
-def _to_base_unit(unit,mm=None):
+def _to_base_unit(unit):
     
     unit = unit.lower()
     if unit in base_units:
         return 1
-    
-    if unit == 'mol':
-        assert mm
-        return mm * _to_base_unit(unit.replace('mol','gram'))
     
     if 'per' in unit:
         a,b = unit.split('per',1)

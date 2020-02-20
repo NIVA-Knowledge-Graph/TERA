@@ -342,15 +342,16 @@ class Effects(DataObject):
             self.graph.add((r,self.namespace[&#39;endpoint&#39;],ep))
             self.graph.add((r,self.namespace[&#39;effect&#39;],ef))
             b = BNode()
-            self.graph.add( (b, RDF.value, Literal(conc)) )
-            if conc_unit != &#39;missing&#39;:
-                u = ut.unit_parser(conc_unit)
-                if u:
-                    self.graph.add( (b, UNIT.units, UNIT[u]) )
-                
+            conc = &#39;&#39;.join(filter(str.isdigit, conc))
+            if conc:
+                self.graph.add( (b, RDF.value, Literal(conc)) )
+                if conc_unit != &#39;missing&#39;:
+                    u = ut.unit_parser(conc_unit)
+                    if u:
+                        self.graph.add( (b, UNIT.units, UNIT[u]) )
+                    
             self.graph.add( (r, self.namespace[&#39;concentration&#39;], b) )
-            
-            self.graph.add((t,self.namespace[&#39;hasResult&#39;],r))
+            self.graph.add( (t,self.namespace[&#39;hasResult&#39;],r) )
             
         self.apply_func(test_func, tests, [&#39;test_id&#39;,
                         &#39;test_cas&#39;,
@@ -389,34 +390,33 @@ class EcotoxTaxonomy(DataObject):
         
     def _load_species(self, path):
         df = pd.read_csv(path, sep=&#39;|&#39;,  dtype = str, na_values = nan_values)
-        df.dropna(inplace=True)
         df = df.apply(lambda x: x.str.strip())
         
         def func(row):
             s, cn, ln, group = row
             
             s = self.namespace[&#39;taxon/&#39;+s]
+            group = str(group).replace(&#39; &#39;,&#39;&#39;)
             names = group.split(&#39;,&#39;)
-            group = group.replace(&#39;/&#39;,&#39;&#39;)
-            group = group.replace(&#39;.&#39;,&#39;&#39;)
-            group = group.replace(&#39; &#39;,&#39;&#39;)
             tmp = group.split(&#39;,&#39;)
-            group_uri = [self.namespace[&#39;group/&#39;+gr] for gr in tmp]
+            group_uri = [self.namespace[&#39;group/&#39;+gr.replace(&#39;\W&#39;,&#39;&#39;)] for gr in tmp]
             
             for gri,n in zip(group_uri,names):
                 self.graph.add((s, RDFS.subClassOf, gri))
                 self.graph.add((gri, RDFS.label, Literal(n)))
-                self.graph.add((gri, RDF.type, self.onto_namespace[&#39;SpeciesGroup&#39;]))
+                self.graph.add((gri, RDF.type, self.namespace[&#39;SpeciesGroup&#39;]))
                 
             self.graph.add((s, RDF.type, self.namespace[&#39;Taxon&#39;]))
-            self.graph.add((s, self.namespace[&#39;commonName&#39;], Literal(cn)))
-            self.graph.add((s, self.namespace[&#39;latinName&#39;], Literal(ln)))
+            if cn:
+                self.graph.add((s, self.namespace[&#39;commonName&#39;], Literal(cn)))
+            if ln:
+                self.graph.add((s, self.namespace[&#39;latinName&#39;], Literal(ln)))
         
         self.apply_func(func, df, [&#39;species_number&#39;,&#39;common_name&#39;,&#39;latin_name&#39;,&#39;ecotox_group&#39;])
             
     def _load_synonyms(self, path):
         df = pd.read_csv(path, sep=&#39;|&#39;,  dtype = str, na_values = nan_values)
-        df.dropna(inplace=True)
+        df.dropna(inplace=True, subset=[&#39;species_number&#39;,&#39;latin_name&#39;])
         df = df.apply(lambda x: x.str.strip())
         
         def func(row):
@@ -429,24 +429,22 @@ class EcotoxTaxonomy(DataObject):
     
     def _load_hierarchy(self, path):
         df = pd.read_csv(path, sep= &#39;|&#39;, dtype = str)
-        df.dropna(inplace=True)
-        df = df.apply(lambda x: x.str.strip())
+        df.dropna(inplace=True, subset=[&#39;species_number&#39;])
+        df = df.apply(lambda x: x.str.replace(&#39;\W&#39;,&#39;&#39;))
         
         def func(row):
             sn, lineage = row
             curr = sn
-            for l in filter(lambda x: x != &#39;&#39;, lineage):
-                curr = self.namespace[&#39;taxon/&#39;+str(curr)]
+            for l in lineage:
+                if pd.isnull(l): continue
+                curr = self.namespace[&#39;taxon/&#39;+str(curr).strip()]
                 self.graph.add((curr, RDFS.subClassOf, self.namespace[&#39;taxon/&#39;+str(l)]))
                 curr = l
         
         pbar = None
         if self.verbose: pbar = tqdm(total=len(df.index))
         for row in zip(df[&#39;species_number&#39;],
-                        zip(df[&#39;variety&#39;],
-                            df[&#39;subspecies&#39;],
-                            df[&#39;species&#39;],
-                            df[&#39;genus&#39;],
+                        zip(df[&#39;genus&#39;],
                             df[&#39;family&#39;],
                             df[&#39;tax_order&#39;],
                             df[&#39;class&#39;],
@@ -931,34 +929,33 @@ Usefull after converting between datasets.</p>
         
     def _load_species(self, path):
         df = pd.read_csv(path, sep=&#39;|&#39;,  dtype = str, na_values = nan_values)
-        df.dropna(inplace=True)
         df = df.apply(lambda x: x.str.strip())
         
         def func(row):
             s, cn, ln, group = row
             
             s = self.namespace[&#39;taxon/&#39;+s]
+            group = str(group).replace(&#39; &#39;,&#39;&#39;)
             names = group.split(&#39;,&#39;)
-            group = group.replace(&#39;/&#39;,&#39;&#39;)
-            group = group.replace(&#39;.&#39;,&#39;&#39;)
-            group = group.replace(&#39; &#39;,&#39;&#39;)
             tmp = group.split(&#39;,&#39;)
-            group_uri = [self.namespace[&#39;group/&#39;+gr] for gr in tmp]
+            group_uri = [self.namespace[&#39;group/&#39;+gr.replace(&#39;\W&#39;,&#39;&#39;)] for gr in tmp]
             
             for gri,n in zip(group_uri,names):
                 self.graph.add((s, RDFS.subClassOf, gri))
                 self.graph.add((gri, RDFS.label, Literal(n)))
-                self.graph.add((gri, RDF.type, self.onto_namespace[&#39;SpeciesGroup&#39;]))
+                self.graph.add((gri, RDF.type, self.namespace[&#39;SpeciesGroup&#39;]))
                 
             self.graph.add((s, RDF.type, self.namespace[&#39;Taxon&#39;]))
-            self.graph.add((s, self.namespace[&#39;commonName&#39;], Literal(cn)))
-            self.graph.add((s, self.namespace[&#39;latinName&#39;], Literal(ln)))
+            if cn:
+                self.graph.add((s, self.namespace[&#39;commonName&#39;], Literal(cn)))
+            if ln:
+                self.graph.add((s, self.namespace[&#39;latinName&#39;], Literal(ln)))
         
         self.apply_func(func, df, [&#39;species_number&#39;,&#39;common_name&#39;,&#39;latin_name&#39;,&#39;ecotox_group&#39;])
             
     def _load_synonyms(self, path):
         df = pd.read_csv(path, sep=&#39;|&#39;,  dtype = str, na_values = nan_values)
-        df.dropna(inplace=True)
+        df.dropna(inplace=True, subset=[&#39;species_number&#39;,&#39;latin_name&#39;])
         df = df.apply(lambda x: x.str.strip())
         
         def func(row):
@@ -971,24 +968,22 @@ Usefull after converting between datasets.</p>
     
     def _load_hierarchy(self, path):
         df = pd.read_csv(path, sep= &#39;|&#39;, dtype = str)
-        df.dropna(inplace=True)
-        df = df.apply(lambda x: x.str.strip())
+        df.dropna(inplace=True, subset=[&#39;species_number&#39;])
+        df = df.apply(lambda x: x.str.replace(&#39;\W&#39;,&#39;&#39;))
         
         def func(row):
             sn, lineage = row
             curr = sn
-            for l in filter(lambda x: x != &#39;&#39;, lineage):
-                curr = self.namespace[&#39;taxon/&#39;+str(curr)]
+            for l in lineage:
+                if pd.isnull(l): continue
+                curr = self.namespace[&#39;taxon/&#39;+str(curr).strip()]
                 self.graph.add((curr, RDFS.subClassOf, self.namespace[&#39;taxon/&#39;+str(l)]))
                 curr = l
         
         pbar = None
         if self.verbose: pbar = tqdm(total=len(df.index))
         for row in zip(df[&#39;species_number&#39;],
-                        zip(df[&#39;variety&#39;],
-                            df[&#39;subspecies&#39;],
-                            df[&#39;species&#39;],
-                            df[&#39;genus&#39;],
+                        zip(df[&#39;genus&#39;],
                             df[&#39;family&#39;],
                             df[&#39;tax_order&#39;],
                             df[&#39;class&#39;],
@@ -1093,15 +1088,16 @@ Path to data set. Downloaded from <a href="ftp://newftp.epa.gov/ecotox/ecotox_as
             self.graph.add((r,self.namespace[&#39;endpoint&#39;],ep))
             self.graph.add((r,self.namespace[&#39;effect&#39;],ef))
             b = BNode()
-            self.graph.add( (b, RDF.value, Literal(conc)) )
-            if conc_unit != &#39;missing&#39;:
-                u = ut.unit_parser(conc_unit)
-                if u:
-                    self.graph.add( (b, UNIT.units, UNIT[u]) )
-                
+            conc = &#39;&#39;.join(filter(str.isdigit, conc))
+            if conc:
+                self.graph.add( (b, RDF.value, Literal(conc)) )
+                if conc_unit != &#39;missing&#39;:
+                    u = ut.unit_parser(conc_unit)
+                    if u:
+                        self.graph.add( (b, UNIT.units, UNIT[u]) )
+                    
             self.graph.add( (r, self.namespace[&#39;concentration&#39;], b) )
-            
-            self.graph.add((t,self.namespace[&#39;hasResult&#39;],r))
+            self.graph.add( (t,self.namespace[&#39;hasResult&#39;],r) )
             
         self.apply_func(test_func, tests, [&#39;test_id&#39;,
                         &#39;test_cas&#39;,
