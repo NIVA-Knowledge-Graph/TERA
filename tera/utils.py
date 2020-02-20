@@ -119,11 +119,15 @@ def _units_of_same_type(unit1, unit2):
     
     return False
 
-def _to_base_unit(unit):
+def _to_base_unit(unit,mm=None):
     
     unit = unit.lower()
     if unit in base_units:
         return 1
+    
+    if unit == 'mol':
+        assert mm
+        return mm * _to_base_unit(unit.replace('mol','gram'))
     
     if 'per' in unit:
         a,b = unit.split('per',1)
@@ -148,7 +152,7 @@ def _to_base_unit(unit):
     
     return 0
 
-def unit_conversion(from_unit, to_unit):
+def unit_conversion(from_unit, to_unit, molecular_mass=None):
     """
     Calculates the conversion factor from one unit to another.
     
@@ -157,6 +161,9 @@ def unit_conversion(from_unit, to_unit):
     from_unit : URIRef 
     
     to_unit : URIRef
+    
+    molecular_mass : float 
+        If converting to or from MOL this is needed.
     
     Returns
     -------
@@ -169,6 +176,7 @@ def unit_conversion(from_unit, to_unit):
     ------
     AssertionError:
         * If from_unit and to_unit is not on the same form. eg. MillimolPerLitre and MillimetrePerLiter raises error, while MillimolPerLitre and MilligramPerLiter does not.
+        * If either unit contails mol, without input of molecular_mass.
     
     KeyError:
         * If conversion is not in prefix table.
@@ -181,7 +189,22 @@ def unit_conversion(from_unit, to_unit):
     
     assert _units_of_same_type(from_unit, to_unit)
     
-    return _to_base_unit(from_unit) / _to_base_unit(to_unit)
+    from_unit = from_unit.lower()
+    to_unit = to_unit.lower()
+    mm_f = 1
+    mm_t = 1
+    
+    if 'mol' in from_unit:
+        assert molecular_mass
+        mm_f = molecular_mass
+        from_unit = from_unit.replace('mol','gram')
+        
+    if 'mol' in to_unit:
+        assert molecular_mass
+        mm_t = molecular_mass
+        to_unit = to_unit.replace('mol','gram')
+        
+    return (mm_f * _to_base_unit(from_unit)) / (mm_t * _to_base_unit(to_unit))
         
 
 def tanimoto(fp1, fp2):

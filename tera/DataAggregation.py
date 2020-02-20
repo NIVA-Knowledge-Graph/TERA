@@ -363,28 +363,27 @@ class EcotoxTaxonomy(DataObject):
         
     def _load_species(self, path):
         df = pd.read_csv(path, sep='|',  dtype = str, na_values = nan_values)
-        df.dropna(inplace=True)
         df = df.apply(lambda x: x.str.strip())
         
         def func(row):
             s, cn, ln, group = row
             
             s = self.namespace['taxon/'+s]
+            group = str(group).replace(' ','')
             names = group.split(',')
-            group = group.replace('/','')
-            group = group.replace('.','')
-            group = group.replace(' ','')
             tmp = group.split(',')
-            group_uri = [self.namespace['group/'+gr] for gr in tmp]
+            group_uri = [self.namespace['group/'+gr.replace('\W','')] for gr in tmp]
             
             for gri,n in zip(group_uri,names):
                 self.graph.add((s, RDFS.subClassOf, gri))
                 self.graph.add((gri, RDFS.label, Literal(n)))
-                self.graph.add((gri, RDF.type, self.onto_namespace['SpeciesGroup']))
+                self.graph.add((gri, RDF.type, self.namespace['SpeciesGroup']))
                 
             self.graph.add((s, RDF.type, self.namespace['Taxon']))
-            self.graph.add((s, self.namespace['commonName'], Literal(cn)))
-            self.graph.add((s, self.namespace['latinName'], Literal(ln)))
+            if cn:
+                self.graph.add((s, self.namespace['commonName'], Literal(cn)))
+            if ln:
+                self.graph.add((s, self.namespace['latinName'], Literal(ln)))
         
         self.apply_func(func, df, ['species_number','common_name','latin_name','ecotox_group'])
             
