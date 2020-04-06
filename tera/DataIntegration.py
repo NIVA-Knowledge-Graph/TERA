@@ -176,6 +176,7 @@ class LogMapMapping(Alignment):
     
     def load_rdf(self):
         out = {}
+        scores = defaultdict(lambda : 0.0)
         g = Graph()
         g.parse(self.filename)
         o = URIRef('http://knowledgeweb.semanticweb.org/heterogeneity/alignmentCell')
@@ -185,7 +186,8 @@ class LogMapMapping(Alignment):
             score = list(g.objects(subject=s,predicate=URIRef('http://knowledgeweb.semanticweb.org/heterogeneity/alignmentmeasure'))).pop(0)
             
             score = float(score)
-            if score >= self.threshold:
+            if score >= self.threshold and score > scores[(e1,e2)]:
+                scores[(e1,e2)] = score
                 e1 = str(e1)
                 e2 = str(e2)
                 if self.strip:
@@ -194,13 +196,16 @@ class LogMapMapping(Alignment):
                 out[e1] = e2
         
         self.mappings = out
+        self.scores = scores
         
     def load_txt(self):
         out = {}
+        scores = defaultdict(lambda : 0.0)
         df = pd.read_csv(self.filename, sep='|', header=0, names=['e1','e2','type','score','is_instance'])
         for e1,e2,score in zip(df['e1'],df['e2'],df['score']):
             score = float(score)
-            if score >= self.threshold:
+            if score >= self.threshold and score > scores[(e1,e2)]:
+                scores[(e1,e2)] = score
                 e1 = str(e1)
                 e2 = str(e2)
                 if self.strip:
@@ -208,7 +213,7 @@ class LogMapMapping(Alignment):
                     e2 = ut.strip_namespace(e2,['/','#','CID'])
                 out[e1] = e2
         self.mappings = out
-        
+        self.scores = scores
         
 class StringMatchingMapping(Alignment):
     def __init__(self, dict1, dict2, threshold = 0.95, verbose=False):
