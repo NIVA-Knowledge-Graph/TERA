@@ -198,7 +198,7 @@ class LogMapMapping(Alignment):
     def load_txt(self):
         out = {}
         df = pd.read_csv(self.filename, sep='|', header=0, names=['e1','e2','type','score','is_instance'])
-        for e1,e2,score in zip(df['e1','e2','score']):
+        for e1,e2,score in zip(df['e1'],df['e2'],df['score']):
             score = float(score)
             if score >= self.threshold:
                 e1 = str(e1)
