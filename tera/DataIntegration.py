@@ -167,8 +167,14 @@ class LogMapMapping(Alignment):
         self.threshold = threshold
         self.filename = filename
         self.strip = strip
-    
+        
     def load(self):
+        if self.filename[-3:] == 'rdf':
+            self.load_rdf()
+        else:
+            self.load_txt()
+    
+    def load_rdf(self):
         out = {}
         g = Graph()
         g.parse(self.filename)
@@ -188,7 +194,21 @@ class LogMapMapping(Alignment):
                 out[e1] = e2
         
         self.mappings = out
-
+        
+    def load_txt(self):
+        out = {}
+        df = pd.read_csv(self.filename, sep='|', header=0, names=['e1','e2','type','score','is_instance'])
+        for e1,e2,score in zip(df['e1','e2','score']):
+            score = float(score)
+            if score >= self.threshold:
+                e1 = str(e1)
+                e2 = str(e2)
+                if self.strip:
+                    e1 = ut.strip_namespace(e1,['/','#','CID'])
+                    e2 = ut.strip_namespace(e2,['/','#','CID'])
+                out[e1] = e2
+        self.mappings = out
+        
         
 class StringMatchingMapping(Alignment):
     def __init__(self, dict1, dict2, threshold = 0.95, verbose=False):
