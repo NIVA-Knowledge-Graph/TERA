@@ -64,7 +64,10 @@ class Alignment:
         if not hasattr(self, 'mappings'):
             self.load()
         if not hasattr(self, 'reverse_mappings'):
-            self.reverse_mappings = {i:k for k,i in self.mappings.items()}
+            self.reverse_mappings = {}
+            for k,i in self.mappings.items():
+                for j in i:
+                    self.reverse_mappings[j] = [k]
             
         if reverse:
             tmp = self.reverse_mappings
@@ -73,7 +76,9 @@ class Alignment:
         
         x = str(x)
         if x in tmp:
-            return tmp[x]
+            if len(tmp) > 1 and self.verbose:
+                print('Mapping from %s is not unique.' % x)
+            return tmp[x].pop(0)
         
         return 'no mapping'
         
@@ -122,7 +127,7 @@ class EndpointMapping(Alignment):
         } 
         """
         res = ut.query_endpoint(self.endpoint, query, var = ['s','o'])
-        self.mappings = {str(s):str(o) for s,o in res}
+        self.mappings = {str(s):[str(o)] for s,o in res}
 
 class WikidataMapping(Alignment):
     def __init__(self, query, verbose=False):
@@ -147,10 +152,10 @@ class WikidataMapping(Alignment):
         res = ut.query_endpoint('https://query.wikidata.org/sparql', 
                              self.query, 
                              var = ['from', 'to'])
-        self.mappings = {str(f):str(t) for f,t in res}
+        self.mappings = {str(f):[str(t)] for f,t in res}
 
 class LogMapMapping(Alignment):
-    def __init__(self, filename, threshold=0.95, verbose=False, strip=True):
+    def __init__(self, filename, threshold=0.95, unique=False,  verbose=False, strip=True):
         """
         Class for using LogMap (or other system) alignments. 
         
@@ -167,6 +172,7 @@ class LogMapMapping(Alignment):
         self.threshold = threshold
         self.filename = filename
         self.strip = strip
+        self.unique = unique
         
     def load(self):
         if self.filename[-3:] == 'rdf':
@@ -175,7 +181,7 @@ class LogMapMapping(Alignment):
             self.load_txt()
     
     def load_rdf(self):
-        out = {}
+        out = defaultdict(list)
         scores = defaultdict(lambda : 0.0)
         g = Graph()
         g.parse(self.filename)
@@ -186,32 +192,36 @@ class LogMapMapping(Alignment):
             score = list(g.objects(subject=s,predicate=URIRef('http://knowledgeweb.semanticweb.org/heterogeneity/alignmentmeasure'))).pop(0)
             
             score = float(score)
-            if score >= self.threshold and score > scores[(e1,e2)]:
+            if score >= self.threshold and (score > scores[(e1,e2)] or not self.unique):
                 scores[(e1,e2)] = score
                 e1 = str(e1)
                 e2 = str(e2)
                 if self.strip:
                     e1 = ut.strip_namespace(e1,['/','#','CID'])
                     e2 = ut.strip_namespace(e2,['/','#','CID'])
-                out[e1] = e2
+                out[e1].append(e2)
         
         self.mappings = out
         self.scores = scores
         
     def load_txt(self):
-        out = {}
+        out = defaultdict(list)
         scores = defaultdict(lambda : 0.0)
-        df = pd.read_csv(self.filename, sep='|', header=0, names=['e1','e2','type','score','is_instance'])
+        try:
+            df = pd.read_csv(self.filename, sep='|', header=0, names=['e1','e2','type','score','is_instance'])
+        except:
+            df = pd.read_csv(self.filename, sep='|', header=0, names=['e1','e2','score'])
+            
         for e1,e2,score in zip(df['e1'],df['e2'],df['score']):
             score = float(score)
-            if score >= self.threshold and score > scores[(e1,e2)]:
+            if score >= self.threshold and (score > scores[(e1,e2)] or not self.unique):
                 scores[(e1,e2)] = score
                 e1 = str(e1)
                 e2 = str(e2)
                 if self.strip:
                     e1 = ut.strip_namespace(e1,['/','#','CID'])
                     e2 = ut.strip_namespace(e2,['/','#','CID'])
-                out[e1] = e2
+                out[e1].append(e2)
         self.mappings = out
         self.scores = scores
         
@@ -249,7 +259,7 @@ class StringMatchingMapping(Alignment):
                 if score >= self.threshold:
                     tmp[k1,k2] = max(tmp[k1,k2],score)
         
-        self.mappings = {k1:k2 for k1,k2 in tmp}
+        self.mappings = {k1:[k2] for k1,k2 in tmp}
     
 class DownloadedWikidata(Alignment):
     def __init__(self, filename, verbose = False):
@@ -267,7 +277,7 @@ class DownloadedWikidata(Alignment):
     
     def load(self):
         df = pd.read_csv(self.filename,dtype=str)
-        self.mappings = dict(zip(df['from'],df['to']))
+        self.mappings = {k1:[k2] for k1,k2 in zip(df['from'],df['to'])}
     
 class StringGraphMapping(Alignment):
     def __init__(self, g1, g2, threshold = 0.95, verbose=False):
@@ -305,7 +315,7 @@ class StringGraphMapping(Alignment):
                 if score >= self.threshold:
                     tmp[k1,k2] = max(tmp[k1,k2],score)
         
-        self.mappings = {k1:k2 for k1,k2 in tmp}
+        self.mappings = {k1:[k2] for k1,k2 in tmp}
 
 class InchikeyToCas(WikidataMapping):
     def __init__(self, verbose=False):
