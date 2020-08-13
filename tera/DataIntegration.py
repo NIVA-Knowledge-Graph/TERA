@@ -81,7 +81,9 @@ class Alignment:
             return tmp[x].pop(0)
         
         return 'no mapping'
-        
+    
+    def __len__(self):
+        return len(self.mappings)
         
     @ut.do_recursively_in_class
     def convert(self, id_, reverse=False, strip=False):

@@ -42,9 +42,9 @@ prefix_table = {'kilo':1000,
                 'deka':10,
                 'desi':0.1,
                 'centi':0.01,
-                'milli':10e-3,
-                'micro':10e-6,
-                'nano':10e-9,
+                'milli':1e-3,
+                'micro':1e-6,
+                'nano':1e-9,
                 'percent':0.01}
 
 base_units = ['gram','mol','litre','metre']
