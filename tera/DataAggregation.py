@@ -15,7 +15,7 @@ import copy
 
 import tera.utils as ut
 
-nan_values = ['nan', float('nan'),'--','-X','NA','NC',-1,'','sp.', -1,'sp,','var.','variant','NR']
+nan_values = ['nan', float('nan'),'--','-X','NA','NC',-1,'','sp.', -1,'sp,','var.','variant','NR','sp','ssp','ssp.','ssp,']
 
 class DataObject:
     def __init__(self, namespace = 'http://www.example.org/', verbose = True, name = 'Data Object'):
@@ -138,12 +138,14 @@ class Taxonomy(DataObject):
         def func(row):
             c,p,r,d = row
             c = self.namespace['taxon/'+str(c)]
-            #self.graph.add((c,RDF.type,self.namespace['Taxon']))
+            self.graph.add((c,RDF.type,self.namespace['Taxon']))
             rc = r
             r = r.replace(' ','_')
-            self.graph.add((c, self.namespace['rank'], self.namespace['rank/'+r]))
-            self.graph.add((self.namespace['rank/'+r], RDFS.label, Literal(rc)))
-            self.graph.add((self.namespace['rank/'+r], RDF.type, self.namespace['Rank']))
+            if r != 'no_rank':
+                self.graph.add((c, self.namespace['rank'], self.namespace['rank/'+r]))
+                self.graph.add((self.namespace['rank/'+r], RDFS.label, Literal(rc)))
+                self.graph.add((self.namespace['rank/'+r], RDF.type, self.namespace['Rank']))
+            
             p = self.namespace['taxon/'+str(p)]
             if r == 'species': #species are treated as instances
                 self.graph.add((c, RDF.type, p))
@@ -392,11 +394,11 @@ class EcotoxTaxonomy(DataObject):
     def _add_subproperties(self):
         self.graph.add((self.namespace['latinName'],OWL.subPropertyOf,RDFS.label))
         self.graph.add((self.namespace['latinName'],OWL.subPropertyOf,URIRef('http://www.w3.org/2004/02/skos/core#prefLabel')))
-        
         self.graph.add((self.namespace['commonName'],OWL.subPropertyOf,RDFS.label))
         
     def _load_species(self, path):
         df = pd.read_csv(path, sep='|',  dtype = str, na_values = nan_values)
+        df.dropna(inplace=True)
         df = df.apply(lambda x: x.str.strip())
         
         def func(row):
@@ -456,14 +458,17 @@ class EcotoxTaxonomy(DataObject):
             sn, lineage = row
             curr = sn
             for l,ln in zip(lineage,ks):
+                if l in nan_values: continue
                 if pd.isnull(l): continue
-                if ln in ['variety','subspecies']: continue
                 curr = self.namespace['taxon/'+str(curr).strip()]
-                if ln != 'species':
-                    self.graph.add((curr, RDFS.subClassOf, self.namespace['taxon/'+str(l)]))
-                else:
+                try:
+                    int(str(curr).split('/')[-1])
                     self.graph.add((curr, RDF.type, self.namespace['taxon/'+str(l)]))
+                except:
+                    self.graph.add((curr, RDFS.subClassOf, self.namespace['taxon/'+str(l)]))
+                    
                 self.graph.add((curr, self.namespace['rank'], self.namespace['rank/'+str(ln)]))
+                self.graph.add((self.namespace['rank/'+str(ln)], RDF.type, self.namespace['Rank']))
                 
                 curr = l
         
@@ -475,13 +480,9 @@ class EcotoxTaxonomy(DataObject):
             if pbar: pbar.update(1)
             
     def _add_domain_and_range_triples(self):
-        self.graph.add((self.namespace['inDivision'],RDFS.domain,self.namespace['Taxon']))
-        self.graph.add((self.namespace['inDivision'],RDFS.range,self.namespace['Division']))
         
         self.graph.add((self.namespace['rank'],RDFS.domain,self.namespace['Taxon']))
         self.graph.add((self.namespace['rank'],RDFS.range,self.namespace['Rank']))
-        
-        
         
 class EcotoxChemicals(DataObject):
     def __init__(self, 
