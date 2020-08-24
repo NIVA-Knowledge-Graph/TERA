@@ -138,7 +138,6 @@ class Taxonomy(DataObject):
         def func(row):
             c,p,r,d = row
             c = self.namespace['taxon/'+str(c)]
-            self.graph.add((c,RDF.type,self.namespace['Taxon']))
             rc = r
             r = r.replace(' ','_')
             if r != 'no_rank':
@@ -148,9 +147,9 @@ class Taxonomy(DataObject):
             
             p = self.namespace['taxon/'+str(p)]
             if r == 'species': #species are treated as instances
-                self.graph.add((c, RDF.type, p))
+                self.graph.add((c,RDF.type, p))
             else:
-                self.graph.add((c, RDFS.subClassOf, p))
+                self.graph.add((c,RDFS.subClassOf, p))
                 
             d = str(d).replace(' ','_')
             d = self.namespace['division/'+str(d)]
@@ -385,7 +384,7 @@ class EcotoxTaxonomy(DataObject):
         """
         super(EcotoxTaxonomy, self).__init__(namespace, verbose, name)
         
-        self._load_species(directory + 'validation/species.txt' )
+        self._load_taxa(directory + 'validation/species.txt' )
         self._load_synonyms(directory + 'validation/species_synonyms.txt')
         self._load_hierarchy(directory + 'validation/species.txt')
         self._add_subproperties()
@@ -396,8 +395,8 @@ class EcotoxTaxonomy(DataObject):
         self.graph.add((self.namespace['latinName'],OWL.subPropertyOf,URIRef('http://www.w3.org/2004/02/skos/core#prefLabel')))
         self.graph.add((self.namespace['commonName'],OWL.subPropertyOf,RDFS.label))
         
-    def _load_species(self, path):
-        df = pd.read_csv(path, sep='|',  dtype = str, na_values = nan_values)
+    def _load_taxa(self, path):
+        df = pd.read_csv(path, sep='|', usecols=['species_number','common_name','latin_name','ecotox_group'],  dtype = str, na_values = nan_values)
         df.dropna(inplace=True)
         df = df.apply(lambda x: x.str.strip())
         
@@ -416,12 +415,11 @@ class EcotoxTaxonomy(DataObject):
                 self.graph.add((gri, RDFS.label, Literal(n)))
                 self.graph.add((gri, RDF.type, self.namespace['SpeciesGroup']))
                 
-            self.graph.add((s, RDF.type, self.namespace['Taxon']))
             if cn:
                 self.graph.add((s, self.namespace['commonName'], Literal(cn)))
             if ln:
                 self.graph.add((s, self.namespace['latinName'], Literal(ln)))
-        
+                
         self.apply_func(func, df, ['species_number','common_name','latin_name','ecotox_group'])
             
     def _load_synonyms(self, path):
@@ -432,17 +430,14 @@ class EcotoxTaxonomy(DataObject):
         def func(row):
             s, ln = row
             s = self.namespace['taxon/'+s]
-            self.graph.add((s, self.namespace['latinName'], Literal(ln)))
+            self.graph.add((s, self.namespace['synonym'], Literal(ln)))
         
         self.apply_func(func, df, ['species_number','latin_name'])
             
     
     def _load_hierarchy(self, path):
-        df = pd.read_csv(path, sep= '|', dtype = str)
-        df.dropna(inplace=True, subset=['species_number'])
-        df = df.apply(lambda x: x.str.replace('\W',''))
-        
-        ks = ['variety',
+        ks = ['species_number',
+              'variety',
               'subspecies',
               'species',
               'genus',
@@ -454,33 +449,37 @@ class EcotoxTaxonomy(DataObject):
               'phylum_division',
               'kingdom']
         
-        def func(row):
-            sn, lineage = row
-            curr = sn
-            for l,ln in zip(lineage,ks):
-                if l in nan_values: continue
-                if pd.isnull(l): continue
-                curr = self.namespace['taxon/'+str(curr).strip()]
-                try:
-                    int(str(curr).split('/')[-1])
-                    self.graph.add((curr, RDF.type, self.namespace['taxon/'+str(l)]))
-                except:
-                    self.graph.add((curr, RDFS.subClassOf, self.namespace['taxon/'+str(l)]))
-                    
-                self.graph.add((curr, self.namespace['rank'], self.namespace['rank/'+str(ln)]))
-                self.graph.add((self.namespace['rank/'+str(ln)], RDF.type, self.namespace['Rank']))
-                
-                curr = l
+        df = pd.read_csv(path, usecols=ks, sep= '|', dtype = str, na_values = nan_values)
+        df.dropna(inplace=True, subset=['species_number'])
+        df = df.apply(lambda x: x.str.replace('\W',''))
         
-        pbar = None
-        if self.verbose: pbar = tqdm(total=len(df.index))
-        for row in zip(df['species_number'],
-                        zip(*list(map(lambda k:df[k],ks)))):
-            func(row)
-            if pbar: pbar.update(1)
+        def func(row):
+            sn, *lineage = row
+            
+            for k,l in zip(ks[1:],lineage):
+                rank = k
+                if not pd.isnull(l):
+                    break
+            
+            rank = self.namespace['rank/'+rank]
+            lineage = [self.namespace['taxon/'+str(l).strip()] for l in lineage if not pd.isnull(l)]
+            
+            s = self.namespace['taxon/'+sn]
+            self.graph.add((s,self.namespece['Rank'],rank))
+            
+            lineage = [s] + lineage
+            
+            for child, parent in zip(lineage,lineage[1:] + [None]):
+                if not parent: 
+                    break
+                if child == lineage[0]:
+                    self.graph.add((child,RDF.type,parent))
+                else:
+                    self.graph.add((child,RDFS.subClassOf,parent))
+        
+        self.apply_func(func, df, ks)
             
     def _add_domain_and_range_triples(self):
-        
         self.graph.add((self.namespace['rank'],RDFS.domain,self.namespace['Taxon']))
         self.graph.add((self.namespace['rank'],RDFS.range,self.namespace['Rank']))
         
