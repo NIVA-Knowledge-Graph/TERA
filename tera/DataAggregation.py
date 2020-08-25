@@ -437,8 +437,6 @@ class EcotoxTaxonomy(DataObject):
     
     def _load_hierarchy(self, path):
         ks = ['species_number',
-              'variety',
-              'subspecies',
               'species',
               'genus',
               'family',
@@ -462,17 +460,18 @@ class EcotoxTaxonomy(DataObject):
                     break
             
             rank = self.namespace['rank/'+rank]
-            lineage = [self.namespace['taxon/'+str(l).strip()] for l in lineage if not pd.isnull(l)]
+            self.graph.add((rank,RDF.type,self.namespace['Rank']))
             
+            lineage = [self.namespace['taxon/'+str(l).strip()] for l in lineage if not pd.isnull(l)]
             s = self.namespace['taxon/'+sn]
-            self.graph.add((s,self.namespece['Rank'],rank))
+            self.graph.add((s,self.namespace['rank'],rank))
             
             lineage = [s] + lineage
             
             for child, parent in zip(lineage,lineage[1:] + [None]):
                 if not parent: 
                     break
-                if child == lineage[0]:
+                if rank == self.namespace['rank/species']:
                     self.graph.add((child,RDF.type,parent))
                 else:
                     self.graph.add((child,RDFS.subClassOf,parent))
