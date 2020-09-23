@@ -129,6 +129,7 @@ class Taxonomy(DataObject):
         self._load_divisions(directory+'division.dmp')
         self._load_names(directory+'names.dmp')
         self._add_domain_and_range_triples()
+        self._add_disjoint_axioms()
 
     def _load_hierarchy(self, path):
         df = pd.read_csv(path, sep='|', usecols=[0,1,2,4], names=['child','parent','rank','division'], na_values = nan_values, dtype = str)
@@ -154,7 +155,7 @@ class Taxonomy(DataObject):
             d = str(d).replace(' ','_')
             d = self.namespace['division/'+str(d)]
             
-            self.graph.add((c, self.namespace['inDivision'], d))
+            self.graph.add((c, RDF.type, d))
         
         self.apply_func(func, df, ['child','parent','rank','division'])
     
@@ -198,11 +199,77 @@ class Taxonomy(DataObject):
         self.apply_func(func, df, ['division','acronym','name'])
         
     def _add_domain_and_range_triples(self):
-        self.graph.add((self.namespace['inDivision'],RDFS.domain,self.namespace['Taxon']))
-        self.graph.add((self.namespace['inDivision'],RDFS.range,self.namespace['Division']))
-        
         self.graph.add((self.namespace['rank'],RDFS.domain,self.namespace['Taxon']))
         self.graph.add((self.namespace['rank'],RDFS.range,self.namespace['Rank']))
+        
+    
+    def _add_disjoint_axioms(self):
+        
+        for d in [self.namespace['division/1'], #Invertebrates
+                  self.namespace['division/2'], #Mammals
+                  self.namespace['division/4'], #Plants and Fungi
+                  self.namespace['division/5'], #Primates 
+                  self.namespace['division/6'], #Rodents
+                  self.namespace['division/9'], #Viruses
+                  self.namespace['division/10']]: #Vertebrates  
+            self.graph.add((self.namespace['division/0'], #Bacteria
+                            OWL.disjoinWith,d))
+        
+        for d in [self.namespace['division/2'], #Mammals
+                  self.namespace['division/4'], #Plants and Fungi
+                  self.namespace['division/5'], #Primates 
+                  self.namespace['division/6'], #Rodents
+                  self.namespace['division/9'], #Viruses
+                  self.namespace['division/10']]: #Vertebrates
+  
+            self.graph.add((self.namespace['division/1'], #Invertebrates
+                            OWL.disjoinWith,d))
+        
+        for d in [self.namespace['division/4'], #Plants and Fungi
+                  self.namespace['division/9'], #Viruses
+                  self.namespace['division/10']]: #Vertebrates
+
+            self.graph.add((self.namespace['division/2'], #Mammals
+                            OWL.disjoinWith,d))
+        
+        for d in [self.namespace['division/2'], #Mammals
+                  self.namespace['division/4'], #Plants and Fungi
+                  self.namespace['division/5'], #Primates 
+                  self.namespace['division/6'], #Rodents
+                  self.namespace['division/10']]: #Vertebrates
+      
+            self.graph.add((self.namespace['division/3'], #Phages
+                            OWL.disjoinWith,d))
+        
+        for d in [self.namespace['division/2'], #Mammals
+                  self.namespace['division/5'], #Primates 
+                  self.namespace['division/6'], #Rodents
+                  self.namespace['division/10']]: #Vertebrates
+    
+            self.graph.add((self.namespace['division/4'], #Plants and Fungi
+                            OWL.disjoinWith,d))
+        
+        for d in [self.namespace['division/1']]: #Invertebrates
+            
+            self.graph.add((self.namespace['division/5'], #Primates
+                            OWL.disjoinWith,d))
+        
+        for d in [self.namespace['division/1']]: #Invertebrates
+            
+            
+            self.graph.add((self.namespace['division/6'], #Rodents
+                            OWL.disjoinWith,d))
+        
+        for d in [self.namespace['division/1'], #Invertebrates
+                  self.namespace['division/0'], #Bacteria
+                  self.namespace['division/2'], #Mammals
+                  self.namespace['division/4'], #Plants and Fungi
+                  self.namespace['division/5'], #Primates
+                  self.namespace['division/6'], #Rodents
+                  self.namespace['division/10']]: #Vertebrates
+           
+            self.graph.add((self.namespace['division/9'], #Viruses
+                            OWL.disjoinWith,d))
         
     
 class Traits(DataObject):
@@ -351,7 +418,7 @@ class Effects(DataObject):
                         self.graph.add( (b, UNIT.units, UNIT[u]) )
                     
             self.graph.add( (r, self.namespace['concentration'], b) )
-            self.graph.add( (t,self.namespace['hasResult'],r) )
+            self.graph.add( (t, self.namespace['hasResult'],r) )
             
         self.apply_func(test_func, tests, ['test_id',
                         'test_cas',
@@ -366,6 +433,8 @@ class Effects(DataObject):
                         'organism_init_wt_unit'])
         
         self.apply_func(results_func, results, ['test_id','endpoint','conc1_mean','conc1_unit','effect'])
+        
+        
 
 
 class EcotoxTaxonomy(DataObject):
@@ -389,6 +458,7 @@ class EcotoxTaxonomy(DataObject):
         self._load_hierarchy(directory + 'validation/species.txt')
         self._add_subproperties()
         self._add_domain_and_range_triples()
+        self._add_disjoint_axioms()
         
     def _add_subproperties(self):
         self.graph.add((self.namespace['latinName'],OWL.subPropertyOf,RDFS.label))
@@ -399,6 +469,7 @@ class EcotoxTaxonomy(DataObject):
         df = pd.read_csv(path, sep='|', usecols=['species_number','common_name','latin_name','ecotox_group'],  dtype = str, na_values = nan_values)
         df.dropna(inplace=True)
         df = df.apply(lambda x: x.str.strip())
+        
         
         def func(row):
             s, cn, ln, group = row
@@ -411,9 +482,8 @@ class EcotoxTaxonomy(DataObject):
             
             for gri,n in zip(group_uri,names):
                 if len(n) < 1: continue
-                self.graph.add((s, self.namespace['speciesGroup'], gri))
+                self.graph.add((s, RDF.type, gri))
                 self.graph.add((gri, RDFS.label, Literal(n)))
-                self.graph.add((gri, RDF.type, self.namespace['SpeciesGroup']))
                 
             if cn:
                 self.graph.add((s, self.namespace['commonName'], Literal(cn)))
@@ -421,6 +491,170 @@ class EcotoxTaxonomy(DataObject):
                 self.graph.add((s, self.namespace['latinName'], Literal(ln)))
                 
         self.apply_func(func, df, ['species_number','common_name','latin_name','ecotox_group'])
+        
+    def _add_disjoint_axioms(self):
+        
+        base = Namespace('https://cfpub.epa.gov/ecotox/group/')
+        
+        for d in ['Worms',
+                  'Algae',
+                  'Insects/Spiders',
+                  'Trees',
+                  'Mammals',
+                  'Fish',
+                  'Reptiles',
+                  'Moss',
+                  'Ferns',
+                  'Fungi',
+                  'Crustaceans',
+                  'Flowers',
+                  'Shrubs']:
+
+            self.graph.add((base['Birds'],
+                            OWL.disjoinWith,
+                            base[d]))
+        
+        for d in ['Insects/Spiders',
+                  'Trees',
+                  'Moss',
+                  'Ferns',
+                  'Fungi']:
+            
+            self.graph.add((base['Amphibians'],
+                            OWL.disjoinWith,
+                            base[d]))
+        for d in ['Insects/Spiders',
+                  'Trees',
+                  'Moss',
+                  'Ferns',
+                  'Fungi',
+                  'Mammals',
+                  'Vertebrates',
+                  'Reptiles',
+                  'Crustaceans']:
+            
+            self.graph.add((base['Algae'],
+                            OWL.disjoinWith,
+                            base[d]))
+        
+        for d in ['Trees',
+                  'Moss',
+                  'Ferns',
+                  'Fungi',
+                  'Fish',
+                  'Mammals',
+                  'Vertebrates']:
+            self.graph.add((base['Invertebrates'],
+                            OWL.disjoinWith,
+                            base[d]))
+        for d in ['Birds',
+                  'Trees',
+                  'Moss',
+                  'Ferns',
+                  'Fungi',
+                  'Mammals',
+                  'Vertebrates',
+                  'Fish']:
+            self.graph.add((base['Insects/Spiders'],
+                            OWL.disjoinWith,
+                            base[d]))
+        for d in ['Birds',
+                  'Trees',
+                  'Moss',
+                  'Ferns',
+                  'Fungi',
+                  'Mammals',
+                  'Vertebrates',
+                  'Fish']:
+
+            self.graph.add((base['Trees'],
+                            OWL.disjoinWith,
+                            base[d]))
+        
+        for d in ['Birds',
+                  'Trees',
+                  'Moss',
+                  'Ferns',
+                  'Fungi',
+                  'Invertebrates',
+                  'Fish',
+                  'Flowers',
+                  'Crustaceans']:
+ 
+            self.graph.add((base['Mammals'],
+                            OWL.disjoinWith,
+                            base[d]))
+        for d in ['Birds',
+                  'Trees',
+                  'Moss',
+                  'Ferns',
+                  'Fungi',
+                  'Mammals',
+                  'Flowers',
+                  'Crustaceans']:
+
+            self.graph.add((base['Fish'],
+                            OWL.disjoinWith,
+                            base[d]))
+        
+        for d in ['Trees',
+                  'Moss',
+                  'Ferns',
+                  'Fungi',
+                  'Mammals',
+                  'Fish',
+                  'Insects/Spiders',
+                  'Crustaceans',
+                  'Flowers']:
+
+            self.graph.add((base['Reptiles'],
+                            OWL.disjoinWith,
+                            base[d]))
+        
+        for d in ['Mammals',
+                  'Fish',
+                  'Crustaceans',
+                  'Insects/Spiders',
+                  'Worms',
+                  'Birds']:
+
+            self.graph.add((base['Moss'],
+                            OWL.disjoinWith,
+                            base[d]))
+        
+        for d in ['Mammals',
+                  'Fish',
+                  'Crustaceans',
+                  'Insects/Spiders',
+                  'Worms',
+                  'Birds']:
+     
+            self.graph.add((base['Ferns'],
+                            OWL.disjoinWith,
+                            base[d]))
+        for d in ['Mammals',
+                  'Fish',
+                  'Vertebrates',
+                  'Invertebrates',
+                  'Crustaceans',
+                  'Insects/Spiders',
+                  'Worms',
+                  'Birds']:
+       
+            self.graph.add((base['Fungi'],
+                            OWL.disjoinWith,
+                            base[d]))
+        for d in ['Mammals',
+                  'Fish',
+                  'Vertebrates',
+                  'Insects/Spiders',
+                  'Worms',
+                  'Birds']:
+         
+            self.graph.add((base['Crustaceans'],
+                            OWL.disjoinWith,
+                            base[d]))
+        
             
     def _load_synonyms(self, path):
         df = pd.read_csv(path, sep='|',  dtype = str, na_values = nan_values)
