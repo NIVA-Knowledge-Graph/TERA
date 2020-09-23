@@ -437,7 +437,6 @@ class EcotoxTaxonomy(DataObject):
     
     def _load_hierarchy(self, path):
         ks = ['species_number',
-              'species',
               'genus',
               'family',
               'tax_order',
@@ -454,7 +453,7 @@ class EcotoxTaxonomy(DataObject):
         def func(row):
             sn, *lineage = row
             
-            for k,l in zip(ks[1:],lineage):
+            for k,l in zip(['species']+ks[1:],lineage):
                 rank = k
                 if not pd.isnull(l):
                     break
