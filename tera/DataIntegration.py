@@ -78,12 +78,21 @@ class Alignment:
         if x in tmp:
             if len(tmp) > 1 and self.verbose:
                 print('Mapping from %s is not unique.' % x)
-            return tmp[x].pop(0)
-        
+            try:
+                return tmp[x].pop(0)
+            except:
+                return 'no mapping'
+            
         return 'no mapping'
     
     def __len__(self):
         return len(self.mappings)
+    
+    def __add__(self,other):
+        self.load()
+        other.load()
+        self.mappings = {**self.mappings,**other.mappings}
+        return self
         
     @ut.do_recursively_in_class
     def convert(self, id_, reverse=False, strip=False):
@@ -107,7 +116,7 @@ class Alignment:
             Mapped values.
         """
         if strip:
-            id_ = ut.strip_namespace(str(id_),['/','#','CID'])
+            id_ = ut.strip_namespace(str(id_),['/','#'])
         return self._mapping(id_,reverse)
 
 class EndpointMapping(Alignment):

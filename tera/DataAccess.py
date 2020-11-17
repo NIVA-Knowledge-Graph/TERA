@@ -316,6 +316,47 @@ class API:
         """
         return set([self.base_identifier]) | set(self.mappings.keys())
     
+class rdfAPI(API):
+    def __init__(self,
+                 filename,
+                 mappings=None,
+                 base_identifier=None,
+                 **kwargs):
+        """
+        Base class for accessing rdf file data. 
+        Parameters
+        ----------
+        filename : string 
+            file containing rdf data in formats supported by rdflib. 
+            
+        mappings : dict 
+            Mappings (tera.Alignment) from base_identifier (eg. ncbi) to other datasets. 
+        """
+        self.graph = Graph()
+        self.graph.load(filename,format=filename.split('.')[-1])
+        
+        super(rdfAPI, self).__init__(mappings=mappings,
+                                     base_identifier=base_identifier, **kwargs)
+        
+    def query(self, q, var):
+        """Pass SPARQL to graph or endpoint.
+        
+        Parameters
+        ----------
+        q : str
+            sparql query
+                
+        var : str or list
+            Bindings to return from query.
+        
+        Returns
+        -------
+        set
+        """
+        q = self.base_query + q
+        return ut.query_graph(self.graph, q)
+    
+    
 class TaxonomyAPI(API):
     def __init__(self, 
                  mappings = {'eol',di.NCBIToEOL()},

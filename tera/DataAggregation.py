@@ -147,15 +147,14 @@ class Taxonomy(DataObject):
                 self.graph.add((self.namespace['rank/'+r], RDF.type, self.namespace['Rank']))
             
             p = self.namespace['taxon/'+str(p)]
-            if r == 'species': #species are treated as instances
-                self.graph.add((c,RDF.type, p))
-            else:
-                self.graph.add((c,RDFS.subClassOf, p))
-                
             d = str(d).replace(' ','_')
             d = self.namespace['division/'+str(d)]
-            
-            self.graph.add((c, RDF.type, d))
+            if r == 'species': #species are treated as instances
+                self.graph.add((c,RDF.type, p))
+                self.graph.add((c, RDF.type, d))
+            else:
+                self.graph.add((c,RDFS.subClassOf, p))
+                self.graph.add((c, RDFS.subClassOf, d))
         
         self.apply_func(func, df, ['child','parent','rank','division'])
     
@@ -194,7 +193,7 @@ class Taxonomy(DataObject):
             d = self.namespace['division/'+str(d)]
             self.graph.add((d,RDF.type,self.namespace['Division']))
             self.graph.add((d,RDFS.label,Literal(n)))
-            self.graph.add((d,RDFS.label,Literal(a)))
+            #self.graph.add((d,RDFS.label,Literal(a)))
         
         self.apply_func(func, df, ['division','acronym','name'])
         
@@ -294,6 +293,7 @@ class Traits(DataObject):
     
     def _load_eol_traits(self, directory):
         self._load_traits(directory+'trait_bank/traits.csv')
+        self._load_desc(directory+'trait_bank/terms.csv')
         for f in glob.glob(directory+'eol_rels/*.csv'):
             self._load_eol_subclasses(f)
     
@@ -316,7 +316,42 @@ class Traits(DataObject):
             if validators.url(s) and validators.url(p) and val:
                 self.graph.add((URIRef(s),URIRef(p),o))
 
-        self.apply_func(func, df, ['page_id','predicate','value_uri'])            
+        self.apply_func(func, df, ['page_id','predicate','value_uri']) 
+        
+    def _load_literal_traits(self,path):
+        df = pd.read_csv(path, sep=',', usecols=['page_id','predicate','measurement','units_uri'], na_values = nan_values, dtype=str)
+        df.dropna(inplace=True)
+        df = df.apply(lambda x: x.str.strip())
+        
+        def func(row):
+            s,p,o,u = row
+            s = self.namespace[s]
+            
+            try:
+                o = Literal(o)
+                u = URIRef(u)
+                bnode = BNode()
+                self.graph.add((bnode,RDF.value,o))
+                self.graph.add((bnode,UNIT.units,u))
+                self.graph.add((URIRef(s),URIRef(p),bnode))
+            except TypeError:
+                pass
+        
+        self.apply_func(func, df, ['page_id','predicate','']) 
+        
+    def _load_desc(self, path):
+        df = pd.read_csv(path, sep=',', usecols=['uri','name'], na_values = nan_values, dtype=str)
+        df.dropna(inplace=True)
+        df = df.apply(lambda x: x.str.strip())
+        
+        def func(row):
+            uri,name = row
+            
+            if validators.url(uri) and name:
+                self.graph.add((URIRef(uri),RDFS.label,Literal(name)))
+
+        self.apply_func(func, df, ['uri','name']) 
+        
             
     def _load_eol_subclasses(self, path):
         try: 
@@ -390,7 +425,7 @@ class Effects(DataObject):
                     if u != 'missing':
                         u = ut.unit_parser(u)
                         if u:
-                            self.graph.add( (b, UNIT.units, Literal(u)) )
+                            self.graph.add( (b, UNIT.units, UNIT[u]) )
                     self.graph.add( (t, self.namespace[p], b) )
             
             if habitat != 'missing':
@@ -475,6 +510,7 @@ class EcotoxTaxonomy(DataObject):
             s, cn, ln, group = row
             
             s = self.namespace['taxon/'+s]
+            
             group = str(group).replace(' ','')
             names = group.split(',')
             tmp = group.split(',')
@@ -482,7 +518,7 @@ class EcotoxTaxonomy(DataObject):
             
             for gri,n in zip(group_uri,names):
                 if len(n) < 1: continue
-                self.graph.add((s, RDF.type, gri))
+                self.graph.add((s, self.namespace['ecotoxGroup'], gri))
                 self.graph.add((gri, RDFS.label, Literal(n)))
                 
             if cn:
