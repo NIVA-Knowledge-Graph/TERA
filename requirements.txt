@@ -1,7 +1,7 @@
 decorator==4.4.1
 fuzzywuzzy==0.17.0
 isodate==0.6.0
-numpy==1.18.1
+numpy==1.22.0
 pandas==1.0.0
 pkg-resources==0.0.0
 PubChemPy==1.0.4
